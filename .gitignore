@@ -1,0 +1,6 @@
+.idea
+*.gem
+/node_modules
+*.map
+*.bak
+/*.log
