@@ -2,7 +2,7 @@
 ### Parsing is easy!
 
 With Peasy, you write the parser by hand, just like to write any other kind of program.
-You need not play ![many balls like that any more.](https://raw.github.com/chaosimdaonode/master/forkit.gif
+You need not play ![many balls like that any more.](https://raw.github.com/chaosim/daonode/master/ballacrobatics.jpg)
 You just play ![one ball like so!](https://raw.github.com/chaosim/daonode/master/dolphinball.jpg),
 
 ### What's new in Peasy
