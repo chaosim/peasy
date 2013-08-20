@@ -2,11 +2,9 @@
 # ## Peasy means parsing is easy
 # ### an easy but powerful parser
 # With Peasy, you write the parser by hand, just like to write any other kind of program.
-# You need not play many balls like that any more:
-#
+# You need not play many balls like that any more: <br/>
 # ![ballacrobatics.jpg](https://raw.github.com/chaosim/peasy/master/ballacrobatics.jpg)
-# You just play one ball like so:
-#
+# You just play one ball like so: <br/>
 # ![dolphinball.jpg](https://raw.github.com/chaosim/peasy/master/dolphinball.jpg),
 
 # Peasy provided two method to tell which symbol is left recursive.
