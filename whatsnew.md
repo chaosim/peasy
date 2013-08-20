@@ -1,6 +1,6 @@
 ## What's new in peasy
 
-### what's new in 0.1.0
+### what's new in 0.2.0
 * the functions to gather information about left recursive symbol automaticly
 * the functions to help yourself to set left recursive symbol by hand.
 * the above utilities use recursive to wrap the left left recursive symbol

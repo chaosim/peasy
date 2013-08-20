@@ -1,4 +1,4 @@
-{char, initialize, autoComputeLeftRecursives} = parser = p  = require "../lib/peasy.js"
+{char, initialize, autoComputeLeftRecursives} = parser = p  = require "../lib/autopeasy.js"
 
 hasOwnProperty = Object.hasOwnProperty
 

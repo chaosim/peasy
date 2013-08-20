@@ -2,7 +2,7 @@
 (function() {
   var a, autoComputeLeftRecursives, b, char, hasOwnProperty, initialize, p, parse1, parse2, parse3, parser, x, xexports, _ref;
 
-  _ref = parser = p = require("../lib/peasy.js"), char = _ref.char, initialize = _ref.initialize, autoComputeLeftRecursives = _ref.autoComputeLeftRecursives;
+  _ref = parser = p = require("../lib/autopeasy.js"), char = _ref.char, initialize = _ref.initialize, autoComputeLeftRecursives = _ref.autoComputeLeftRecursives;
 
   hasOwnProperty = Object.hasOwnProperty;
 

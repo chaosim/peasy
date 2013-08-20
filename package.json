@@ -1,7 +1,11 @@
 {
   "name": "peasy",
   "description": "an easy but powerful parser",
-  "keywords": ["peasy", "parser", "javascript", "coffeescript"
+  "keywords": [
+    "peasy",
+    "parser",
+    "javascript",
+    "coffeescript"
   ],
   "author": "Caoxingming",
   "version": "0.2.0",
@@ -28,12 +32,12 @@
     "type": "git",
     "url": "git://github.com/chaosim/peasy.git"
   },
-  "dependencies": {
-  },
+  "dependencies": {},
   "devDependencies": {
     "nodeunit": "*",
     "grunt": "~0.4.1",
-    "grunt-contrib-nodeunit": "~0.2.0"
+    "grunt-contrib-nodeunit": "~0.2.0",
+    "grunt-gh-pages": "~0.7.1"
   },
   "readme": "README.md"
 }

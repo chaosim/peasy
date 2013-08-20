@@ -22,12 +22,12 @@
                 <a class="pilcrow" href="#section-1">&#182;</a>
               </div>
               <h1>Peasy</h1>
-<h2>Peasy means parsing is easy</h2>
-<h3>an easy but powerful parser</h3>
-<p>With Peasy, you write the parser by hand, just like to write any other kind of program.
-You need not play many balls like that any more: <br/>
+<h6>Peasy means parsing is easy</h6>
+<h6>an easy but powerful parser</h6>
+<p>With Peasy, you write the parser by hand, just like to write any other kind of program.<br/>
+You need not play many balls like that any more: <br/><br/>
 <img src="https://raw.github.com/chaosim/peasy/master/ballacrobatics.jpg" alt="ballacrobatics.jpg"><br/>
-You just play one ball like so: <br/>
+You just play one ball like so: <br/><br/>
 <img src="https://raw.github.com/chaosim/peasy/master/dolphinball.jpg" alt="dolphinball.jpg"><br/>,</p>
 
             </div>
@@ -41,10 +41,9 @@ You just play one ball like so: <br/>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p>Peasy provided two method to tell which symbol is left recursive.
-here is the automiatic method:
-You just write your rules normally, when parsing, you first call  intialize() and autoComputeLeftRecursives(grammar),
-and then everything about left recursive symbols is automatic computed.</p>
+              <p>You can embeded other features in the grammar rules seamless, such as lexer, rewriter, semantic action, error
+process( error reporting, error recovering) or any other tasks; you can dynamicly modify the grammar rules, even
+the parsed object, if you wish.<br/></p>
 
             </div>
             
@@ -54,12 +53,12 @@ and then everything about left recursive symbols is automatic computed.</p>
         <li id="section-3">
             <div class="annotation">
               
-              <div class="pilwrap for-h3">
+              <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <h3>global variables</h3>
-<p>It is for the performace that I use global variables, and I provided another version which have Parser class for
-people who prefer more modular to speed.</p>
+              <p>Instead of a tool or a library, Peasy is rather a new method to write parser. As a demonstration, Peasy presents
+itself as a module of single file, which includes some global variables used while parsing, some functions to
+process left recursives symbols, some matchers which parse the text, and some cominators of matchers.<br/>  <br/></p>
 
             </div>
             
@@ -72,17 +71,10 @@ people who prefer more modular to speed.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p>some global variable used while parsing</p>
+              <p>With the method provided by Peasy, you can parse any object which is not only text, but also array, embedded list,
+binary stream, or other data structures, like tree, graph, and so on.<br/></p>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>
-text = <span class="string">''</span> <span class="comment"># the text which is being parsed, this could be any sequence, not only strincs.</span>
-textLength = <span class="number">0</span> <span class="comment"># the length of text</span>
-cursor = <span class="number">0</span>  <span class="comment"># the current position of parsing, use text[cursor] to get current character in parsed stream</span>
-
-grammar = <span class="literal">undefined</span>  <span class="comment"># the grammar object which contains all of rules defined for the symbol in grammar.</span>
-originalRules = {} <span class="comment"># saved the original rules of the grammar.</span></pre></div></div>
             
         </li>
         
@@ -93,22 +85,11 @@ originalRules = {} <span class="comment"># saved the original rules of the gramm
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>store the wrapped function to rule of the left recursive symbol, and before entering them, store it in grammar too.
-when entering them, grammar[symbol] is unwrapped to originalRules[symbol] or memorizeRecursives[symbol]</p>
+              <p>To use Peasy, just copy this file to your project, read it, modify it, write rules for the grammar, and
+remove any unnessary stuffs when you are sure that, and parse the object with the grammar.<br/>
+See <a href="#peasysample">here</a> for a sample grammar in Peasy.</p>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>recursiveRules = {}
-memorizedRecursivs = {}
-memoRules = {}
-symbolDescedentsMap = {}
-
-symbolToTagMap = {}  <span class="comment"># {symbol: tag}, from rule symbol map to a shorter memo tag, for memory efficeny</span>
-tags = {}  <span class="comment"># {tag: true}, record tags that has been used to avoid conflict</span>
-parseCache = {} <span class="comment"># {tag+start: [result, cursor]}, memorized parser result</span>
-functionCache = {} <span class="comment"># memorized normal function result</span>
-
-hasOwnProperty = Object.hasOwnProperty</pre></div></div>
             
         </li>
         
@@ -116,24 +97,12 @@ hasOwnProperty = Object.hasOwnProperty</pre></div></div>
         <li id="section-6">
             <div class="annotation">
               
-              <div class="pilwrap ">
+              <div class="pilwrap for-h6">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <p>call intialize() at first</p>
+              <h6>Nothing but the method in Peasy is indispensable:<br/></h6>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.initialize = () -&gt;
-  parseCache = {}
-  functionCache = {}
-  originalRules = {}
-  recursiveRules = {}
-  memorizedRecursivs = {}
-  memoRules = {}
-  symbolDescedentsMap = {}
-  symbolToTagMap = {}
-  tags = {}
-  parseCache = {}</pre></div></div>
             
         </li>
         
@@ -144,17 +113,16 @@ hasOwnProperty = Object.hasOwnProperty</pre></div></div>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-7">&#182;</a>
               </div>
-              <p>parse @data from @root with @aGrammar function @root</p>
+              <ul>
+<li>If there is no left recursive symbol, you can remove the code about that(mainly three functions and 80 lines).<br/></li>
+<li>If you don&#39;t need memorize the parsed result, you can remove the stuffs about
+memorization(mainly refer to the function <code>memorize</code>).<br/></li>
+<li>The matchers(e.g. spaces, literal, identifier, etc.) and combinators(e.g. andp, orp, etc) in this module exists just
+for demostrating the method initiated by Peasy. You will see they are all very simple, after seeing them, I bet
+that you would rather to remove them and write them by hand yourself when you write the grammar rules.<br/><br/></li>
+</ul>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">parse</span></span> = (data, aGrammar, root) -&gt;
-  text = data
-  textLength = text.length
-  cursor = <span class="number">0</span>
-  root = root <span class="keyword">or</span> aGrammar.rootSymbol
-  grammar = aGrammar
-  grammar[root](<span class="number">0</span>)</pre></div></div>
             
         </li>
         
@@ -165,8 +133,13 @@ hasOwnProperty = Object.hasOwnProperty</pre></div></div>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
-              <p>use addParentChildren(grammar, parentChildrens...) or addRecursiveCircles(grammar, recursiveCircles...) to tell
-the left calling relations between symbols in the grammar</p>
+              <p>Peasy provided two method to tell which symbols are left recursive.<br/>
+This module presents the semiautomatic method:<br/>
+At first you write grammar rules in this manner: replace one and only one of
+grmmar.symbol in the grammar rule with memo(symbol) for every left recursive circles. Before parsing, you first call
+intialize(), and tell which symbol are left call or left recursive by calling  addParentChildrens(grammar, parentChildren)
+and/or addRecursiveCircles(grammar, recursiveCircles...), and then call computeLeftRecursives(grammar), now
+everything about left recursive symbols is computed and you can call parse(data, grammar, root) to do the work.</p>
 
             </div>
             
@@ -179,8 +152,326 @@ the left calling relations between symbols in the grammar</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
-              <p>add direct left call parent-&gt;children relation for @parentChildrens to global variable symbolToParentsMap
-e.g. addRecursiveCircles(grammar, {A:[&#39;B&#39;], B:[&#39;A&#39;, &#39;B&#39;]})</p>
+              <p>The notation <strong>@name</strong> in the comment below means a global variable, and <strong>$name</strong> means a parameter. <br/></p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-10">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h4">
+                <a class="pilcrow" href="#section-10">&#182;</a>
+              </div>
+              <h4>global variables<br/></h4>
+<p>It is for the performace reason that I use global variables, and at some time I will provide another version which
+have the class Parser for people who prefer modularization to speed. Of course you can modify the code to have the
+class Parser yourself if you like. It&#39;s just a snap to do that.</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-11">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-11">&#182;</a>
+              </div>
+              <p>some global variable used while parsing<br/></p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-12">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-12">&#182;</a>
+              </div>
+              <p>the text which is being parsed<br/>
+<em>Don&#39;t be confused by the variable name, it could be not only text strings but also array, sequence, tree, graph,etc.</em></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>text = <span class="string">''</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-13">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-13">&#182;</a>
+              </div>
+              <p>the length of @text</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>textLength = <span class="number">0</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-14">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-14">&#182;</a>
+              </div>
+              <p>the current position of parsing, use text[cursor] to get current character in parsed stream</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>cursor = <span class="number">0</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-15">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-15">&#182;</a>
+              </div>
+              <p>the grammar object which contains all of rules defined for the symbol in grammar.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>grammar = <span class="literal">undefined</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-16">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-16">&#182;</a>
+              </div>
+              <p>saved the original rules of the grammar.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>originalRules = {}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-17">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>store the wrapped function to rule of the left recursive symbol with <code>recursive</code>, and before entering them, store it in grammar too.
+when entering them, <code>grammar[symbol]</code> is unwrapped to <code>originalRules[symbol]</code> or <code>memorizeRecursives[symbol]</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>recursiveRules = {}
+symbolDescedentsMap = {}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
+              </div>
+              <p>if you would like to use just symbol itself as the hash head, remove these four lines below and other correlative stuffs.<br/>
+{symbol: tag}, from rule symbol map to a shorter memo tag, for memory efficeny</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>symbolToTagMap = {}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-19">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-19">&#182;</a>
+              </div>
+              <p>{tag: true}, record tags that has been used to avoid conflict</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>tags = {}
+
+parseCache = {} <span class="comment"># {tag+start: [result, cursor]}, memorized parser result</span>
+functionCache = {} <span class="comment"># memorized normal function result</span>
+
+hasOwnProperty = Object.hasOwnProperty</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-20">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h4">
+                <a class="pilcrow" href="#section-20">&#182;</a>
+              </div>
+              <h4>helper functions</h4>
+<p>some functions is helpful to make the parser.</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-21">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-21">&#182;</a>
+              </div>
+              <p><strong>intialize</strong>: clear global varialbes. you should call <code>intialize()</code> at first.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.initialize = () -&gt;
+  parseCache = {}
+  functionCache = {}
+  originalRules = {}
+  recursiveRules = {}
+  symbolDescedentsMap = {}
+  symbolToTagMap = {}
+  tags = {}
+  parseCache = {}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-22">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-22">&#182;</a>
+              </div>
+              <p><strong>_parse</strong>: parse <strong>$data</strong> from <strong>$root</strong> with <strong>$aGrammar</strong>.<br/>
+before parsing, you should tell the informations about left recursion in grammar.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.parse = <span class="function"><span class="title">_parse</span></span> = (data, aGrammar, root) -&gt;
+  text = data
+  textLength = text.length
+  cursor = <span class="number">0</span>
+  root = root <span class="keyword">or</span> aGrammar.rootSymbol
+  grammar = aGrammar
+  grammar[root](<span class="number">0</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-23">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-23">&#182;</a>
+              </div>
+              <p><a id="peasysample"></a>
+<strong>parse</strong>: this is a sample parse function to demonstrate on how to write your own grammar rules yourself.<br/>
+notice that there exists indirect left recursion in the grammar.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="title">parse</span></span> = (text) -&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-24">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-24">&#182;</a>
+              </div>
+              <p>generate the matchers by the combinators in advance for better performance.<br/>
+if you don&#39;t mind performance, you can write them in the rule directly.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  a = char(<span class="string">'a'</span>); b = char(<span class="string">'b'</span>); x = char(<span class="string">'x'</span>)
+  memoA = memo(<span class="string">'A'</span>)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-25">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-25">&#182;</a>
+              </div>
+              <p>the grammar rules object.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  rules =
+    A: (start) -&gt;</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-26">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-26">&#182;</a>
+              </div>
+              <p><em>add <code>or memoResult</code> to prevent executing nonrecursive part more than once.</em></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>      (memoResult = m = rules.B(start)) <span class="keyword">and</span> x(p.cur()) <span class="keyword">and</span> m+<span class="string">'x'</span> <span class="keyword">or</span> memoResult\
+      <span class="keyword">or</span> a(start)
+    B: (start) -&gt; rules.C(start)
+    C: (start) -&gt; memoA(start) <span class="keyword">or</span> b(start)
+    rootSymbol: <span class="string">'A'</span>
+  initialize()
+  addRecursiveCircles(rules, [<span class="string">'A'</span>, <span class="string">'B'</span>, <span class="string">'C'</span>])
+  computeLeftRecursives(rules)
+  _parse(text, rules)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-27">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h5">
+                <a class="pilcrow" href="#section-27">&#182;</a>
+              </div>
+              <h5>stuffs for left recursives</h5>
+<p>use <code>addParentChildren(grammar, parentChildrens)</code> or <code>addRecursiveCircles(grammar, recursiveCircles...)</code> to tell
+the left calling relations between symbols in the grammar<br/></p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-28">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-28">&#182;</a>
+              </div>
+              <p><strong>addParentChildrens</strong>: add direct left call parent-&gt;children relation for <strong>$parentChildrens</strong> to <strong>@symbolToParentsMap</strong><br/>
+e.g. <code>addRecursiveCircles(grammar, {A:[&#39;B&#39;], B:[&#39;A&#39;, &#39;B&#39;]})</code></p>
 
             </div>
             
@@ -195,14 +486,14 @@ e.g. addRecursiveCircles(grammar, {A:[&#39;B&#39;], B:[&#39;A&#39;, &#39;B&#39;]
         </li>
         
         
-        <li id="section-10">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-10">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
-              <p>add left recursive parent-&gt;children relation to @symbolToParentsMap for symbols in @recursiveCircles
-e.g. addRecursiveCircles(grammar, [&#39;A&#39;, &#39;B&#39;], [&#39;B&#39;]) tell the same left recursive relations as above sample.</p>
+              <p><strong>addRecursiveCircles</strong>: add left recursive parent-&gt;children relation to <code>grammar.parentToChildren</code> for symbols in <strong>@recursiveCircles</strong><br/>
+e.g. <code>addRecursiveCircles(grammar, [&#39;A&#39;, &#39;B&#39;], [&#39;B&#39;])</code> tell the same left recursive relations as above sample.</p>
 
             </div>
             
@@ -223,13 +514,14 @@ e.g. addRecursiveCircles(grammar, [&#39;A&#39;, &#39;B&#39;], [&#39;B&#39;]) tel
         </li>
         
         
-        <li id="section-11">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-11">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
-              <p>after telling left recursive relations, compute the left recsives group and wrap symbol in them with recursive function</p>
+              <p><strong>computeLeftRecursives</strong>: after telling left recursive relations, compute the left recsives group and wrap symbol in
+them with <code>recursive</code> function<br/></p>
 
             </div>
             
@@ -253,22 +545,22 @@ e.g. addRecursiveCircles(grammar, [&#39;A&#39;, &#39;B&#39;], [&#39;B&#39;]) tel
         </li>
         
         
-        <li id="section-12">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-12">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
-              <p>this is the key function to left recursive.
-Make @symbol a left recursive symbol, which means to wrap originalRules[symbol] with recursive.
-when recursiv(symbol)(start) is executed, first let rule = grammar[symbol], grammar[symbol] = originalRules[child] for
+              <p><strong>recursive</strong>: this is the key function to left recursive.<br/>
+Make <strong>$symbol</strong> a left recursive symbol, which means to wrap <code>originalRules[symbol]</code> with recursive.
+when recursiv(symbol)(start) is executed, first let <code>rule = grammar[symbol]</code>, <code>grammar[symbol] = originalRules[child]</code> for
 all symbols in left recursive circles and loop computing rule(start) until no changes happened, and
-restore all symbols in left recursive cirle to recursiveRules[symbol] at last.,</p>
+restore all symbols in left recursive cirle to <code>recursiveRules[symbol]</code> at last.,</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.recursive = <span class="function"><span class="title">recursive</span></span> = (symbol) -&gt;
-  rule = grammar[symbol]
+  rule = originalRules[symbol]
   (start) -&gt;
     <span class="keyword">for</span> child <span class="keyword">in</span> symbolDescedentsMap[symbol]
       grammar[child] = originalRules[child]
@@ -293,35 +585,49 @@ restore all symbols in left recursive cirle to recursiveRules[symbol] at last.,<
         </li>
         
         
-        <li id="section-13">
+        <li id="section-32">
             <div class="annotation">
               
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-13">&#182;</a>
+              <div class="pilwrap for-h5">
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
-              <p>set a shorter start part of symbol as the tag used in parseCache</p>
+              <h5>memorization</h5>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="title">setMemoTag</span></span> = (symbol) -&gt;
-  i = <span class="number">1</span>
-  <span class="keyword">while</span> <span class="number">1</span>
-    <span class="keyword">if</span> hasOwnProperty.call(tags, symbol.slice(<span class="number">0</span>, i)) <span class="keyword">in</span> tags <span class="keyword">then</span> i++
-    <span class="keyword">else</span> <span class="keyword">break</span>
-  tag = symbol.slice(<span class="number">0</span>, i)
-  symbolToTagMap[symbol] = tag
-  tags[tag] = <span class="literal">true</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-14">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-14">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
-              <p>set the symbols in grammar which  memorize their rule&#39;s result.</p>
+              <p><strong>memo</strong>: lookup the memorized result and reached cursor for <strong>$symbol</strong> at the position of <strong>$start</strong><br/>
+It is set up automaticly by <code>computeLeftRecursives(grammar)</code> for the symbols which is left recursive.<br/>
+For other symbol, you should be able to call this in rule mannually.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.memo = <span class="function"><span class="title">memo</span></span> = (symbol) -&gt;
+  (start) -&gt;
+    hash = symbol+start
+    m = parseCache[hash]
+    <span class="keyword">if</span> m <span class="keyword">then</span> m[<span class="number">0</span>]</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-34">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-34">&#182;</a>
+              </div>
+              <p><strong>setMemorizeRules</strong>: set the symbols in grammar which  memorize their rule&#39;s result.<br/>
+this function should be used only for the symbols which is not left recursives.<br/>
+you can do this after <code>initialize()</code> and before <code>parse(...)</code>.</p>
 
             </div>
             
@@ -333,14 +639,14 @@ restore all symbols in left recursive cirle to recursiveRules[symbol] at last.,<
         </li>
         
         
-        <li id="section-15">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-15">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
-              <p>memorize result and cursor for @symbol which is not left recursive.
-left recursive should be wrapped by recursive(symbol)!!!</p>
+              <p><strong>memorize</strong>: memorize result and cursor for <strong>$symbol</strong> which is not left recursive.<br/>
+<em>The symbols which is left recursive should be wrapped by <code>recursive(symbol)</code>, not <code>memorize(symbol)</code>!!!</em></p>
 
             </div>
             
@@ -359,369 +665,474 @@ left recursive should be wrapped by recursive(symbol)!!!</p>
         </li>
         
         
-        <li id="section-16">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-16">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
-              <p>lookup the memorized result and reached cursor for @symbol at the position of @start</p>
+              <p><strong>setMemoTag</strong>: find a shorter part of symbol as the head of hash tag to index <strong>@parseCache</strong> <br/>
+It exists just for performance reason. If you don&#39;t like this idea, you can remove the stuffs about memo tag yourself and
+just use symbol itself as the head of hash tag.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.memo = <span class="function"><span class="title">memo</span></span> = (symbol) -&gt;
-  (start) -&gt;
-    hash = symbol+start
-    m = parseCache[hash]
-    <span class="keyword">if</span> m <span class="keyword">then</span> m[<span class="number">0</span>]</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="title">setMemoTag</span></span> = (symbol) -&gt;
+  i = <span class="number">1</span>
+  <span class="keyword">while</span> <span class="number">1</span>
+    <span class="keyword">if</span> hasOwnProperty.call(tags, symbol.slice(<span class="number">0</span>, i)) <span class="keyword">in</span> tags <span class="keyword">then</span> i++
+    <span class="keyword">else</span> <span class="keyword">break</span>
+  tag = symbol.slice(<span class="number">0</span>, i)
+  symbolToTagMap[symbol] = tag
+  tags[tag] = <span class="literal">true</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-17">
+        <li id="section-37">
             <div class="annotation">
               
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-17">&#182;</a>
+              <div class="pilwrap for-h4">
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
-              <p>matchers and matcher combinators</p>
-
-            </div>
-            
-        </li>
-        
-        
-        <li id="section-18">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
-              </div>
-              <p>any matcher should not return a value which is not null or undefined on succeed, except the root symbol.</p>
+              <h4>matchers and matcher combinators<br/></h4>
 
             </div>
             
         </li>
         
         
-        <li id="section-19">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
-              <p>compute exps in sequence, return the result of the last one.
-andp and orp are used to compose the matchers
-the effect is the same as by using the Short-circuit evaluation, like below:
-exps<a href="start">0</a> and exps[2](cursor] ... and exps<a href="cursor">exps.length-1</a></p>
+              <p>A <strong>matcher</strong> is a function which read the text being parsed and move cursor directly.<br/>
+All matcher should return truth value on succeed, and return falsic value on fail.<br/>
+A <strong>combinator</strong> is a function which receive zero or more matchers as parameter(maybe plus some other parameters
+which are not matchers), and generate a new matchers.<br/>
+there are other matcher generator besides the standard combinators described as above, like <code>recursive</code>, <code>memo</code>, <code>memorize</code>,
+which we have met above.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">andp</span></span> = (exps) -&gt;
-  exps = <span class="keyword">for</span> exp <span class="keyword">in</span> exps
-    <span class="keyword">if</span> isString(exp) <span class="keyword">then</span> literal(exp) <span class="keyword">else</span> exp
+            <div class="content"><div class='highlight'><pre>
+<span class="function"><span class="title">isMatcher</span></span> = (item) -&gt;  <span class="keyword">typeof</span>(item)==<span class="string">"function"</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-39">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-39">&#182;</a>
+              </div>
+              <p>combinator <strong>andp</strong><br/>
+execute item(cursor) in sequence, return the result of the last one. <br/>
+when <code>andp</code> is used to combined of the matchers, the effect is the same as by using the Short-circuit evaluation, like below:<br/>
+<code>item1(start) and item2(cursor] ... and itemn(cursor).</code>  <br/>
+In fact, you maybe would rather like to use <code>item1(start) and item2(cursor) ..</code> when you write the grammar rule in the
+manner of Peasy. That would be simpler, faster and more elegant. <br/>
+And in that manner, you would have more control on your grammar rule, say like below: <br/>
+<code>if (x=item1(start) and (x&gt;100) and item2(cursor) and not item3(cursor) and (y = item(cursor)) then doSomething()</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">andp</span></span> = (items) -&gt;
+  items = <span class="keyword">for</span> item <span class="keyword">in</span> items
+    <span class="keyword">if</span> isMatcher(item) <span class="keyword">then</span> literal(item) <span class="keyword">else</span> item
   (start) -&gt;
     cursor = start
-    <span class="keyword">for</span> exp <span class="keyword">in</span> exps
-      <span class="keyword">if</span> <span class="keyword">not</span>(result = exp(cursor)) <span class="keyword">then</span> <span class="keyword">return</span>
+    <span class="keyword">for</span> item <span class="keyword">in</span> items
+      <span class="keyword">if</span> <span class="keyword">not</span>(result = item(cursor)) <span class="keyword">then</span> <span class="keyword">return</span>
     <span class="keyword">return</span> result</pre></div></div>
             
         </li>
         
         
-        <li id="section-20">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
-              <p>compute exps in parallel, return the result of the first which is not evaluated to false.
-the effect is the same as by using the Short-circuit evaluation, like below:
-exps<a href="start">0</a> or exps[2](cursor] ... or exps<a href="cursor">exps.length-1</a></p>
+              <p>combinator <strong>orp</strong> <br/>
+execute <code>item(start)</code> one by one, until the first item which is evaluated to truth value and return the value.<br/>
+when orp is used to combined of the matchers, the effect is the same as by using the Short-circuit evaluation, like below:<br/>
+item1(start) or item2(cursor] ... or itemn(cursor) <br/>
+In fact, you maybe would rather like to use <code>item1(start) or item2(cursor) ..</code> when you write the grammar rule in the
+manner of Peasy. That would be simpler, faster and more elegant. <br/>
+And in that manner, you would have more control on your grammar rule, say like below: <br/>
+<code>if ((x=item1(start) and (x&gt;100)) or (item2(cursor) and not item3(cursor)) or (y = item(cursor)) then doSomething()</code></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">orp</span></span> = (exps...) -&gt;
-  exps = <span class="keyword">for</span> exp <span class="keyword">in</span> exps
-    <span class="keyword">if</span> isString(exp) <span class="keyword">then</span> literal(exp) <span class="keyword">else</span> exp
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">orp</span></span> = (items...) -&gt;
+  items = <span class="keyword">for</span> item <span class="keyword">in</span> items
+    <span class="keyword">if</span> isMatcher(item) <span class="keyword">then</span> literal(item) <span class="keyword">else</span> item
   (start) -&gt;
-    <span class="keyword">for</span> exp <span class="keyword">in</span> exps
-      <span class="keyword">if</span> result = exp(start) <span class="keyword">then</span> <span class="keyword">return</span> result
+    <span class="keyword">for</span> item <span class="keyword">in</span> items
+      <span class="keyword">if</span> result = item(start) <span class="keyword">then</span> <span class="keyword">return</span> result
       <span class="keyword">return</span> result</pre></div></div>
             
         </li>
         
         
-        <li id="section-21">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
-              <p>applicaton of not operation
-notp is not useful  except to compose the matchers.
-It&#39;s not unnessary, low effecient and ugly to write &quot;notp(exp)(start)&quot;,
-so don&#39;t write &quot;notp(exp)(start)&quot;, instead &quot;not exp(start)&quot;.</p>
+              <p>combinator <strong>notp</strong><br/>
+<code>notp</code> is not useful except being used in other combinators, just like this: <code>andp(item1, notp(item2))</code>.<br/>
+<em>It&#39;s unnessary, low effecient and ugly to write <code>notp(item)(start)</code>, just write <code>not item(start)</code>.</em></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">notp</span></span> = (exp) -&gt;
-  <span class="keyword">if</span> isString(exp) <span class="keyword">then</span> exp = literal(exp)
-  (start) -&gt; <span class="keyword">not</span> exp(start)</pre></div></div>
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">notp</span></span> = (item) -&gt;
+  <span class="keyword">if</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
+  (start) -&gt; <span class="keyword">not</span> item(start)</pre></div></div>
             
         </li>
         
         
-        <li id="section-22">
+        <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
-              <p>any: zero or more times of @exp(start)</p>
+              <p>combinator <strong>any</strong>: zero or more times of <code>item(cursor)</code></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">any</span></span> = (exp) -&gt;
-  <span class="keyword">if</span> isString(exp) <span class="keyword">then</span> exp = literal(exp)
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">any</span></span> = (item) -&gt;
+  <span class="keyword">if</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
   (start) -&gt;
     result = []; cursor = start
-    <span class="keyword">while</span> ( x = exp(cursor)) <span class="keyword">then</span> result.push(x)
+    <span class="keyword">while</span> ( x = item(cursor)) <span class="keyword">then</span> result.push(x)
     result</pre></div></div>
             
         </li>
         
         
-        <li id="section-23">
+        <li id="section-43">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
-              <p>any: one or more times of @exp(start)</p>
+              <p>combinator <strong>some</strong>: one or more times of <code>item(cursor)</code></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">some</span></span> = (exp) -&gt;
-  <span class="keyword">if</span> isString(exp) <span class="keyword">then</span> exp = literal(exp)
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">some</span></span> = (item) -&gt;
+  <span class="keyword">if</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
   (start) -&gt;
     result = []; cursor = start
-
-    <span class="keyword">if</span> <span class="keyword">not</span> (x = exp(cursor)) <span class="keyword">then</span> <span class="keyword">return</span> x
+    <span class="keyword">if</span> <span class="keyword">not</span> (x = item(cursor)) <span class="keyword">then</span> <span class="keyword">return</span> x
     <span class="keyword">while</span> <span class="number">1</span>
       result.push(x)
-      x = exp(cursor)
+      x = item(cursor)
       <span class="keyword">if</span> <span class="keyword">not</span> x <span class="keyword">then</span> <span class="keyword">break</span>
     result</pre></div></div>
             
         </li>
         
         
-        <li id="section-24">
+        <li id="section-44">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
-              <p>maybe exp(start)</p>
+              <p>combinator  <strong>may</strong>: a.k.a optional <br/>
+try to match <code>item(cursor)</code>, wether <code>item(cursor)</code> succeed or not, <code>maybe(item)(start)</code> succeed.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.may = exports.<span class="function"><span class="title">optional</span></span> = (exp) -&gt;
-  <span class="keyword">if</span> isString(exp) <span class="keyword">then</span> exp = literal(exp)
+            <div class="content"><div class='highlight'><pre>exports.may = exports.<span class="function"><span class="title">optional</span></span> = (item) -&gt;
+  <span class="keyword">if</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
   (start) -&gt;
     cursor = start
-    <span class="keyword">if</span> x = exp(cursor) <span class="keyword">then</span> x
+    <span class="keyword">if</span> x = item(cursor) <span class="keyword">then</span> x
     <span class="keyword">else</span> cursor = start; <span class="literal">true</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-25">
+        <li id="section-45">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-45">&#182;</a>
               </div>
-              <p>follow exp(start)?
+              <p>combinator <strong>follow</strong> <br/>
+try to match <code>item(start)</code>, if succeed, reset cursor and return the value of item(start) <br/>
 whether succeed or not, cursor is reset to start</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">follow</span></span> = (exp) -&gt;
-  <span class="keyword">if</span> isString(exp) <span class="keyword">then</span> exp = literal(exp)
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">follow</span></span> = (item) -&gt;
+  <span class="keyword">if</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
   (start) -&gt;
     cursor = start
-    <span class="keyword">if</span> x = exp(cursor) <span class="keyword">then</span> cursor = start; x</pre></div></div>
+    <span class="keyword">if</span> x = item(cursor) <span class="keyword">then</span> cursor = start; x</pre></div></div>
             
         </li>
         
         
-        <li id="section-26">
+        <li id="section-46">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-46">&#182;</a>
               </div>
-              <p>given @n times @exp, n&gt;=1</p>
+              <p>combinator <strong>times</strong>: match <strong>$n</strong> times item(cursor), n&gt;=1</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">times</span></span> = (exp, n) -&gt;
-  <span class="keyword">if</span> isString(exp) <span class="keyword">then</span> exp = literal(exp)
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">times</span></span> = (item, n) -&gt;
+  <span class="keyword">if</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
   (start) -&gt;
     cursor = start; i = <span class="number">0</span>
     <span class="keyword">while</span> i++&lt;n
-      <span class="keyword">if</span> x = exp(cursor) <span class="keyword">then</span> result.push(x)
+      <span class="keyword">if</span> x = item(cursor) <span class="keyword">then</span> result.push(x)
       <span class="keyword">else</span> <span class="keyword">return</span>
     <span class="keyword">return</span> result</pre></div></div>
             
         </li>
         
         
-        <li id="section-27">
+        <li id="section-47">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-47">&#182;</a>
               </div>
-              <p>some times @exp separated by @separator</p>
+              <p>combinator <strong>seperatedList</strong>: some times item(cursor), separated by @separator</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">seperatedList</span></span> = (exp, separator=spaces) -&gt;
-  <span class="keyword">if</span> isString(exp) <span class="keyword">then</span> exp = literal(exp)
-  <span class="keyword">if</span> isString(separator) <span class="keyword">then</span> separator = literal(separator)
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">seperatedList</span></span> = (item, separator=spaces) -&gt;
+  <span class="keyword">if</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
+  <span class="keyword">if</span> isMatcher(separator) <span class="keyword">then</span> separator = literal(separator)
   (start) -&gt;
     cursor = start
     result = []
-    x = exp(cursor)
+    x = item(cursor)
     <span class="keyword">if</span> <span class="keyword">not</span> x <span class="keyword">then</span> <span class="keyword">return</span>
     <span class="keyword">while</span> <span class="number">1</span>
       result.push(x)
-      <span class="keyword">if</span> <span class="keyword">not</span>(x = exp(cursor)) <span class="keyword">then</span> <span class="keyword">break</span>
+      <span class="keyword">if</span> <span class="keyword">not</span>(x = item(cursor)) <span class="keyword">then</span> <span class="keyword">break</span>
     result</pre></div></div>
             
         </li>
         
         
-        <li id="section-28">
+        <li id="section-48">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-48">&#182;</a>
               </div>
-              <p>given @n times @exp separated by @separator, n&gt;=1</p>
+              <p>combinator <strong>timesSeperatedList</strong>: given @n times $item separated by @separator, n&gt;=1</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">timesSeperatedList</span></span> = (exp, n, separator=spaces) -&gt;
-  <span class="keyword">if</span> isString(exp) <span class="keyword">then</span> exp = literal(exp)
-  <span class="keyword">if</span> isString(separator) <span class="keyword">then</span> separator = literal(separator)
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">timesSeperatedList</span></span> = (item, n, separator=spaces) -&gt;
+  <span class="keyword">if</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
+  <span class="keyword">if</span> isMatcher(separator) <span class="keyword">then</span> separator = literal(separator)
   (start) -&gt;
     cursor = start
     result = []
-    x = exp(cursor)
+    x = item(cursor)
     <span class="keyword">if</span> <span class="keyword">not</span> x <span class="keyword">then</span> <span class="keyword">return</span>
     i = <span class="number">1</span>
     <span class="keyword">while</span> i++&lt;n
       result.push(x)
-      <span class="keyword">if</span> <span class="keyword">not</span>(x = exp(cursor)) <span class="keyword">then</span> <span class="keyword">break</span>
+      <span class="keyword">if</span> <span class="keyword">not</span>(x = item(cursor)) <span class="keyword">then</span> <span class="keyword">break</span>
     result</pre></div></div>
             
         </li>
         
         
-        <li id="section-29">
+        <li id="section-49">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-49">&#182;</a>
               </div>
-              <p>As you have seen above, all of these utilities is so simple that you can write them at home by hand.
-To put it them here, it is just being used to demonstrate how easy to write matcher in the method brought by Peasy.</p>
+              <p>As the same as andp, orp, in the manner of Peasy, you would rather to write youself a loop to do the things, instead
+of useing the combinators like any, some, times, seperatedList,etc. and that would be simpler, faster and more elegant. <br/>
+And in that manner, you would have more control on your grammar rule so that we can do other things include lexer,
+error report, errer recovery, semantic operatons, and any other things you would like to do. <br/></p>
 
             </div>
             
         </li>
         
         
-        <li id="section-30">
+        <li id="section-50">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-50">&#182;</a>
               </div>
-              <p>If you like, you can add a faster version for every matcher, which do not pass @start as parameter
-Don&#39;t use the faster version in orp(exps...)!!!</p>
+              <p>It is for three motives to put all of the stuffs abve here:
+<em> 1. to demonstrate how to write matcher and grammar rules in the method brought by Peasy
+</em> 2. to demonstrate that Peasy can implement any component that other combinational parser libaries like pyparsing,
+parsec too, but in a simpler, faster manner.
+* 3. to show that it is how easy to write the matchers in the manner of Peasy.<br/><br/></p>
 
             </div>
             
         </li>
         
         
-        <li id="section-31">
+        <li id="section-51">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-51">&#182;</a>
               </div>
-              <p>match one character</p>
+              <p>As you have seen above, all of these utilities is so simple that you can write them at home by hand easily. In fact,
+you can write yourself all of the grammar rules in the same manner as above.</p>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">char</span></span> = (c) -&gt; (start) -&gt;
-  <span class="keyword">if</span> text[start]==c <span class="keyword">then</span> cursor = start+<span class="number">1</span>; <span class="keyword">return</span> c
-
-exports.<span class="function"><span class="title">char_</span></span> = (c) -&gt; () -&gt;
-  <span class="keyword">if</span> text[cursor]==c <span class="keyword">then</span> cursor++; <span class="keyword">return</span> c</pre></div></div>
             
         </li>
         
         
-        <li id="section-32">
+        <li id="section-52">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-52">&#182;</a>
               </div>
-              <p>match a literal string.</p>
+              <p>If you like, you can add a faster version for every matcher, which do not pass $start as parameter around.<br/>
+Some of the matchers below have two version, to demonstrate how to do that.
+<em>Don&#39;t use the faster version in orp, any, some, times, separatedList, timesSeparatedList.</em> <br/><br/></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.literal = <span class="function"><span class="title">literal</span></span> = (string) -&gt; (start) -&gt;
+        </li>
+        
+        
+        <li id="section-53">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h4">
+                <a class="pilcrow" href="#section-53">&#182;</a>
+              </div>
+              <h4>some other matchers, combinators and predicate<br/></h4>
+<p>A <strong>predicate</strong> is a function which return true or false, usually according to its parameter, but not look at parsed object.
+below is some little utilities may be useful. Three version of some of them is provided.<br/>
+just remove them if you don&#39;t need them, except <strong>literal</strong>, which is depended by the matchers above.</p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-54">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-54">&#182;</a>
+              </div>
+              <p>matcher <strong>literal</strong>, normal version<br/>
+match a text string.<br/>
+`notice: some combinators like andp, orp, notp, any, some, etc. use literal to wrap a object which is not a matcher.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+exports.literal = <span class="function"><span class="title">literal</span></span> = (string) -&gt; (start) -&gt;
   len = string.length
-  <span class="keyword">if</span> text.slice(start,  stop = start+len)==string <span class="keyword">then</span> cursor = stop; <span class="literal">true</span>
+  <span class="keyword">if</span> text.slice(start,  stop = start+len)==string <span class="keyword">then</span> cursor = stop; <span class="literal">true</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-55">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-55">&#182;</a>
+              </div>
+              <p>matcher <strong>literal_</strong>, faster version<br/>
+match a text string.</p>
 
-exports.literal_ = <span class="function"><span class="title">literal_</span></span> = (string) -&gt; (start) -&gt;
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.literal_ = <span class="function"><span class="title">literal_</span></span> = (string) -&gt; (start) -&gt;
   len = string.length
   <span class="keyword">if</span> text.slice(cursor,  stop = cursor+len)==string <span class="keyword">then</span> cursor = stop; <span class="literal">true</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-33">
+        <li id="section-56">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-56">&#182;</a>
               </div>
-              <p>In spaces, spaces<em>, spaces1, spaces1</em>, a tat(&#39;\t&#39;) is seen as tabWidth spaces,
-which is used in indent style language, such as coffeescript, python, haskell, etc.
-If you don&#39;t need this feature, you can rewrite these utilities to remove the code about tab width by yourself easily.</p>
+              <p>matcher <strong>char</strong>, normal version<br/>
+match one character</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">char</span></span> = (c) -&gt; (start) -&gt;
+  <span class="keyword">if</span> text[start]==c <span class="keyword">then</span> cursor = start+<span class="number">1</span>; <span class="keyword">return</span> c</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-57">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-57">&#182;</a>
+              </div>
+              <p>matcher <strong>char_</strong>, normal version <br/>
+match one character</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">char_</span></span> = (c) -&gt; () -&gt;
+  <span class="keyword">if</span> text[cursor]==c <span class="keyword">then</span> cursor++; <span class="keyword">return</span> c</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-58">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-58">&#182;</a>
+              </div>
+              <p>In spaces, spaces<em>, spaces1, spaces1</em>, a tat(&#39;\t&#39;) is seen as tabWidth spaces, <br/>
+which is used in indent style language, such as coffeescript, python, haskell, etc. <br/>
+If you don&#39;t need this feature, you can easily rewrite these utilities to remove the code about tab width yourself.<br/><br/></p>
 
             </div>
             
         </li>
         
         
-        <li id="section-34">
+        <li id="section-59">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-59">&#182;</a>
               </div>
-              <p>zero or more whitespaces, ie. space or tab.</p>
+              <p>matcher <strong>spaces</strong>, normal version<br/>
+zero or more whitespaces, ie. space or tab.<br/></p>
 
             </div>
             
@@ -739,13 +1150,13 @@ If you don&#39;t need this feature, you can rewrite these utilities to remove th
         </li>
         
         
-        <li id="section-35">
+        <li id="section-60">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-60">&#182;</a>
               </div>
-              <p>faster version, do not pass @start as parameter
+              <p>matcher <strong>spaces_</strong>, faster version<br/>
 zero or more whitespaces, ie. space or tab.</p>
 
             </div>
@@ -763,13 +1174,14 @@ zero or more whitespaces, ie. space or tab.</p>
         </li>
         
         
-        <li id="section-36">
+        <li id="section-61">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-61">&#182;</a>
               </div>
-              <p>one or more whitespaces, ie. space or tab.</p>
+              <p>matcher <strong>spaces1</strong>, normal version<br/>
+one or more whitespaces, ie. space or tab.<br/></p>
 
             </div>
             
@@ -787,13 +1199,13 @@ zero or more whitespaces, ie. space or tab.</p>
         </li>
         
         
-        <li id="section-37">
+        <li id="section-62">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-62">&#182;</a>
               </div>
-              <p>faster version, do not pass @start as parameter
+              <p>matcher <strong>spaces1_</strong>, faster version<br/>
 one or more whitespaces, ie. space or tab.</p>
 
             </div>
@@ -806,29 +1218,39 @@ one or more whitespaces, ie. space or tab.</p>
       <span class="keyword">when</span> <span class="string">' '</span> <span class="keyword">then</span> len++
       <span class="keyword">when</span> <span class="string">'\t'</span> <span class="keyword">then</span> len += tabWidth
       <span class="keyword">else</span> <span class="keyword">break</span>
-  <span class="keyword">if</span> len <span class="keyword">then</span> <span class="keyword">return</span> cursor = cursor; len
-
-exports.<span class="function"><span class="title">wrap</span></span> = (item, left=spaces, right=spaces) -&gt;
-  <span class="keyword">if</span> isString(item) <span class="keyword">then</span> item = literal(item)
-  (start) -&gt;
-     <span class="keyword">if</span> left(start) <span class="keyword">and</span> result = item(cursor) <span class="keyword">and</span> right(cursor) <span class="keyword">then</span> result
-
-exports.getcursor = exports.cur = () -&gt; cursor
-
-exports.setcursor = exports.<span class="function"><span class="title">setcur</span></span> = (pos) -&gt; cursor = pos</pre></div></div>
+  <span class="keyword">if</span> len <span class="keyword">then</span> <span class="keyword">return</span> cursor = cursor; len</pre></div></div>
             
         </li>
         
         
-        <li id="section-38">
+        <li id="section-63">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-63">&#182;</a>
               </div>
-              <p>is a letter used in identifer?
-follow word such as return, break, etc.
-javascript style, &#39;$&#39; is a identifierLetter_</p>
+              <p>matcher <strong>wrap</strong>, normal version<br/>
+match left, then match item, match right at last</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">wrap</span></span> = (item, left=spaces, right=spaces) -&gt;
+  <span class="keyword">if</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
+  (start) -&gt;
+     <span class="keyword">if</span> left(start) <span class="keyword">and</span> result = item(cursor) <span class="keyword">and</span> right(cursor) <span class="keyword">then</span> result</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-64">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-64">&#182;</a>
+              </div>
+              <p>matcher <strong>identifierLetter</strong>: normal version<br/>
+is a letter than can be used in identifer?<br/>
+javascript style, &#39;$&#39; is a identifierLetter_<br/></p>
 
             </div>
             
@@ -841,13 +1263,14 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
         </li>
         
         
-        <li id="section-39">
+        <li id="section-65">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-65">&#182;</a>
               </div>
-              <p>is a letter used in identifer?
+              <p>matcher <strong>identifierLetter_</strong>, version<br/>
+is a letter that can be used in identifer? <br/>
 javascript style, &#39;$&#39; is a identifierLetter_</p>
 
             </div>
@@ -860,13 +1283,14 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
         </li>
         
         
-        <li id="section-40">
+        <li id="section-66">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
+                <a class="pilcrow" href="#section-66">&#182;</a>
               </div>
-              <p>lookahead whether the following character is a letter used in identifer, don&#39;t change cursor?
+              <p>matcher <strong>followIdentifierLetter_</strong>, faster version<br/>
+lookahead whether the following character is a letter used in identifer. don&#39;t change cursor. <br/>
 javascript style, &#39;$&#39; is a identifierLetter_</p>
 
             </div>
@@ -875,92 +1299,195 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
   c = text[cursor]
   c <span class="keyword">is</span> <span class="string">'$'</span> <span class="keyword">or</span> c <span class="keyword">is</span> <span class="string">'_'</span> <span class="keyword">or</span> <span class="string">'a'</span>&lt;=c&lt;<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span>
 
-<span class="function"><span class="title">isIdentifierLetter</span></span> = (c) -&gt; <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'$'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span>
+<span class="function"><span class="title">isIdentifierLetter</span></span> = (c) -&gt; <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'$'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-67">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-67">&#182;</a>
+              </div>
+              <p>predicate isdigit<br/></p>
 
-ObjecttoString = Object.prototype.toString
-exports.isString = <span class="function"><span class="title">isString</span></span> = (x) -&gt; ObjecttoString.call(x) <span class="keyword">is</span> <span class="string">'[object String]'</span>
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">isdigit</span></span> = (c) -&gt; <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-68">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-68">&#182;</a>
+              </div>
+              <p>matcher digit, normal version<br/></p>
 
-exports.<span class="function"><span class="title">isdigit</span></span> = (c) -&gt; <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span>
-exports.<span class="function"><span class="title">digit</span></span> = (start) -&gt;
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">digit</span></span> = (start) -&gt;
   c = text[start];  <span class="keyword">if</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">then</span> cursor = start+<span class="number">1</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-41">
+        <li id="section-69">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
+                <a class="pilcrow" href="#section-69">&#182;</a>
               </div>
-              <p>faster version, do not pass @start as parameter</p>
+              <p>matcher digit_, faster version<br/></p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.digit_ = () -&gt;
-  c = text[cursor];  <span class="keyword">if</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">then</span> cursor++
+  c = text[cursor];  <span class="keyword">if</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">then</span> cursor++</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-70">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-70">&#182;</a>
+              </div>
+              <p>predicate isletter<br/></p>
 
-exports.isletter = exports.<span class="function"><span class="title">isalpha</span></span> = (c) -&gt; <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span>
-exports.letter = exports.<span class="function"><span class="title">alpha</span></span> = (start) -&gt;
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.isletter = exports.<span class="function"><span class="title">isalpha</span></span> = (c) -&gt; <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-71">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-71">&#182;</a>
+              </div>
+              <p>matcher letter, normal version<br/></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.letter = exports.<span class="function"><span class="title">alpha</span></span> = (start) -&gt;
   c = text[start]; <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">then</span> cursor = start+<span class="number">1</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-42">
+        <li id="section-72">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
+                <a class="pilcrow" href="#section-72">&#182;</a>
               </div>
-              <p>faster version, do not pass @start as parameter</p>
+              <p>matcher letter, faster version<br/></p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.letter_ = exports.alpha_ = () -&gt;
-  c = text[cursor]; <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">then</span> cursor++
+  c = text[cursor]; <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">then</span> cursor++</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-73">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-73">&#182;</a>
+              </div>
+              <p>predicate: islower</p>
 
-exports.<span class="function"><span class="title">islower</span></span> = (c) -&gt; <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span>
-exports.<span class="function"><span class="title">lower</span></span> = (start) -&gt;
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">islower</span></span> = (c) -&gt; <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-74">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-74">&#182;</a>
+              </div>
+              <p>matcher lower, normal version</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">lower</span></span> = (start) -&gt;
   c = text[start]; <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">then</span> cursor = start+<span class="number">1</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-43">
+        <li id="section-75">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-75">&#182;</a>
               </div>
-              <p>faster version, do not pass @start as parameter</p>
+              <p>matcher lower_, faster version</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.lower_ = () -&gt;
   c = text[cursor]; <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">then</span> cursor++
 
-exports.<span class="function"><span class="title">isupper</span></span> = (c) -&gt;<span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span>
-exports.<span class="function"><span class="title">upper</span></span> = (start) -&gt;
-  c = text[start]; <span class="keyword">if</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">then</span> cursor = start+<span class="number">1</span></pre></div></div>
+exports.<span class="function"><span class="title">isupper</span></span> = (c) -&gt;<span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span></pre></div></div>
             
         </li>
         
         
-        <li id="section-44">
+        <li id="section-76">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
+                <a class="pilcrow" href="#section-76">&#182;</a>
               </div>
-              <p>faster version, do not pass @start as parameter</p>
+              <p>matcher upper, normal version</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">upper_</span></span> = (start) -&gt;
-  c = text[cursor]; <span class="keyword">if</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">then</span> cursor++
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">upper</span></span> = (start) -&gt;  c = text[start]; <span class="keyword">if</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">then</span> cursor = start+<span class="number">1</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-77">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-77">&#182;</a>
+              </div>
+              <p>matcher upper_, faster version</p>
 
-exports.<span class="function"><span class="title">identifier</span></span> = (start) -&gt;
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">upper_</span></span> = (start) -&gt; c = text[cursor]; <span class="keyword">if</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">then</span> cursor++</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-78">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-78">&#182;</a>
+              </div>
+              <p>matcher identifier, normal version</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">identifier</span></span> = (start) -&gt;
   cursor = start
   c = text[cursor]
   <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'$'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span> <span class="keyword">then</span> cursor++
@@ -974,17 +1501,17 @@ exports.<span class="function"><span class="title">identifier</span></span> = (s
         </li>
         
         
-        <li id="section-45">
+        <li id="section-79">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
+                <a class="pilcrow" href="#section-79">&#182;</a>
               </div>
-              <p>faster version, do not pass @start as parameter</p>
+              <p>matcher identifier_, faster version</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">identifier</span></span> = (start) -&gt;
+            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">identifier_</span></span> = (start) -&gt;
   c = text[cursor]
   <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'$'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span> <span class="keyword">then</span> cursor++
   <span class="keyword">else</span> <span class="keyword">return</span>
@@ -997,47 +1524,65 @@ exports.<span class="function"><span class="title">identifier</span></span> = (s
         </li>
         
         
-        <li id="section-46">
+        <li id="section-80">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-46">&#182;</a>
+                <a class="pilcrow" href="#section-80">&#182;</a>
               </div>
-              <p>some utilities used by the parser</p>
+              <p>The untilites above is just for providing some examples on how to write matchers for Peasy.<br/>
+In fact, It&#39;s realy easy peasy to write any matchers for your grammar.<br/>
+see <a href="http://en.wiktionary.org/wiki/easy_peasy">realy easy peasy</a> <br/></p>
 
             </div>
             
         </li>
         
         
-        <li id="section-47">
+        <li id="section-81">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-47">&#182;</a>
+                <a class="pilcrow" href="#section-81">&#182;</a>
               </div>
-              <p>The untilites above is just for providing some examples on how to write matchers for Peasy.
-In fact, It&#39;s realy easy peasy to write any matchers for your grammar.
-<a href="http://en.wiktionary.org/wiki/easy_peasy">http://en.wiktionary.org/wiki/easy_peasy</a>
-you can embedde your grammar rules with other features seamless,
-such as lexer, rewriter, semantic action, error process( error reporting, error recovering)
-you can dynamicly modify your parser&#39;s grammar rules, dynamic update the parsed text, if you wish.</p>
+              <p>these utilities exists for people who want to use these file a independent module, instead of modify this file and put
+the grammar rule just in it directly.<br/></p>
 
             </div>
             
         </li>
         
         
-        <li id="section-48">
+        <li id="section-82">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-48">&#182;</a>
+                <a class="pilcrow" href="#section-82">&#182;</a>
               </div>
-              <p>With the method provided by Peasy, you can parse stream which is not text or stream,
-including list, binary stream, or other data structure, like tree, graph, and so on.</p>
+              <p>gettext: get the being pased text<br/>
+If you use this file to contain the grammar rules, just directly use <code>text</code><br/>
+and use <code>text[cursor]</code> to get current character, <code>text.slice(cursor, cursor+n)</code> to get substring of the text, if
+text is a string object.</p>
 
             </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.gettext = () -&gt; text</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-83">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-83">&#182;</a>
+              </div>
+              <p>If you use this file to contain the grammar rules, just directly use <code>cursor</code> or <code>cursor = n</code> or <code>cursor++</code> or <code>cursor--</code></p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.getcursor = exports.cur = () -&gt; cursor
+exports.setcursor = exports.<span class="function"><span class="title">setcur</span></span> = (pos) -&gt; cursor = pos</pre></div></div>
             
         </li>
         

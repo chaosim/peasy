@@ -7,7 +7,7 @@
 
 # Peasy provided two method to tell which symbol is left recursive.
 # here is the automiatic method:
-# You just write your rules normally, when parsing, you first call  intialize() and autoComputeLeftRecursives(grammar),
+# You just write your rules normally at first. before parsing, you first call  intialize() and autoComputeLeftRecursives(grammar),
 # and then everything about left recursive symbols is automatic computed.
 
 # ### global variables
