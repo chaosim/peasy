@@ -1,21 +1,17 @@
-{initialize, char, memo, setRules, addRecursiveCircles, computeLeftRecursives
-} = parser = p  = require "../lib/peasy.js"
+{char, initialize, autoComputeLeftRecursives} = parser = p  = require "../lib/peasy.js"
 
 hasOwnProperty = Object.hasOwnProperty
 
 a = char('a'); b = char('b'); x = char('x')
 
-memoA = memo('A')
-
 parse1 = (text) ->
   rules =
     A: (start) ->
-      (m = memoA(start)) and x(p.cur()) and m+'x' or m\
+      (m = rules.A(start)) and x(p.cur()) and m+'x' or m\
       or a(start)
     rootSymbol: 'A'
   initialize()
-  addRecursiveCircles(rules, ['A'])
-  computeLeftRecursives(rules)
+  autoComputeLeftRecursives(rules)
   parser.parse(text, rules)
 
 parse2 = (text) ->
@@ -23,11 +19,10 @@ parse2 = (text) ->
     A: (start) ->
       (m =  rules.B(start)) and x(p.cur()) and m+'x' or m\
       or a(start)
-    B: (start) ->memoA(start) or b(start)
+    B: (start) -> rules.A(start) or b(start)
     rootSymbol: 'A'
   initialize()
-  addRecursiveCircles(rules, ['A', 'B'])
-  computeLeftRecursives(rules)
+  autoComputeLeftRecursives(rules)
   parser.parse(text,  rules)
 
 parse3 = (text) ->
@@ -36,11 +31,10 @@ parse3 = (text) ->
       (m =  rules.B(start)) and x(p.cur()) and m+'x' or m\
       or a(start)
     B: (start) -> rules.C(start)
-    C: (start) -> memoA(start) or b(start)
+    C: (start) -> rules.A(start) or b(start)
     rootSymbol: 'A'
   initialize()
-  addRecursiveCircles(rules, ['A', 'B', 'C'])
-  computeLeftRecursives(rules)
+  autoComputeLeftRecursives(rules)
   parser.parse(text, rules)
 
 xexports = {}
@@ -54,7 +48,7 @@ exports.Test =
     test.equal parse('axxx'), 'axxx'
     test.done()
 
-#xexports.Test =
+#exports.Test =
   "test A: Bx|a; B:A|b": (test) ->
     parse = parse2
     test.equal parse('a'), 'a'
@@ -71,7 +65,7 @@ exports.Test =
     test.equal parse(''), undefined
     test.done()
 
-#xexports.Test =
+#exports.Test =
   "test A: Bx|a; B:C; C:A|b": (test) ->
     parse = parse3
     test.equal parse('a'), 'a'
