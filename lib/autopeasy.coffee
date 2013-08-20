@@ -2,10 +2,8 @@
 # ## Peasy means parsing is easy
 # ### an easy but powerful parser
 # With Peasy, you write the parser by hand, just like to write any other kind of program.
-# You need not play many balls like that any more:
-# ![ballacrobatics.jpg](https://raw.github.com/chaosim/peasy/master/ballacrobatics.jpg)
-# You just play one ball like so:
-# ![dolphinball.jpg](https://raw.github.com/chaosim/peasy/master/dolphinball.jpg),
+# You need not play ![many balls like that any more.](https://raw.github.com/chaosim/peasy/master/ballacrobatics.jpg)
+# You just play ![one ball like so!](https://raw.github.com/chaosim/peasy/master/dolphinball.jpg),
 
 # Peasy provided two method to tell which symbol is left recursive.
 # here is the automiatic method:
@@ -61,67 +59,115 @@ exports.parse = (data, aGrammar, root) ->
   grammar = aGrammar
   grammar[root](0)
 
+# Peasy provided two method to tell which symbol is left recursive.
+#
 
-# use addParentChildren(grammar, parentChildrens...) or addRecursiveCircles(grammar, recursiveCircles...) to tell
-# the left calling relations between symbols in the grammar
+# check whether property = @grammar[@name] is a grammar rule?
+# if property is not function, or property(undefined) does not change cursor to a nonzero, then it is not rule.
+# the property is a combinator like andp, any and so on, property('') will not touch cursor,
+# so cursor should keep its value unchanged.
+isRule = (grammar, name) ->
+  if hasOwnProperty.call(functionCache, name) then return functionCache[name]
+  if not hasOwnProperty.call(grammar, name) then result = false
+  else
+    property = grammar[name]
+    if typeof(property)!= "function"  then result = false
+    else
+      try if typeof(property(spaces))=="function"  then result = false
+      catch e then result =  true
+  functionCache[name] = result
+  result
 
-# add direct left call parent->children relation for @parentChildrens to global variable symbolToParentsMap
-# e.g. addRecursiveCircles(grammar, {A:['B'], B:['A', 'B']})
-exports.addParentChildrens = (grammar, parentChildren) ->
-  map = grammar.parentToChildren ?= {}
-  for parent, children of parentChildren
-    list = map[parent] ?= []
-    for name in children
-      if name not in list then list.push name
-  null
-
-# add left recursive parent->children relation to @symbolToParentsMap for symbols in @recursiveCircles
-# e.g. addRecursiveCircles(grammar, ['A', 'B'], ['B']) tell the same left recursive relations as above sample.
-exports.addRecursiveCircles = (grammar, recursiveCircles...) ->
-  map = grammar.parentToChildren ?= {}
-  for circle in recursiveCircles
-    i = 0
-    length = circle.length
-    while i<length
-      if i==length-1 then j = 0 else j = i+1
-      name = circle[i]
-      parent = circle[j]
-      list = map[parent] ?= []
-      if name not in list then list.push name
-      i++
-  null
-
-# after telling left recursive relations, compute the left recsives group and wrap symbol in them with recursive function
-exports.computeLeftRecursives = (grammar) ->
-  parentToChildren = grammar.parentToChildren
-  addDescendents = (symbol, meetTable, descedents) ->
-    children =  parentToChildren[symbol]
-    for child in children
-      if child not in descedents then descedents.push child
-      if not meetTable[child] then addDescendents(child, meetTable, descedents)
-  symbolDescedentsMap = {}
-  for symbol of parentToChildren
+# automatic compute left recursive rules
+exports.autoComputeLeftRecursives = computeLeftRecursives = (grammar) ->
+  originalRules = {}
+  for symbol of grammar
+    if not isRule(grammar, symbol) then break
+    originalRules[symbol] = grammar[symbol]
+  parentToChildren = {}
+  currentLeftHand = null # declare a closure variable for probe function
+  # replace every grammar symbol's rule with a probe function
+  # by running this probe function, the parent-children left call relation will be built up automaticlly.
+  for symbol of grammar
+    if not isRule(grammar, symbol) then break
+    do (symbol = symbol) ->
+      grammar[symbol] = (start) ->
+        if start!=0 then return
+        else
+          cursor++
+          children = parentToChildren[currentLeftHand] ?= []
+          if symbol not in children then children.push symbol
+  for symbol of grammar
+    if not isRule(grammar, symbol) then break
+    currentLeftHand = symbol
+    originalRules[symbol](0)
+  # find all left recursives circles in grammar.
+  appendToPaths = (symbol, meetTable, paths) ->
+    if not (chidlren = parentToChildren[symbol]) then return
+    for child in chidlren
+      for path in paths
+        length = path.length
+        if length>1 and path[length-1]==path[0] then continue
+        else if child in path
+          if child==path[0] then path.push child
+          else continue
+        else path.push child
+      if not meetTable[child] then appendToPaths(child, meetTable, paths)
+  symbolPathsMap = {}
+  for symbol of grammar
+    if not isRule(grammar, symbol) then break
     meetTable = {}; meetTable[symbol] = true
+    paths = symbolPathsMap[symbol] ?= [[symbol]]
+    appendToPaths(symbol, meetTable, paths)
+    i = 0
+    pathsCount = paths.length
+    circles = []
+    while i<pathsCount
+      path = paths[i++]
+      length = path.length
+      if path[length-1]==symbol then path.pop(); circles.push path
+    if circles.length then symbolPathsMap[symbol] = circles
+    else delete symbolPathsMap[symbol]
+  # examples below should set one and only one of C or D as memo('C') or memo('D')
+  # but it is very complicated and errorable to implement this.
+  # A: B C D | D C
+  # C: D
+  # D: C
+  for symbol of grammar
+    if not isRule(grammar, symbol) then continue
+    if not hasOwnProperty.call(symbolPathsMap, symbol)
+      grammar[symbol] = originalRules[symbol]
+      delete originalRules[symbol]
+      continue
     descendents = symbolDescedentsMap[symbol] = []
-    addDescendents(symbol, meetTable, descendents)
-    if symbol in descendents
-      originalRules[symbol] = grammar[symbol]
-      grammar[symbol] = recursive(symbol)
-  symbolDescedentsMap
+    grammar[symbol] = recursiveRules[symbol] = autoRecursive(symbol)
+    memoRules[symbol] = memo(symbol)
+    circles = symbolPathsMap[symbol]
+    for circle in circles
+      length = circle.length
+      memorized = false
+      for i in [0...length]
+        sym = circle[i]
+        if sym not in descendents then descendents.push sym
+        if memorizedRecursivs[sym] then memorized = true
+        if i==length-1 and not memorized then memorizedRecursivs[sym] = memoAutoRecursive(sym)
+  symbolPathsMap = undefined
+  functionCache = undefined
 
-# this is the key function to left recursive.
-# Make @symbol a left recursive symbol, which means to wrap originalRules[symbol] with recursive.
-# when recursiv(symbol)(start) is executed, first let rule = grammar[symbol], grammar[symbol] = originalRules[child] for
-# all symbols in left recursive circles and loop computing rule(start) until no changes happened, and
-# restore all symbols in left recursive cirle to recursiveRules[symbol] at last.,
-exports.recursive = recursive = (symbol) ->
-  rule = grammar[symbol]
+# make @symbol a left recursive symbol, which means to wrap originalRules[symbol] with recursive,
+# when recursiv(symbol)(start) is executed,
+# restore all other symbol in left recursive cirle,
+# and loop computing originalRules[symbol] until no more changes happened
+autoRecursive = (symbol) ->
   (start) ->
     for child in symbolDescedentsMap[symbol]
-      grammar[child] = originalRules[child]
+      memoRule =  memorizedRecursivs[child]
+      if memoRule then grammar[child] = memoRule
+      else grammar[child] = originalRules[child]
     hash = symbol+start
     m = parseCache[hash] ?= [undefined, -1]
     if m[1]>=0 then cursor = m[1]; return m[0]
+    rule = grammar[symbol]
     while 1
       result = rule(start)
       if m[1]<0
@@ -136,6 +182,22 @@ exports.recursive = recursive = (symbol) ->
     for child in symbolDescedentsMap[symbol]
       grammar[child] = recursiveRules[child]
     result
+
+memoAutoRecursive = (symbol) ->
+  rule = originalRules[symbol]
+  (start) ->
+    descendents = symbolDescedentsMap[symbol]
+    for child in descendents
+      grammar[child] = memoRules[child]
+    result = rule(start)
+    for child in descendents
+      memoRecursive =  memorizedRecursivs[child]
+      if memoRecursive then grammar[child] = memoRecursive
+      else grammar[child] = originalRules[child]
+    result
+
+# some utilities used by the parser
+# on succeed any matcher should not return a value which is not null or undefined, except the root symbol.
 
 # set a shorter start part of symbol as the tag used in parseCache
 setMemoTag = (symbol) ->
@@ -173,11 +235,6 @@ exports.memo = memo = (symbol) ->
     hash = symbol+start
     m = parseCache[hash]
     if m then m[0]
-
-# matchers and matcher combinators
-
-# any matcher should not return a value which is not null or undefined on succeed, except the root symbol.
-
 
 # compute exps in sequence, return the result of the last one.
 # andp and orp are used to compose the matchers
@@ -364,7 +421,7 @@ exports.spaces1_ = () ->
 exports.wrap = (item, left=spaces, right=spaces) ->
   if isString(item) then item = literal(item)
   (start) ->
-     if left(start) and result = item(cursor) and right(cursor) then result
+    if left(start) and result = item(cursor) and right(cursor) then result
 
 exports.getcursor = exports.cur = () -> cursor
 
@@ -446,8 +503,6 @@ exports.identifier = (start) ->
     if 'a'<=c<='z' or 'A'<=c<='Z' or '0'<=c<='9' or 'c'=='$' or 'c'=='_' then cursor++
     else break
   true
-
-# some utilities used by the parser
 
 # The untilites above is just for providing some examples on how to write matchers for Peasy.
 # In fact, It's realy easy peasy to write any matchers for your grammar.
