@@ -1,5 +1,10 @@
 ## What's new in peasy
 
+### what's new in 0.2.1
+* split peasy.coffe to peasy.coffee and autopeasy.coffee
+* more combinators: optional, any, some, times, separatedList, timesSeparatedList, follow
+* document: annotated peasy.coffee
+
 ### what's new in 0.2.0
 * the functions to gather information about left recursive symbol automaticly
 * the functions to help yourself to set left recursive symbol by hand.
