@@ -9,7 +9,6 @@ To use Peasy, just copy this file to your project, read it, modify it, write rul
 remove any unnessary stuffs when you are sure that, and parse the object with the grammar.
 See [here](#peasysample) for a sample grammar in Peasy.
 
-
 ### What's new in Peasy
 ### what's new in 0.2.0
 * the functions to gather information about left recursive symbol automaticly
@@ -19,9 +18,8 @@ See [here](#peasysample) for a sample grammar in Peasy.
 * some functions to demonstrate the method to write the matchers for peasy yourself, such as andp, orp, spaces, etc.
 
 ### Documentation
-See <https://github.com/chaosim/peasy/wiki> for documents for Peasy.
-The annotated coffeescript source is [here]().
-See the tests, and you'll get some information about the api and use cases.
+The [annotated peasy.coffee](http://http://chaosim.github.io/peasy/doc/peasy.html) is best document for Peasy at the moment.
+See the tests in /test, and you'll see some samples of left recursive grammars and how to parse them.
 
 ### Web sites
 the project's repository is on github <https://github.com/chaosim/peasy>.
