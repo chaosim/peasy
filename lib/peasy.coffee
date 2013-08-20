@@ -3,9 +3,9 @@
 # ### an easy but powerful parser
 # With Peasy, you write the parser by hand, just like to write any other kind of program.
 # You need not play many balls like that any more: <br/><br/>
-# ![ballacrobatics.jpg](https://raw.github.com/chaosim/peasy/master/ballacrobatics.jpg)
-# You just play one ball like so: <br/> <br/>
-# ![dolphinball.jpg](https://raw.github.com/chaosim/peasy/master/dolphinball.jpg),
+# ![ballacrobatics.jpg](https://raw.github.com/chaosim/peasy/master/ballacrobatics.jpg)<br/>
+# You just play one ball like so: <br/><br/>
+# ![dolphinball.jpg](https://raw.github.com/chaosim/peasy/master/dolphinball.jpg)<br/>,
 
 # Peasy provided two method to tell which symbol is left recursive.
 # here is the automiatic method:
