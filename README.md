@@ -18,7 +18,7 @@ See [here](#peasysample) for a sample grammar in Peasy.
 * some functions to demonstrate the method to write the matchers for peasy yourself, such as andp, orp, spaces, etc.
 
 ### Documentation
-The [annotated peasy.coffee](http://http://chaosim.github.io/peasy/doc/peasy.html) is best document for Peasy at the moment.
+The [annotated peasy.coffee](http://chaosim.github.io/peasy/doc/peasy.html) is best document for Peasy at the moment.
 See the tests in /test, and you'll see some samples of left recursive grammars and how to parse them.
 
 ### Web sites
