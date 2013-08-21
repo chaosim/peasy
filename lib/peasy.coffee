@@ -8,9 +8,9 @@
 
 # With Peasy, you write the parser by hand, just like to write any other kind of program.<br/>
 # You need not play many balls like that any more: <br/><br/>
-# ![ballacrobatics.jpg](https://raw.github.com/chaosim/peasy/master/ballacrobatics.jpg)<br/>
+# ![ballacrobatics.jpg](https://raw.github.com/chaosim/peasy/master/doc/ballacrobatics.jpg)<br/>
 # You just play one ball like so: <br/><br/>
-# ![dolphinball.jpg](https://raw.github.com/chaosim/peasy/master/dolphinball.jpg)<br/>,
+# ![dolphinball.jpg](https://raw.github.com/chaosim/peasy/master/doc/dolphinball.jpg)<br/>,
 
 # You can embeded other features in the grammar rules seamless, such as lexer, rewriter, semantic action, error
 # process( error reporting, error recovering) or any other tasks; you can dynamicly modify the grammar rules, even
@@ -564,12 +564,12 @@ exports.identifier_ = (start) ->
     else break
   true
 
-# The untilites above is just for providing some examples on how to write matchers for Peasy.<br/>
-# In fact, It's realy easy peasy to write any matchers for your grammar.<br/>
-# see [realy easy peasy]( http://en.wiktionary.org/wiki/easy_peasy ) <br/>
+# The utilites above is just for providing some examples on how to write matchers for Peasy.<br/>
+# In fact, It's realy easy peasy to write the matchers for your grammar rule yourself.<br/>
+# see [easy peasy]( http://en.wiktionary.org/wiki/easy_peasy ) <br/>
 
-# these utilities exists for people who want to use these file a independent module, instead of modify this file and put
-# the grammar rule just in it directly.<br/>
+# These utilities below exists for people who want to use these file a independent module, and put the grammar rule in
+# another separated file.<br/>
 
 # gettext: get the being pased text<br/>
 # If you use this file to contain the grammar rules, just directly use `text`<br/>

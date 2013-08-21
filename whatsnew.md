@@ -1,6 +1,9 @@
 ## What's new in peasy
 
-### what's new in 0.2.1
+### what's new in 0.2.2
+  * just for test npm readme
+
+### what's new in 0.2.2
 * split peasy.coffe to peasy.coffee and autopeasy.coffee
 * more combinators: optional, any, some, times, separatedList, timesSeparatedList, follow
 * document: annotated peasy.coffee

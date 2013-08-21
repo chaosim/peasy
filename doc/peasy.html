@@ -24,11 +24,6 @@
               <h1>Peasy</h1>
 <h6>Peasy means parsing is easy</h6>
 <h6>an easy but powerful parser</h6>
-<p>With Peasy, you write the parser by hand, just like to write any other kind of program.<br/>
-You need not play many balls like that any more: <br/><br/>
-<img src="https://raw.github.com/chaosim/peasy/master/ballacrobatics.jpg" alt="ballacrobatics.jpg"><br/>
-You just play one ball like so: <br/><br/>
-<img src="https://raw.github.com/chaosim/peasy/master/dolphinball.jpg" alt="dolphinball.jpg"><br/>,</p>
 
             </div>
             
@@ -41,9 +36,9 @@ You just play one ball like so: <br/><br/>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p>You can embeded other features in the grammar rules seamless, such as lexer, rewriter, semantic action, error
-process( error reporting, error recovering) or any other tasks; you can dynamicly modify the grammar rules, even
-the parsed object, if you wish.<br/></p>
+              <p>To use Peasy, just copy this file to your project, read it, modify it, write rules for the grammar, and
+remove any unnessary stuffs when you are sure that, and parse the object with the grammar.<br/>
+See <a href="#peasysample">here</a> for a sample grammar in Peasy.<br/></p>
 
             </div>
             
@@ -56,9 +51,11 @@ the parsed object, if you wish.<br/></p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-3">&#182;</a>
               </div>
-              <p>Instead of a tool or a library, Peasy is rather a new method to write parser. As a demonstration, Peasy presents
-itself as a module of single file, which includes some global variables used while parsing, some functions to
-process left recursives symbols, some matchers which parse the text, and some cominators of matchers.<br/>  <br/></p>
+              <p>With Peasy, you write the parser by hand, just like to write any other kind of program.<br/>
+You need not play many balls like that any more: <br/><br/>
+<img src="https://raw.github.com/chaosim/peasy/master/doc/ballacrobatics.jpg" alt="ballacrobatics.jpg"><br/>
+You just play one ball like so: <br/><br/>
+<img src="https://raw.github.com/chaosim/peasy/master/doc/dolphinball.jpg" alt="dolphinball.jpg"><br/>,</p>
 
             </div>
             
@@ -71,8 +68,9 @@ process left recursives symbols, some matchers which parse the text, and some co
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-4">&#182;</a>
               </div>
-              <p>With the method provided by Peasy, you can parse any object which is not only text, but also array, embedded list,
-binary stream, or other data structures, like tree, graph, and so on.<br/></p>
+              <p>You can embeded other features in the grammar rules seamless, such as lexer, rewriter, semantic action, error
+process( error reporting, error recovering) or any other tasks; you can dynamicly modify the grammar rules, even
+the parsed object, if you wish.<br/></p>
 
             </div>
             
@@ -85,9 +83,9 @@ binary stream, or other data structures, like tree, graph, and so on.<br/></p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-5">&#182;</a>
               </div>
-              <p>To use Peasy, just copy this file to your project, read it, modify it, write rules for the grammar, and
-remove any unnessary stuffs when you are sure that, and parse the object with the grammar.<br/>
-See <a href="#peasysample">here</a> for a sample grammar in Peasy.</p>
+              <p>Instead of a tool or a library, Peasy is rather a new method to write parser. As a demonstration, Peasy presents
+itself as a module of single file, which includes some global variables used while parsing, some functions to
+process left recursives symbols, some matchers which parse the text, and some cominators of matchers.<br/>  <br/></p>
 
             </div>
             
@@ -97,10 +95,11 @@ See <a href="#peasysample">here</a> for a sample grammar in Peasy.</p>
         <li id="section-6">
             <div class="annotation">
               
-              <div class="pilwrap for-h6">
+              <div class="pilwrap ">
                 <a class="pilcrow" href="#section-6">&#182;</a>
               </div>
-              <h6>Nothing but the method in Peasy is indispensable:<br/></h6>
+              <p>With the method provided by Peasy, you can parse any object which is not only text, but also array, embedded list,
+binary stream, or other data structures, like tree, graph, and so on.<br/></p>
 
             </div>
             
@@ -110,8 +109,21 @@ See <a href="#peasysample">here</a> for a sample grammar in Peasy.</p>
         <li id="section-7">
             <div class="annotation">
               
-              <div class="pilwrap ">
+              <div class="pilwrap for-h6">
                 <a class="pilcrow" href="#section-7">&#182;</a>
+              </div>
+              <h6>Nothing but the method in Peasy is indispensable:<br/></h6>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-8">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-8">&#182;</a>
               </div>
               <ul>
 <li>If there is no left recursive symbol, you can remove the code about that(mainly three functions and 80 lines).<br/></li>
@@ -127,11 +139,11 @@ that you would rather to remove them and write them by hand yourself when you wr
         </li>
         
         
-        <li id="section-8">
+        <li id="section-9">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-8">&#182;</a>
+                <a class="pilcrow" href="#section-9">&#182;</a>
               </div>
               <p>Peasy provided two method to tell which symbols are left recursive.<br/>
 This module presents the semiautomatic method:<br/>
@@ -146,29 +158,13 @@ everything about left recursive symbols is computed and you can call parse(data,
         </li>
         
         
-        <li id="section-9">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-9">&#182;</a>
-              </div>
-              <p>The notation <strong>@name</strong> in the comment below means a global variable, and <strong>$name</strong> means a parameter. <br/></p>
-
-            </div>
-            
-        </li>
-        
-        
         <li id="section-10">
             <div class="annotation">
               
-              <div class="pilwrap for-h4">
+              <div class="pilwrap ">
                 <a class="pilcrow" href="#section-10">&#182;</a>
               </div>
-              <h4>global variables<br/></h4>
-<p>It is for the performace reason that I use global variables, and at some time I will provide another version which
-have the class Parser for people who prefer modularization to speed. Of course you can modify the code to have the
-class Parser yourself if you like. It&#39;s just a snap to do that.</p>
+              <p>The notation <strong>@name</strong> in the comment below means a global variable, and <strong>$name</strong> means a parameter. <br/></p>
 
             </div>
             
@@ -178,10 +174,13 @@ class Parser yourself if you like. It&#39;s just a snap to do that.</p>
         <li id="section-11">
             <div class="annotation">
               
-              <div class="pilwrap ">
+              <div class="pilwrap for-h4">
                 <a class="pilcrow" href="#section-11">&#182;</a>
               </div>
-              <p>some global variable used while parsing<br/></p>
+              <h4>global variables<br/></h4>
+<p>It is for the performace reason that I use global variables, and at some time I will provide another version which
+have the class Parser for people who prefer modularization to speed. Of course you can modify the code to have the
+class Parser yourself if you like. It&#39;s just a snap to do that.</p>
 
             </div>
             
@@ -194,12 +193,9 @@ class Parser yourself if you like. It&#39;s just a snap to do that.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-12">&#182;</a>
               </div>
-              <p>the text which is being parsed<br/>
-<em>Don&#39;t be confused by the variable name, it could be not only text strings but also array, sequence, tree, graph,etc.</em></p>
+              <p>some global variable used while parsing<br/></p>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>text = <span class="string">''</span></pre></div></div>
             
         </li>
         
@@ -210,11 +206,12 @@ class Parser yourself if you like. It&#39;s just a snap to do that.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-13">&#182;</a>
               </div>
-              <p>the length of @text</p>
+              <p>the text which is being parsed<br/>
+<em>Don&#39;t be confused by the variable name, it could be not only text strings but also array, sequence, tree, graph,etc.</em></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>textLength = <span class="number">0</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>text = <span class="string">''</span></pre></div></div>
             
         </li>
         
@@ -225,11 +222,11 @@ class Parser yourself if you like. It&#39;s just a snap to do that.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-14">&#182;</a>
               </div>
-              <p>the current position of parsing, use text[cursor] to get current character in parsed stream</p>
+              <p>the length of @text</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>cursor = <span class="number">0</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>textLength = <span class="number">0</span></pre></div></div>
             
         </li>
         
@@ -240,11 +237,11 @@ class Parser yourself if you like. It&#39;s just a snap to do that.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
-              <p>the grammar object which contains all of rules defined for the symbol in grammar.</p>
+              <p>the current position of parsing, use text[cursor] to get current character in parsed stream</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>grammar = <span class="literal">undefined</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>cursor = <span class="number">0</span></pre></div></div>
             
         </li>
         
@@ -255,11 +252,11 @@ class Parser yourself if you like. It&#39;s just a snap to do that.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
-              <p>saved the original rules of the grammar.</p>
+              <p>the grammar object which contains all of rules defined for the symbol in grammar.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>originalRules = {}</pre></div></div>
+            <div class="content"><div class='highlight'><pre>grammar = <span class="literal">undefined</span></pre></div></div>
             
         </li>
         
@@ -269,6 +266,21 @@ class Parser yourself if you like. It&#39;s just a snap to do that.</p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-17">&#182;</a>
+              </div>
+              <p>saved the original rules of the grammar.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>originalRules = {}</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-18">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p>store the wrapped function to rule of the left recursive symbol with <code>recursive</code>, and before entering them, store it in grammar too.
 when entering them, <code>grammar[symbol]</code> is unwrapped to <code>originalRules[symbol]</code> or <code>memorizeRecursives[symbol]</code></p>
@@ -281,11 +293,11 @@ symbolDescedentsMap = {}</pre></div></div>
         </li>
         
         
-        <li id="section-18">
+        <li id="section-19">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-18">&#182;</a>
+                <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
               <p>if you would like to use just symbol itself as the hash head, remove these four lines below and other correlative stuffs.<br/>
 {symbol: tag}, from rule symbol map to a shorter memo tag, for memory efficeny</p>
@@ -297,11 +309,11 @@ symbolDescedentsMap = {}</pre></div></div>
         </li>
         
         
-        <li id="section-19">
+        <li id="section-20">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-19">&#182;</a>
+                <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
               <p>{tag: true}, record tags that has been used to avoid conflict</p>
 
@@ -317,11 +329,11 @@ hasOwnProperty = Object.hasOwnProperty</pre></div></div>
         </li>
         
         
-        <li id="section-20">
+        <li id="section-21">
             <div class="annotation">
               
               <div class="pilwrap for-h4">
-                <a class="pilcrow" href="#section-20">&#182;</a>
+                <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
               <h4>helper functions</h4>
 <p>some functions is helpful to make the parser.</p>
@@ -331,11 +343,11 @@ hasOwnProperty = Object.hasOwnProperty</pre></div></div>
         </li>
         
         
-        <li id="section-21">
+        <li id="section-22">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-21">&#182;</a>
+                <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
               <p><strong>intialize</strong>: clear global varialbes. you should call <code>intialize()</code> at first.</p>
 
@@ -354,11 +366,11 @@ hasOwnProperty = Object.hasOwnProperty</pre></div></div>
         </li>
         
         
-        <li id="section-22">
+        <li id="section-23">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-22">&#182;</a>
+                <a class="pilcrow" href="#section-23">&#182;</a>
               </div>
               <p><strong>_parse</strong>: parse <strong>$data</strong> from <strong>$root</strong> with <strong>$aGrammar</strong>.<br/>
 before parsing, you should tell the informations about left recursion in grammar.</p>
@@ -376,11 +388,11 @@ before parsing, you should tell the informations about left recursion in grammar
         </li>
         
         
-        <li id="section-23">
+        <li id="section-24">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-23">&#182;</a>
+                <a class="pilcrow" href="#section-24">&#182;</a>
               </div>
               <p><a id="peasysample"></a>
 <strong>parse</strong>: this is a sample parse function to demonstrate on how to write your own grammar rules yourself.<br/>
@@ -393,11 +405,11 @@ notice that there exists indirect left recursion in the grammar.</p>
         </li>
         
         
-        <li id="section-24">
+        <li id="section-25">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-24">&#182;</a>
+                <a class="pilcrow" href="#section-25">&#182;</a>
               </div>
               <p>generate the matchers by the combinators in advance for better performance.<br/>
 if you don&#39;t mind performance, you can write them in the rule directly.</p>
@@ -410,11 +422,11 @@ if you don&#39;t mind performance, you can write them in the rule directly.</p>
         </li>
         
         
-        <li id="section-25">
+        <li id="section-26">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-25">&#182;</a>
+                <a class="pilcrow" href="#section-26">&#182;</a>
               </div>
               <p>the grammar rules object.</p>
 
@@ -426,11 +438,11 @@ if you don&#39;t mind performance, you can write them in the rule directly.</p>
         </li>
         
         
-        <li id="section-26">
+        <li id="section-27">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-26">&#182;</a>
+                <a class="pilcrow" href="#section-27">&#182;</a>
               </div>
               <p><em>add <code>or memoResult</code> to prevent executing nonrecursive part more than once.</em></p>
 
@@ -449,11 +461,11 @@ if you don&#39;t mind performance, you can write them in the rule directly.</p>
         </li>
         
         
-        <li id="section-27">
+        <li id="section-28">
             <div class="annotation">
               
               <div class="pilwrap for-h5">
-                <a class="pilcrow" href="#section-27">&#182;</a>
+                <a class="pilcrow" href="#section-28">&#182;</a>
               </div>
               <h5>stuffs for left recursives</h5>
 <p>use <code>addParentChildren(grammar, parentChildrens)</code> or <code>addRecursiveCircles(grammar, recursiveCircles...)</code> to tell
@@ -464,11 +476,11 @@ the left calling relations between symbols in the grammar<br/></p>
         </li>
         
         
-        <li id="section-28">
+        <li id="section-29">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-28">&#182;</a>
+                <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <p><strong>addParentChildrens</strong>: add direct left call parent-&gt;children relation for <strong>$parentChildrens</strong> to <strong>@symbolToParentsMap</strong><br/>
 e.g. <code>addRecursiveCircles(grammar, {A:[&#39;B&#39;], B:[&#39;A&#39;, &#39;B&#39;]})</code></p>
@@ -486,11 +498,11 @@ e.g. <code>addRecursiveCircles(grammar, {A:[&#39;B&#39;], B:[&#39;A&#39;, &#39;B
         </li>
         
         
-        <li id="section-29">
+        <li id="section-30">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-29">&#182;</a>
+                <a class="pilcrow" href="#section-30">&#182;</a>
               </div>
               <p><strong>addRecursiveCircles</strong>: add left recursive parent-&gt;children relation to <code>grammar.parentToChildren</code> for symbols in <strong>@recursiveCircles</strong><br/>
 e.g. <code>addRecursiveCircles(grammar, [&#39;A&#39;, &#39;B&#39;], [&#39;B&#39;])</code> tell the same left recursive relations as above sample.</p>
@@ -514,11 +526,11 @@ e.g. <code>addRecursiveCircles(grammar, [&#39;A&#39;, &#39;B&#39;], [&#39;B&#39;
         </li>
         
         
-        <li id="section-30">
+        <li id="section-31">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-30">&#182;</a>
+                <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
               <p><strong>computeLeftRecursives</strong>: after telling left recursive relations, compute the left recsives group and wrap symbol in
 them with <code>recursive</code> function<br/></p>
@@ -545,11 +557,11 @@ them with <code>recursive</code> function<br/></p>
         </li>
         
         
-        <li id="section-31">
+        <li id="section-32">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-31">&#182;</a>
+                <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
               <p><strong>recursive</strong>: this is the key function to left recursive.<br/>
 Make <strong>$symbol</strong> a left recursive symbol, which means to wrap <code>originalRules[symbol]</code> with recursive.
@@ -585,11 +597,11 @@ restore all symbols in left recursive cirle to <code>recursiveRules[symbol]</cod
         </li>
         
         
-        <li id="section-32">
+        <li id="section-33">
             <div class="annotation">
               
               <div class="pilwrap for-h5">
-                <a class="pilcrow" href="#section-32">&#182;</a>
+                <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
               <h5>memorization</h5>
 
@@ -598,11 +610,11 @@ restore all symbols in left recursive cirle to <code>recursiveRules[symbol]</cod
         </li>
         
         
-        <li id="section-33">
+        <li id="section-34">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-33">&#182;</a>
+                <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
               <p><strong>memo</strong>: lookup the memorized result and reached cursor for <strong>$symbol</strong> at the position of <strong>$start</strong><br/>
 It is set up automaticly by <code>computeLeftRecursives(grammar)</code> for the symbols which is left recursive.<br/>
@@ -619,11 +631,11 @@ For other symbol, you should be able to call this in rule mannually.</p>
         </li>
         
         
-        <li id="section-34">
+        <li id="section-35">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-34">&#182;</a>
+                <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
               <p><strong>setMemorizeRules</strong>: set the symbols in grammar which  memorize their rule&#39;s result.<br/>
 this function should be used only for the symbols which is not left recursives.<br/>
@@ -639,11 +651,11 @@ you can do this after <code>initialize()</code> and before <code>parse(...)</cod
         </li>
         
         
-        <li id="section-35">
+        <li id="section-36">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-35">&#182;</a>
+                <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
               <p><strong>memorize</strong>: memorize result and cursor for <strong>$symbol</strong> which is not left recursive.<br/>
 <em>The symbols which is left recursive should be wrapped by <code>recursive(symbol)</code>, not <code>memorize(symbol)</code>!!!</em></p>
@@ -665,11 +677,11 @@ you can do this after <code>initialize()</code> and before <code>parse(...)</cod
         </li>
         
         
-        <li id="section-36">
+        <li id="section-37">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-36">&#182;</a>
+                <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
               <p><strong>setMemoTag</strong>: find a shorter part of symbol as the head of hash tag to index <strong>@parseCache</strong> <br/>
 It exists just for performance reason. If you don&#39;t like this idea, you can remove the stuffs about memo tag yourself and
@@ -689,11 +701,11 @@ just use symbol itself as the head of hash tag.</p>
         </li>
         
         
-        <li id="section-37">
+        <li id="section-38">
             <div class="annotation">
               
               <div class="pilwrap for-h4">
-                <a class="pilcrow" href="#section-37">&#182;</a>
+                <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
               <h4>matchers and matcher combinators<br/></h4>
 
@@ -702,11 +714,11 @@ just use symbol itself as the head of hash tag.</p>
         </li>
         
         
-        <li id="section-38">
+        <li id="section-39">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-38">&#182;</a>
+                <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
               <p>A <strong>matcher</strong> is a function which read the text being parsed and move cursor directly.<br/>
 All matcher should return truth value on succeed, and return falsic value on fail.<br/>
@@ -723,11 +735,11 @@ which we have met above.</p>
         </li>
         
         
-        <li id="section-39">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-39">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p>combinator <strong>andp</strong><br/>
 execute item(cursor) in sequence, return the result of the last one. <br/>
@@ -752,11 +764,11 @@ And in that manner, you would have more control on your grammar rule, say like b
         </li>
         
         
-        <li id="section-40">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
               <p>combinator <strong>orp</strong> <br/>
 execute <code>item(start)</code> one by one, until the first item which is evaluated to truth value and return the value.<br/>
@@ -780,11 +792,11 @@ And in that manner, you would have more control on your grammar rule, say like b
         </li>
         
         
-        <li id="section-41">
+        <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
+                <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
               <p>combinator <strong>notp</strong><br/>
 <code>notp</code> is not useful except being used in other combinators, just like this: <code>andp(item1, notp(item2))</code>.<br/>
@@ -799,11 +811,11 @@ And in that manner, you would have more control on your grammar rule, say like b
         </li>
         
         
-        <li id="section-42">
+        <li id="section-43">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
+                <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
               <p>combinator <strong>any</strong>: zero or more times of <code>item(cursor)</code></p>
 
@@ -819,11 +831,11 @@ And in that manner, you would have more control on your grammar rule, say like b
         </li>
         
         
-        <li id="section-43">
+        <li id="section-44">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
+                <a class="pilcrow" href="#section-44">&#182;</a>
               </div>
               <p>combinator <strong>some</strong>: one or more times of <code>item(cursor)</code></p>
 
@@ -843,11 +855,11 @@ And in that manner, you would have more control on your grammar rule, say like b
         </li>
         
         
-        <li id="section-44">
+        <li id="section-45">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
+                <a class="pilcrow" href="#section-45">&#182;</a>
               </div>
               <p>combinator  <strong>may</strong>: a.k.a optional <br/>
 try to match <code>item(cursor)</code>, wether <code>item(cursor)</code> succeed or not, <code>maybe(item)(start)</code> succeed.</p>
@@ -864,11 +876,11 @@ try to match <code>item(cursor)</code>, wether <code>item(cursor)</code> succeed
         </li>
         
         
-        <li id="section-45">
+        <li id="section-46">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
+                <a class="pilcrow" href="#section-46">&#182;</a>
               </div>
               <p>combinator <strong>follow</strong> <br/>
 try to match <code>item(start)</code>, if succeed, reset cursor and return the value of item(start) <br/>
@@ -885,11 +897,11 @@ whether succeed or not, cursor is reset to start</p>
         </li>
         
         
-        <li id="section-46">
+        <li id="section-47">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-46">&#182;</a>
+                <a class="pilcrow" href="#section-47">&#182;</a>
               </div>
               <p>combinator <strong>times</strong>: match <strong>$n</strong> times item(cursor), n&gt;=1</p>
 
@@ -907,11 +919,11 @@ whether succeed or not, cursor is reset to start</p>
         </li>
         
         
-        <li id="section-47">
+        <li id="section-48">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-47">&#182;</a>
+                <a class="pilcrow" href="#section-48">&#182;</a>
               </div>
               <p>combinator <strong>seperatedList</strong>: some times item(cursor), separated by @separator</p>
 
@@ -933,11 +945,11 @@ whether succeed or not, cursor is reset to start</p>
         </li>
         
         
-        <li id="section-48">
+        <li id="section-49">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-48">&#182;</a>
+                <a class="pilcrow" href="#section-49">&#182;</a>
               </div>
               <p>combinator <strong>timesSeperatedList</strong>: given @n times $item separated by @separator, n&gt;=1</p>
 
@@ -960,33 +972,16 @@ whether succeed or not, cursor is reset to start</p>
         </li>
         
         
-        <li id="section-49">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-49">&#182;</a>
-              </div>
-              <p>As the same as andp, orp, in the manner of Peasy, you would rather to write youself a loop to do the things, instead
-of useing the combinators like any, some, times, seperatedList,etc. and that would be simpler, faster and more elegant. <br/>
-And in that manner, you would have more control on your grammar rule so that we can do other things include lexer,
-error report, errer recovery, semantic operatons, and any other things you would like to do. <br/></p>
-
-            </div>
-            
-        </li>
-        
-        
         <li id="section-50">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-50">&#182;</a>
               </div>
-              <p>It is for three motives to put all of the stuffs abve here:
-<em> 1. to demonstrate how to write matcher and grammar rules in the method brought by Peasy
-</em> 2. to demonstrate that Peasy can implement any component that other combinational parser libaries like pyparsing,
-parsec too, but in a simpler, faster manner.
-* 3. to show that it is how easy to write the matchers in the manner of Peasy.<br/><br/></p>
+              <p>As the same as andp, orp, in the manner of Peasy, you would rather to write youself a loop to do the things, instead
+of useing the combinators like any, some, times, seperatedList,etc. and that would be simpler, faster and more elegant. <br/>
+And in that manner, you would have more control on your grammar rule so that we can do other things include lexer,
+error report, errer recovery, semantic operatons, and any other things you would like to do. <br/></p>
 
             </div>
             
@@ -999,8 +994,11 @@ parsec too, but in a simpler, faster manner.
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-51">&#182;</a>
               </div>
-              <p>As you have seen above, all of these utilities is so simple that you can write them at home by hand easily. In fact,
-you can write yourself all of the grammar rules in the same manner as above.</p>
+              <p>It is for three motives to put all of the stuffs abve here:
+<em> 1. to demonstrate how to write matcher and grammar rules in the method brought by Peasy
+</em> 2. to demonstrate that Peasy can implement any component that other combinational parser libaries like pyparsing,
+parsec too, but in a simpler, faster manner.
+* 3. to show that it is how easy to write the matchers in the manner of Peasy.<br/><br/></p>
 
             </div>
             
@@ -1013,9 +1011,8 @@ you can write yourself all of the grammar rules in the same manner as above.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-52">&#182;</a>
               </div>
-              <p>If you like, you can add a faster version for every matcher, which do not pass $start as parameter around.<br/>
-Some of the matchers below have two version, to demonstrate how to do that.
-<em>Don&#39;t use the faster version in orp, any, some, times, separatedList, timesSeparatedList.</em> <br/><br/></p>
+              <p>As you have seen above, all of these utilities is so simple that you can write them at home by hand easily. In fact,
+you can write yourself all of the grammar rules in the same manner as above.</p>
 
             </div>
             
@@ -1025,8 +1022,23 @@ Some of the matchers below have two version, to demonstrate how to do that.
         <li id="section-53">
             <div class="annotation">
               
-              <div class="pilwrap for-h4">
+              <div class="pilwrap ">
                 <a class="pilcrow" href="#section-53">&#182;</a>
+              </div>
+              <p>If you like, you can add a faster version for every matcher, which do not pass $start as parameter around.<br/>
+Some of the matchers below have two version, to demonstrate how to do that.
+<em>Don&#39;t use the faster version in orp, any, some, times, separatedList, timesSeparatedList.</em> <br/><br/></p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-54">
+            <div class="annotation">
+              
+              <div class="pilwrap for-h4">
+                <a class="pilcrow" href="#section-54">&#182;</a>
               </div>
               <h4>some other matchers, combinators and predicate<br/></h4>
 <p>A <strong>predicate</strong> is a function which return true or false, usually according to its parameter, but not look at parsed object.
@@ -1038,11 +1050,11 @@ just remove them if you don&#39;t need them, except <strong>literal</strong>, wh
         </li>
         
         
-        <li id="section-54">
+        <li id="section-55">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-54">&#182;</a>
+                <a class="pilcrow" href="#section-55">&#182;</a>
               </div>
               <p>matcher <strong>literal</strong>, normal version<br/>
 match a text string.<br/>
@@ -1058,11 +1070,11 @@ exports.literal = <span class="function"><span class="title">literal</span></spa
         </li>
         
         
-        <li id="section-55">
+        <li id="section-56">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-55">&#182;</a>
+                <a class="pilcrow" href="#section-56">&#182;</a>
               </div>
               <p>matcher <strong>literal_</strong>, faster version<br/>
 match a text string.</p>
@@ -1076,11 +1088,11 @@ match a text string.</p>
         </li>
         
         
-        <li id="section-56">
+        <li id="section-57">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-56">&#182;</a>
+                <a class="pilcrow" href="#section-57">&#182;</a>
               </div>
               <p>matcher <strong>char</strong>, normal version<br/>
 match one character</p>
@@ -1093,11 +1105,11 @@ match one character</p>
         </li>
         
         
-        <li id="section-57">
+        <li id="section-58">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-57">&#182;</a>
+                <a class="pilcrow" href="#section-58">&#182;</a>
               </div>
               <p>matcher <strong>char_</strong>, normal version <br/>
 match one character</p>
@@ -1110,11 +1122,11 @@ match one character</p>
         </li>
         
         
-        <li id="section-58">
+        <li id="section-59">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-58">&#182;</a>
+                <a class="pilcrow" href="#section-59">&#182;</a>
               </div>
               <p>In spaces, spaces<em>, spaces1, spaces1</em>, a tat(&#39;\t&#39;) is seen as tabWidth spaces, <br/>
 which is used in indent style language, such as coffeescript, python, haskell, etc. <br/>
@@ -1125,11 +1137,11 @@ If you don&#39;t need this feature, you can easily rewrite these utilities to re
         </li>
         
         
-        <li id="section-59">
+        <li id="section-60">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-59">&#182;</a>
+                <a class="pilcrow" href="#section-60">&#182;</a>
               </div>
               <p>matcher <strong>spaces</strong>, normal version<br/>
 zero or more whitespaces, ie. space or tab.<br/></p>
@@ -1150,11 +1162,11 @@ zero or more whitespaces, ie. space or tab.<br/></p>
         </li>
         
         
-        <li id="section-60">
+        <li id="section-61">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-60">&#182;</a>
+                <a class="pilcrow" href="#section-61">&#182;</a>
               </div>
               <p>matcher <strong>spaces_</strong>, faster version<br/>
 zero or more whitespaces, ie. space or tab.</p>
@@ -1174,11 +1186,11 @@ zero or more whitespaces, ie. space or tab.</p>
         </li>
         
         
-        <li id="section-61">
+        <li id="section-62">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-61">&#182;</a>
+                <a class="pilcrow" href="#section-62">&#182;</a>
               </div>
               <p>matcher <strong>spaces1</strong>, normal version<br/>
 one or more whitespaces, ie. space or tab.<br/></p>
@@ -1199,11 +1211,11 @@ one or more whitespaces, ie. space or tab.<br/></p>
         </li>
         
         
-        <li id="section-62">
+        <li id="section-63">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-62">&#182;</a>
+                <a class="pilcrow" href="#section-63">&#182;</a>
               </div>
               <p>matcher <strong>spaces1_</strong>, faster version<br/>
 one or more whitespaces, ie. space or tab.</p>
@@ -1223,11 +1235,11 @@ one or more whitespaces, ie. space or tab.</p>
         </li>
         
         
-        <li id="section-63">
+        <li id="section-64">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-63">&#182;</a>
+                <a class="pilcrow" href="#section-64">&#182;</a>
               </div>
               <p>matcher <strong>wrap</strong>, normal version<br/>
 match left, then match item, match right at last</p>
@@ -1242,11 +1254,11 @@ match left, then match item, match right at last</p>
         </li>
         
         
-        <li id="section-64">
+        <li id="section-65">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-64">&#182;</a>
+                <a class="pilcrow" href="#section-65">&#182;</a>
               </div>
               <p>matcher <strong>identifierLetter</strong>: normal version<br/>
 is a letter than can be used in identifer?<br/>
@@ -1263,11 +1275,11 @@ javascript style, &#39;$&#39; is a identifierLetter_<br/></p>
         </li>
         
         
-        <li id="section-65">
+        <li id="section-66">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-65">&#182;</a>
+                <a class="pilcrow" href="#section-66">&#182;</a>
               </div>
               <p>matcher <strong>identifierLetter_</strong>, version<br/>
 is a letter that can be used in identifer? <br/>
@@ -1283,11 +1295,11 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
         </li>
         
         
-        <li id="section-66">
+        <li id="section-67">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-66">&#182;</a>
+                <a class="pilcrow" href="#section-67">&#182;</a>
               </div>
               <p>matcher <strong>followIdentifierLetter_</strong>, faster version<br/>
 lookahead whether the following character is a letter used in identifer. don&#39;t change cursor. <br/>
@@ -1304,11 +1316,11 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
         </li>
         
         
-        <li id="section-67">
+        <li id="section-68">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-67">&#182;</a>
+                <a class="pilcrow" href="#section-68">&#182;</a>
               </div>
               <p>predicate isdigit<br/></p>
 
@@ -1319,11 +1331,11 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
         </li>
         
         
-        <li id="section-68">
+        <li id="section-69">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-68">&#182;</a>
+                <a class="pilcrow" href="#section-69">&#182;</a>
               </div>
               <p>matcher digit, normal version<br/></p>
 
@@ -1335,11 +1347,11 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
         </li>
         
         
-        <li id="section-69">
+        <li id="section-70">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-69">&#182;</a>
+                <a class="pilcrow" href="#section-70">&#182;</a>
               </div>
               <p>matcher digit_, faster version<br/></p>
 
@@ -1351,11 +1363,11 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
         </li>
         
         
-        <li id="section-70">
+        <li id="section-71">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-70">&#182;</a>
+                <a class="pilcrow" href="#section-71">&#182;</a>
               </div>
               <p>predicate isletter<br/></p>
 
@@ -1366,11 +1378,11 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
         </li>
         
         
-        <li id="section-71">
+        <li id="section-72">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-71">&#182;</a>
+                <a class="pilcrow" href="#section-72">&#182;</a>
               </div>
               <p>matcher letter, normal version<br/></p>
 
@@ -1382,11 +1394,11 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
         </li>
         
         
-        <li id="section-72">
+        <li id="section-73">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-72">&#182;</a>
+                <a class="pilcrow" href="#section-73">&#182;</a>
               </div>
               <p>matcher letter, faster version<br/></p>
 
@@ -1398,11 +1410,11 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
         </li>
         
         
-        <li id="section-73">
+        <li id="section-74">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-73">&#182;</a>
+                <a class="pilcrow" href="#section-74">&#182;</a>
               </div>
               <p>predicate: islower</p>
 
@@ -1413,11 +1425,11 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
         </li>
         
         
-        <li id="section-74">
+        <li id="section-75">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-74">&#182;</a>
+                <a class="pilcrow" href="#section-75">&#182;</a>
               </div>
               <p>matcher lower, normal version</p>
 
@@ -1429,11 +1441,11 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
         </li>
         
         
-        <li id="section-75">
+        <li id="section-76">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-75">&#182;</a>
+                <a class="pilcrow" href="#section-76">&#182;</a>
               </div>
               <p>matcher lower_, faster version</p>
 
@@ -1447,11 +1459,11 @@ exports.<span class="function"><span class="title">isupper</span></span> = (c) -
         </li>
         
         
-        <li id="section-76">
+        <li id="section-77">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-76">&#182;</a>
+                <a class="pilcrow" href="#section-77">&#182;</a>
               </div>
               <p>matcher upper, normal version</p>
 
@@ -1462,11 +1474,11 @@ exports.<span class="function"><span class="title">isupper</span></span> = (c) -
         </li>
         
         
-        <li id="section-77">
+        <li id="section-78">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-77">&#182;</a>
+                <a class="pilcrow" href="#section-78">&#182;</a>
               </div>
               <p>matcher upper_, faster version</p>
 
@@ -1477,11 +1489,11 @@ exports.<span class="function"><span class="title">isupper</span></span> = (c) -
         </li>
         
         
-        <li id="section-78">
+        <li id="section-79">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-78">&#182;</a>
+                <a class="pilcrow" href="#section-79">&#182;</a>
               </div>
               <p>matcher identifier, normal version</p>
 
@@ -1501,11 +1513,11 @@ exports.<span class="function"><span class="title">isupper</span></span> = (c) -
         </li>
         
         
-        <li id="section-79">
+        <li id="section-80">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-79">&#182;</a>
+                <a class="pilcrow" href="#section-80">&#182;</a>
               </div>
               <p>matcher identifier_, faster version</p>
 
@@ -1524,29 +1536,15 @@ exports.<span class="function"><span class="title">isupper</span></span> = (c) -
         </li>
         
         
-        <li id="section-80">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-80">&#182;</a>
-              </div>
-              <p>The untilites above is just for providing some examples on how to write matchers for Peasy.<br/>
-In fact, It&#39;s realy easy peasy to write any matchers for your grammar.<br/>
-see <a href="http://en.wiktionary.org/wiki/easy_peasy">realy easy peasy</a> <br/></p>
-
-            </div>
-            
-        </li>
-        
-        
         <li id="section-81">
             <div class="annotation">
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-81">&#182;</a>
               </div>
-              <p>these utilities exists for people who want to use these file a independent module, instead of modify this file and put
-the grammar rule just in it directly.<br/></p>
+              <p>The utilites above is just for providing some examples on how to write matchers for Peasy.<br/>
+In fact, It&#39;s realy easy peasy to write the matchers for your grammar rule yourself.<br/>
+see <a href="http://en.wiktionary.org/wiki/easy_peasy">easy peasy</a> <br/></p>
 
             </div>
             
@@ -1558,6 +1556,20 @@ the grammar rule just in it directly.<br/></p>
               
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-82">&#182;</a>
+              </div>
+              <p>These utilities below exists for people who want to use these file a independent module, and put the grammar rule in
+another separated file.<br/></p>
+
+            </div>
+            
+        </li>
+        
+        
+        <li id="section-83">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-83">&#182;</a>
               </div>
               <p>gettext: get the being pased text<br/>
 If you use this file to contain the grammar rules, just directly use <code>text</code><br/>
@@ -1571,11 +1583,11 @@ text is a string object.</p>
         </li>
         
         
-        <li id="section-83">
+        <li id="section-84">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-83">&#182;</a>
+                <a class="pilcrow" href="#section-84">&#182;</a>
               </div>
               <p>If you use this file to contain the grammar rules, just directly use <code>cursor</code> or <code>cursor = n</code> or <code>cursor++</code> or <code>cursor--</code></p>
 

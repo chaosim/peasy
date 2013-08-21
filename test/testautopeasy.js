@@ -123,5 +123,5 @@
 }).call(this);
 
 /*
-//@ sourceMappingURL=testpeasy2.map
+//@ sourceMappingURL=testautopeasy.map
 */
