@@ -36,7 +36,7 @@
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-2">&#182;</a>
               </div>
-              <p>To use Peasy, just copy this file to your project, read it, modify it, write the grammar rules,, and
+              <p>To use Peasy, just copy this file to your project, read it, modify it, write the grammar rules, and
 remove any unnecessary stuffs in Peasy, and parse with the grammar.<br/>
 See <a href="#peasysample">here</a> for a sample grammar in Peasy.<br/></p>
 
@@ -150,7 +150,7 @@ This module presents the semiautomatic method:<br/>
 At first you write grammar rules in this manner: replace one and only one of
 grmmar.symbol in the grammar rule with memo(symbol) for every left recursive circles. Before parsing, you first call
 intialize(), and tell which symbol are left call or left recursive by calling  addParentChildrens(grammar, parentChildren)
-and/or addRecursiveCircles(grammar, recursiveCircles...), and then call computeLeftRecursives(grammar), now
+and/or addRecursiveCircles(grammar, recursiveCircles...), and: call computeLeftRecursives(grammar), now
 everything about left recursive symbols is computed and you can call parse(data, grammar, root) to do the work.</p>
 
             </div>
@@ -211,7 +211,7 @@ class Parser yourself if you like. It&#39;s just a snap to do that.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>text = <span class="string">''</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">global</span> text</pre></div></div>
             
         </li>
         
@@ -226,7 +226,7 @@ class Parser yourself if you like. It&#39;s just a snap to do that.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>textLength = <span class="number">0</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">global</span> textLength</pre></div></div>
             
         </li>
         
@@ -241,7 +241,7 @@ class Parser yourself if you like. It&#39;s just a snap to do that.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>cursor = <span class="number">0</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">global</span> cursor</pre></div></div>
             
         </li>
         
@@ -256,7 +256,7 @@ class Parser yourself if you like. It&#39;s just a snap to do that.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>grammar = <span class="literal">undefined</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">global</span> grammar</pre></div></div>
             
         </li>
         
@@ -271,7 +271,7 @@ class Parser yourself if you like. It&#39;s just a snap to do that.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>originalRules = {}</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">global</span> originalRules</pre></div></div>
             
         </li>
         
@@ -287,8 +287,8 @@ when entering them, <code>grammar[symbol]</code> is unwrapped to <code>originalR
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>recursiveRules = {}
-symbolDescedentsMap = {}</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">global</span> recursiveRules
+<span class="keyword">global</span> symbolDescedentsMap</pre></div></div>
             
         </li>
         
@@ -304,7 +304,7 @@ symbolDescedentsMap = {}</pre></div></div>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>symbolToTagMap = {}</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="keyword">global</span> symbolToTagMap</pre></div></div>
             
         </li>
         
@@ -315,16 +315,14 @@ symbolDescedentsMap = {}</pre></div></div>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
-              <p>{tag: true}, record tags that has been used to avoid conflict</p>
+              <p>{tag: True}, record tags that has been used to avoid conflict</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>tags = {}
+            <div class="content"><div class='highlight'><pre><span class="keyword">global</span> tags
 
-parseCache = {} <span class="comment"># {tag+start: [result, cursor]}, memorized parser result</span>
-functionCache = {} <span class="comment"># memorized normal function result</span>
-
-hasOwnProperty = Object.hasOwnProperty</pre></div></div>
+<span class="keyword">global</span> parseCache <span class="comment"># {tag+start: [result, cursor]}, memorized parser result</span>
+<span class="keyword">global</span> functionCache <span class="comment"># memorized normal function result</span></pre></div></div>
             
         </li>
         
@@ -353,15 +351,18 @@ hasOwnProperty = Object.hasOwnProperty</pre></div></div>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.initialize = () -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">initialize</span><span class="params">(aGrammar)</span>:</span>
+  <span class="keyword">global</span> grammar, parseCache, functionCache, originalRules, recursiveRules, symbolDescedentsMap,\
+         symbolToTagMap, tags
+  grammar = aGrammar
+  grammar.parentToChildren = {}
   parseCache = {}
   functionCache = {}
   originalRules = {}
   recursiveRules = {}
   symbolDescedentsMap = {}
   symbolToTagMap = {}
-  tags = {}
-  parseCache = {}</pre></div></div>
+  tags = {}</pre></div></div>
             
         </li>
         
@@ -377,13 +378,13 @@ before parsing, you should tell the informations about left recursion in grammar
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.parse = <span class="function"><span class="title">_parse</span></span> = (data, aGrammar, root) -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">parse</span><span class="params">(data, aGrammar, root=None)</span>:</span>
+  <span class="keyword">global</span> text, textLength, cursor 
   text = data
-  textLength = text.length
+  textLength = len(text)
   cursor = <span class="number">0</span>
   root = root <span class="keyword">or</span> aGrammar.rootSymbol
-  grammar = aGrammar
-  grammar[root](<span class="number">0</span>)</pre></div></div>
+  <span class="keyword">return</span> getattr(grammar, root)(<span class="number">0</span>)</pre></div></div>
             
         </li>
         
@@ -400,7 +401,7 @@ notice that there exists indirect left recursion in the grammar.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="title">parse</span></span> = (text) -&gt;</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">parseSample</span><span class="params">(text)</span>:</span></pre></div></div>
             
         </li>
         
@@ -432,8 +433,9 @@ if you don&#39;t mind performance, you can write them in the rule directly.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  rules =
-    A: (start) -&gt;</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="class"><span class="keyword">class</span> <span class="title">rules</span>:</span>
+    rootSymbol = <span class="string">'A'</span>    
+    <span class="function"><span class="keyword">def</span> <span class="title">A</span><span class="params">(self,start)</span>:</span></pre></div></div>
             
         </li>
         
@@ -448,15 +450,14 @@ if you don&#39;t mind performance, you can write them in the rule directly.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>      (memoResult = m = rules.B(start)) <span class="keyword">and</span> x(p.cur()) <span class="keyword">and</span> m+<span class="string">'x'</span> <span class="keyword">or</span> memoResult\
-      <span class="keyword">or</span> a(start)
-    B: (start) -&gt; rules.C(start)
-    C: (start) -&gt; memoA(start) <span class="keyword">or</span> b(start)
-    rootSymbol: <span class="string">'A'</span>
+            <div class="content"><div class='highlight'><pre>      memoResult = m = rules.B(start)
+      <span class="keyword">return</span> (m <span class="keyword">and</span> x(p.cur()) <span class="keyword">and</span> m+<span class="string">'x'</span> <span class="keyword">or</span> memoResult) <span class="keyword">or</span> a(start)
+    <span class="function"><span class="keyword">def</span> <span class="title">B</span><span class="params">(self,start)</span>:</span> <span class="keyword">return</span> rules.C(start)
+    <span class="function"><span class="keyword">def</span> <span class="title">C</span><span class="params">(self,start)</span>:</span> <span class="keyword">return</span> memoA(start) <span class="keyword">or</span> b(start)
   initialize()
   addRecursiveCircles(rules, [<span class="string">'A'</span>, <span class="string">'B'</span>, <span class="string">'C'</span>])
   computeLeftRecursives(rules)
-  _parse(text, rules)</pre></div></div>
+  parse(text, rules)</pre></div></div>
             
         </li>
         
@@ -487,13 +488,12 @@ e.g. <code>addRecursiveCircles(grammar, {A:[&#39;B&#39;], B:[&#39;A&#39;, &#39;B
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">addParentChildrens</span></span> = (grammar, parentChildren) -&gt;
-  map = grammar.parentToChildren ?= {}
-  <span class="keyword">for</span> parent, children <span class="keyword">of</span> parentChildren
-    list = map[parent] ?= []
-    <span class="keyword">for</span> name <span class="keyword">in</span> children
-      <span class="keyword">if</span> name <span class="keyword">not</span> <span class="keyword">in</span> list <span class="keyword">then</span> list.push name
-  <span class="literal">null</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">addParentChildrens</span><span class="params">(grammar, parentChildren)</span>:</span>
+  map = grammar.parentToChildren
+  <span class="keyword">for</span> parent, children <span class="keyword">in</span> parentChildren:
+    list = map.setdefault(parent, [])
+    <span class="keyword">for</span> name <span class="keyword">in</span> children:
+      <span class="keyword">if</span> name <span class="keyword">not</span> <span class="keyword">in</span> list: list.append(name)</pre></div></div>
             
         </li>
         
@@ -509,19 +509,17 @@ e.g. <code>addRecursiveCircles(grammar, [&#39;A&#39;, &#39;B&#39;], [&#39;B&#39;
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">addRecursiveCircles</span></span> = (grammar, recursiveCircles...) -&gt;
-  map = grammar.parentToChildren ?= {}
-  <span class="keyword">for</span> circle <span class="keyword">in</span> recursiveCircles
-    i = <span class="number">0</span>
-    length = circle.length
-    <span class="keyword">while</span> i&lt;length
-      <span class="keyword">if</span> i==length-<span class="number">1</span> <span class="keyword">then</span> j = <span class="number">0</span> <span class="keyword">else</span> j = i+<span class="number">1</span>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">addRecursiveCircles</span><span class="params">(grammar, *recursiveCircles)</span>:</span>
+  map = grammar.parentToChildren
+  <span class="keyword">for</span> circle <span class="keyword">in</span> recursiveCircles:
+    length = len(circle)
+    <span class="keyword">for</span> i <span class="keyword">in</span> range(length):
+      <span class="keyword">if</span> i==length-<span class="number">1</span>: j = <span class="number">0</span> 
+      <span class="keyword">else</span>: j = i+<span class="number">1</span>
       name = circle[i]
       parent = circle[j]
-      list = map[parent] ?= []
-      <span class="keyword">if</span> name <span class="keyword">not</span> <span class="keyword">in</span> list <span class="keyword">then</span> list.push name
-      i++
-  <span class="literal">null</span></pre></div></div>
+      list = map.setdefault(parent, [])
+      <span class="keyword">if</span> name <span class="keyword">not</span> <span class="keyword">in</span> list: list.append(name)</pre></div></div>
             
         </li>
         
@@ -537,21 +535,22 @@ them with <code>recursive</code> function<br/></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">computeLeftRecursives</span></span> = (grammar) -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">computeLeftRecursives</span><span class="params">(grammar)</span>:</span>
+  <span class="keyword">global</span> symbolDescedentsMap, originalRules
   parentToChildren = grammar.parentToChildren
-  <span class="function"><span class="title">addDescendents</span></span> = (symbol, meetTable, descedents) -&gt;
+  <span class="function"><span class="keyword">def</span> <span class="title">addDescendents</span><span class="params">(symbol, meetTable, descedents)</span>:</span>
     children =  parentToChildren[symbol]
-    <span class="keyword">for</span> child <span class="keyword">in</span> children
-      <span class="keyword">if</span> child <span class="keyword">not</span> <span class="keyword">in</span> descedents <span class="keyword">then</span> descedents.push child
-      <span class="keyword">if</span> <span class="keyword">not</span> meetTable[child] <span class="keyword">then</span> addDescendents(child, meetTable, descedents)
+    <span class="keyword">for</span> child <span class="keyword">in</span> children:
+      <span class="keyword">if</span> child <span class="keyword">not</span> <span class="keyword">in</span> descedents: descedents.append(child)
+      <span class="keyword">if</span> child <span class="keyword">not</span> <span class="keyword">in</span> meetTable: addDescendents(child, meetTable, descedents)
   symbolDescedentsMap = {}
-  <span class="keyword">for</span> symbol <span class="keyword">of</span> parentToChildren
-    meetTable = {}; meetTable[symbol] = <span class="literal">true</span>
+  <span class="keyword">for</span> symbol <span class="keyword">in</span> parentToChildren:
+    meetTable = {}; meetTable[symbol] = <span class="built_in">True</span>
     descendents = symbolDescedentsMap[symbol] = []
     addDescendents(symbol, meetTable, descendents)
-    <span class="keyword">if</span> symbol <span class="keyword">in</span> descendents
-      originalRules[symbol] = grammar[symbol]
-      grammar[symbol] = recursive(symbol)
+    <span class="keyword">if</span> symbol <span class="keyword">in</span> descendents:
+      originalRules[symbol] = getattr(grammar, symbol)
+      setattr(grammar, symbol, recursive(symbol))
   symbolDescedentsMap</pre></div></div>
             
         </li>
@@ -571,27 +570,29 @@ restore all symbols in left recursive cirle to <code>recursiveRules[symbol]</cod
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.recursive = <span class="function"><span class="title">recursive</span></span> = (symbol) -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">recursive</span><span class="params">(symbol)</span>:</span>
   rule = originalRules[symbol]
-  (start) -&gt;
-    <span class="keyword">for</span> child <span class="keyword">in</span> symbolDescedentsMap[symbol]
-      grammar[child] = originalRules[child]
-    hash = symbol+start
-    m = parseCache[hash] ?= [<span class="literal">undefined</span>, -<span class="number">1</span>]
-    <span class="keyword">if</span> m[<span class="number">1</span>]&gt;=<span class="number">0</span> <span class="keyword">then</span> cursor = m[<span class="number">1</span>]; <span class="keyword">return</span> m[<span class="number">0</span>]
-    <span class="keyword">while</span> <span class="number">1</span>
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">(start)</span>:</span>
+    <span class="keyword">global</span> cursor
+    <span class="keyword">for</span> child <span class="keyword">in</span> symbolDescedentsMap[symbol]:
+      setattr(grammar, child, originalRules[child])
+    hash = symbol+str(start)
+    m = parseCache.setdefault(hash, [<span class="built_in">None</span>, -<span class="number">1</span>])
+    <span class="keyword">if</span> m[<span class="number">1</span>]&gt;=<span class="number">0</span>: cursor = m[<span class="number">1</span>]; <span class="keyword">return</span> m[<span class="number">0</span>]
+    <span class="keyword">while</span> <span class="number">1</span>:
       result = rule(start)
-      <span class="keyword">if</span> m[<span class="number">1</span>]&lt;<span class="number">0</span>
+      <span class="keyword">if</span> m[<span class="number">1</span>]&lt;<span class="number">0</span>:
         m[<span class="number">0</span>] = result
-        <span class="keyword">if</span> result <span class="keyword">then</span>  m[<span class="number">1</span>] = cursor
-        <span class="keyword">else</span> m[<span class="number">1</span>] = start
-      <span class="keyword">else</span>
-        <span class="keyword">if</span> m[<span class="number">1</span>]==cursor <span class="keyword">then</span> m[<span class="number">0</span>] = result; <span class="keyword">return</span> result
-        <span class="keyword">else</span> <span class="keyword">if</span> cursor&lt;m[<span class="number">1</span>] <span class="keyword">then</span> m[<span class="number">0</span>] = result; cursor = m[<span class="number">1</span>]; <span class="keyword">return</span> result
-        <span class="keyword">else</span> m[<span class="number">0</span>] = result; m[<span class="number">1</span>] = cursor
-    <span class="keyword">for</span> child <span class="keyword">in</span> symbolDescedentsMap[symbol]
+        <span class="keyword">if</span> result:  m[<span class="number">1</span>] = cursor
+        <span class="keyword">else</span>: m[<span class="number">1</span>] = start
+      <span class="keyword">else</span>:
+        <span class="keyword">if</span> m[<span class="number">1</span>]==cursor: m[<span class="number">0</span>] = result; <span class="keyword">return</span> result
+        <span class="keyword">elif</span> cursor&lt;m[<span class="number">1</span>]: m[<span class="number">0</span>] = result; cursor = m[<span class="number">1</span>]; <span class="keyword">return</span> result
+        <span class="keyword">else</span>: m[<span class="number">0</span>] = result; m[<span class="number">1</span>] = cursor
+    <span class="keyword">for</span> child <span class="keyword">in</span> symbolDescedentsMap[symbol]:
       grammar[child] = recursiveRules[child]
-    result</pre></div></div>
+    <span class="keyword">return</span> result
+  <span class="keyword">return</span> matcher</pre></div></div>
             
         </li>
         
@@ -621,11 +622,15 @@ For other symbol, you should be able to call this in rule mannually.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.memo = <span class="function"><span class="title">memo</span></span> = (symbol) -&gt;
-  (start) -&gt;
-    hash = symbol+start
-    m = parseCache[hash]
-    <span class="keyword">if</span> m <span class="keyword">then</span> m[<span class="number">0</span>]</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">memo</span><span class="params">(symbol)</span>:</span>
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">(start)</span>:</span>
+    <span class="keyword">global</span> parseCache, cursor
+    hash = symbol+str(start)
+    <span class="keyword">try</span>: 
+      m = parseCache[hash]
+      <span class="keyword">if</span> m: cursor = m[<span class="number">1</span>]; <span class="keyword">return</span> m[<span class="number">0</span>]
+    <span class="keyword">except</span>: <span class="keyword">return</span>       
+  <span class="keyword">return</span> matcher</pre></div></div>
             
         </li>
         
@@ -642,8 +647,8 @@ you can do this after <code>initialize()</code> and before <code>parse(...)</cod
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="title">setMemorizeRules</span></span> = (grammar, symbols) -&gt;
-  <span class="keyword">for</span> symbol <span class="keyword">in</span> symbols
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">setMemorizeRules</span><span class="params">(grammar, symbols)</span>:</span>
+  <span class="keyword">for</span> symbol <span class="keyword">in</span> symbols:
     originalRules[symbol] = grammar[symbol]
     grammar[symbol] = memorize(symbol)</pre></div></div>
             
@@ -661,17 +666,18 @@ you can do this after <code>initialize()</code> and before <code>parse(...)</cod
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="title">memorize</span></span> = (symbol) -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">memorize</span><span class="params">(symbol)</span>:</span>
   tag = symbolToTagMap[symbol]
   rule = originalRules[symbol]
-  (start) -&gt;
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">(start)</span>:</span>
     hash = tag+start
     m = parseCache[hash]
-    <span class="keyword">if</span> m <span class="keyword">then</span> cursor = m[<span class="number">1</span>]; m[<span class="number">0</span>]
-    <span class="keyword">else</span>
+    <span class="keyword">if</span> m: cursor = m[<span class="number">1</span>]; <span class="keyword">return</span> m[<span class="number">0</span>]
+    <span class="keyword">else</span>:
       result = rule(start)
       parseCache[hash] = [result, cursor]
-      result</pre></div></div>
+      <span class="keyword">return</span> result
+  <span class="keyword">return</span> matcher</pre></div></div>
             
         </li>
         
@@ -688,14 +694,12 @@ just use symbol itself as the head of hash tag.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="title">setMemoTag</span></span> = (symbol) -&gt;
-  i = <span class="number">1</span>
-  <span class="keyword">while</span> <span class="number">1</span>
-    <span class="keyword">if</span> hasOwnProperty.call(tags, symbol.slice(<span class="number">0</span>, i)) <span class="keyword">then</span> i++
-    <span class="keyword">else</span> <span class="keyword">break</span>
-  tag = symbol.slice(<span class="number">0</span>, i)
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">setMemoTag</span><span class="params">(symbol)</span>:</span>
+  <span class="keyword">for</span> i <span class="keyword">in</span> range(len(symbol)):
+    <span class="keyword">if</span> symbol[<span class="number">0</span>:i] <span class="keyword">not</span> <span class="keyword">in</span> tags: <span class="keyword">break</span>
+  tag = symbol[<span class="number">0</span>:i]
   symbolToTagMap[symbol] = tag
-  tags[tag] = <span class="literal">true</span></pre></div></div>
+  tags[tag] = <span class="built_in">True</span></pre></div></div>
             
         </li>
         
@@ -729,7 +733,7 @@ which we have met above.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>
-<span class="function"><span class="title">isMatcher</span></span> = (item) -&gt;  <span class="keyword">typeof</span>(item)==<span class="string">"function"</span></pre></div></div>
+<span class="function"><span class="keyword">def</span> <span class="title">isMatcher</span><span class="params">(item)</span>:</span>  <span class="keyword">return</span> hasattr(obj, <span class="string">'__call__'</span>)</pre></div></div>
             
         </li>
         
@@ -747,17 +751,21 @@ when <code>andp</code> is used to combined of the matchers, the effect is the sa
 In fact, you maybe would rather like to use <code>item1(start) and item2(cursor) ..</code> when you write the grammar rule in the
 manner of Peasy. That would be simpler, faster and more elegant. <br/>
 And in that manner, you would have more control on your grammar rule, say like below: <br/>
-<code>if (x=item1(start) and (x&gt;100) and item2(cursor) and not item3(cursor) and (y = item(cursor)) then doSomething()</code></p>
+<code>if (x=item1(start) and (x&gt;100) and item2(cursor) and not item3(cursor) and (y = item(cursor)): doSomething()</code></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">andp</span></span> = (items) -&gt;
-  items = <span class="keyword">for</span> item <span class="keyword">in</span> items
-    <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> literal(item) <span class="keyword">else</span> item
-  (start) -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">andp</span><span class="params">(items)</span>:</span>
+  items1 = []
+  <span class="keyword">for</span> item <span class="keyword">in</span> items:
+    <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item): items1.append(literal(item))
+    <span class="keyword">else</span>: items1.append(item)
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">(start)</span>:</span>
+    <span class="keyword">global</span> cursor
     cursor = start
-    <span class="keyword">for</span> item <span class="keyword">in</span> items
-      <span class="keyword">if</span> <span class="keyword">not</span>(result = item(cursor)) <span class="keyword">then</span> <span class="keyword">return</span>
+    <span class="keyword">for</span> item <span class="keyword">in</span> items1:
+      result = item(cursor)
+      <span class="keyword">if</span> <span class="keyword">not</span>(result): <span class="keyword">return</span>
     <span class="keyword">return</span> result</pre></div></div>
             
         </li>
@@ -776,17 +784,20 @@ item1(start) or item2(cursor] ... or itemn(cursor) <br/>
 In fact, you maybe would rather like to use <code>item1(start) or item2(cursor) ..</code> when you write the grammar rule in the
 manner of Peasy. That would be simpler, faster and more elegant. <br/>
 And in that manner, you would have more control on your grammar rule, say like below: <br/>
-<code>if ((x=item1(start) and (x&gt;100)) or (item2(cursor) and not item3(cursor)) or (y = item(cursor)) then doSomething()</code></p>
+<code>if ((x=item1(start) and (x&gt;100)) or (item2(cursor) and not item3(cursor)) or (y = item(cursor)): doSomething()</code></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">orp</span></span> = (items...) -&gt;
-  items = <span class="keyword">for</span> item <span class="keyword">in</span> items
-    <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> literal(item) <span class="keyword">else</span> item
-  (start) -&gt;
-    <span class="keyword">for</span> item <span class="keyword">in</span> items
-      <span class="keyword">if</span> result = item(start) <span class="keyword">then</span> <span class="keyword">return</span> result
-    result</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">orp</span><span class="params">(*items)</span>:</span>
+  items1 = []
+  <span class="keyword">for</span> item <span class="keyword">in</span> items:
+    <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item): items1.append(literal(item))
+    <span class="keyword">else</span>: items1.append(item)
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">(start)</span>:</span>
+    <span class="keyword">for</span> item <span class="keyword">in</span> items1:
+      result = item(start)
+      <span class="keyword">if</span> result: <span class="keyword">return</span> result
+    <span class="keyword">return</span> result</pre></div></div>
             
         </li>
         
@@ -803,9 +814,10 @@ And in that manner, you would have more control on your grammar rule, say like b
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">notp</span></span> = (item) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
-  (start) -&gt; <span class="keyword">not</span> item(start)</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">notp</span><span class="params">(item)</span>:</span>
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item): item = literal(item)
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">(start)</span>:</span> <span class="keyword">return</span> <span class="keyword">not</span> item(start)
+  <span class="keyword">return</span> matcher</pre></div></div>
             
         </li>
         
@@ -820,12 +832,17 @@ And in that manner, you would have more control on your grammar rule, say like b
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">any</span></span> = (item) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
-  (start) -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">any</span><span class="params">(item)</span>:</span>
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item): item = literal(item)
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">(start)</span>:</span>
+    <span class="keyword">global</span> cursor
     result = []; cursor = start
-    <span class="keyword">while</span> ( x = item(cursor)) <span class="keyword">then</span> result.push(x)
-    result</pre></div></div>
+    <span class="keyword">while</span> <span class="number">1</span>:
+      x = item(cursor)
+      <span class="keyword">if</span> x: result.append(x)
+      <span class="keyword">else</span>: <span class="keyword">break</span>
+    <span class="keyword">return</span> result
+  <span class="keyword">return</span> matcher</pre></div></div>
             
         </li>
         
@@ -840,16 +857,19 @@ And in that manner, you would have more control on your grammar rule, say like b
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">some</span></span> = (item) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
-  (start) -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">some</span><span class="params">(item)</span>:</span>
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item): item = literal(item)
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">(start)</span>:</span>
+    <span class="keyword">global</span> cursor
     result = []; cursor = start
-    <span class="keyword">if</span> <span class="keyword">not</span> (x = item(cursor)) <span class="keyword">then</span> <span class="keyword">return</span> x
-    <span class="keyword">while</span> <span class="number">1</span>
-      result.push(x)
+    x = item(cursor)
+    <span class="keyword">if</span> <span class="keyword">not</span> x: <span class="keyword">return</span> x
+    <span class="keyword">while</span> <span class="number">1</span>:
+      result.append(x)
       x = item(cursor)
-      <span class="keyword">if</span> <span class="keyword">not</span> x <span class="keyword">then</span> <span class="keyword">break</span>
-    result</pre></div></div>
+      <span class="keyword">if</span> <span class="keyword">not</span> x: <span class="keyword">break</span>
+    <span class="keyword">return</span> result
+  <span class="keyword">return</span> matcher</pre></div></div>
             
         </li>
         
@@ -865,12 +885,15 @@ try to match <code>item(cursor)</code>, wether <code>item(cursor)</code> succeed
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.may = exports.<span class="function"><span class="title">optional</span></span> = (item) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
-  (start) -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">optional</span><span class="params">(item)</span>:</span>
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item): item = literal(item)
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">(start)</span>:</span>
+    <span class="keyword">global</span> cursor
     cursor = start
-    <span class="keyword">if</span> x = item(cursor) <span class="keyword">then</span> x
-    <span class="keyword">else</span> cursor = start; <span class="literal">true</span></pre></div></div>
+    x = item(cursor)
+    <span class="keyword">if</span> x: <span class="keyword">return</span> x
+    <span class="keyword">else</span>: cursor = start; <span class="keyword">return</span> <span class="built_in">True</span>
+  <span class="keyword">return</span> matcher</pre></div></div>
             
         </li>
         
@@ -887,11 +910,14 @@ whether succeed or not, cursor is reset to start</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">follow</span></span> = (item) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
-  (start) -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">follow</span><span class="params">(item)</span>:</span>
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item): item = literal(item)
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">(start)</span>:</span>
+    <span class="keyword">global</span> cursor
     cursor = start
-    <span class="keyword">if</span> x = item(cursor) <span class="keyword">then</span> cursor = start; x</pre></div></div>
+    x = item(cursor)
+    <span class="keyword">if</span> x: cursor = start; <span class="keyword">return</span> x
+  <span class="keyword">return</span> matcher</pre></div></div>
             
         </li>
         
@@ -906,14 +932,17 @@ whether succeed or not, cursor is reset to start</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">times</span></span> = (item, n) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
-  (start) -&gt;
-    cursor = start; i = <span class="number">0</span>
-    <span class="keyword">while</span> i++&lt;n
-      <span class="keyword">if</span> x = item(cursor) <span class="keyword">then</span> result.push(x)
-      <span class="keyword">else</span> <span class="keyword">return</span>
-    result</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">times</span><span class="params">(item, n)</span>:</span>
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item): item = literal(item)
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">(start)</span>:</span>
+    <span class="keyword">global</span> cursor
+    cursor = start
+    <span class="keyword">for</span> i <span class="keyword">in</span> range(n):
+      x = item(cursor)
+      <span class="keyword">if</span> x: result.append(x)
+      <span class="keyword">else</span>: <span class="keyword">return</span>
+    <span class="keyword">return</span> result
+  <span class="keyword">return</span> matcher</pre></div></div>
             
         </li>
         
@@ -928,18 +957,22 @@ whether succeed or not, cursor is reset to start</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">seperatedList</span></span> = (item, separator=spaces) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(separator) <span class="keyword">then</span> separator = literal(separator)
-  (start) -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">seperatedList</span><span class="params">(item, separator=None)</span>:</span>
+  <span class="keyword">if</span> separator <span class="keyword">is</span> <span class="built_in">None</span>: separator = spaces
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item): item = literal(item)
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(separator): separator = literal(separator)
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">(start)</span>:</span>
+    <span class="keyword">global</span> cursor
     cursor = start
     result = []
     x = item(cursor)
-    <span class="keyword">if</span> <span class="keyword">not</span> x <span class="keyword">then</span> <span class="keyword">return</span>
-    <span class="keyword">while</span> <span class="number">1</span>
-      result.push(x)
-      <span class="keyword">if</span> <span class="keyword">not</span>(x = item(cursor)) <span class="keyword">then</span> <span class="keyword">break</span>
-    result</pre></div></div>
+    <span class="keyword">if</span> <span class="keyword">not</span> x: <span class="keyword">return</span>
+    <span class="keyword">while</span> <span class="number">1</span>:
+      result.append(x)
+      x = item(cursor)
+      <span class="keyword">if</span> <span class="keyword">not</span>(x): <span class="keyword">break</span>
+    <span class="keyword">return</span> result
+  <span class="keyword">return</span> matcher</pre></div></div>
             
         </li>
         
@@ -954,19 +987,22 @@ whether succeed or not, cursor is reset to start</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">timesSeperatedList</span></span> = (item, n, separator=spaces) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(separator) <span class="keyword">then</span> separator = literal(separator)
-  (start) -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">timesSeperatedList</span><span class="params">(item, n, separator=None)</span>:</span>
+  <span class="keyword">if</span> separator <span class="keyword">is</span> <span class="built_in">None</span>: separator = spaces
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item): item = literal(item)
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(separator): separator = literal(separator)
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">(start)</span>:</span>
+    <span class="keyword">global</span> cursor
     cursor = start
     result = []
     x = item(cursor)
-    <span class="keyword">if</span> <span class="keyword">not</span> x <span class="keyword">then</span> <span class="keyword">return</span>
-    i = <span class="number">1</span>
-    <span class="keyword">while</span> i++&lt;n
-      result.push(x)
-      <span class="keyword">if</span> <span class="keyword">not</span>(x = item(cursor)) <span class="keyword">then</span> <span class="keyword">break</span>
-    result</pre></div></div>
+    <span class="keyword">if</span> <span class="keyword">not</span> x: <span class="keyword">return</span>
+    <span class="keyword">for</span> i <span class="keyword">in</span> ranges(n-<span class="number">1</span>):
+      result.append(x)
+      x = item(cursor)
+      <span class="keyword">if</span> <span class="keyword">not</span> x: <span class="keyword">break</span>
+    <span class="keyword">return</span> result
+  <span class="keyword">return</span> matcher</pre></div></div>
             
         </li>
         
@@ -1040,7 +1076,7 @@ Some of the matchers below have two version, to demonstrate how to do that.
                 <a class="pilcrow" href="#section-54">&#182;</a>
               </div>
               <h4>some other matchers, combinators and predicate<br/></h4>
-<p>A <strong>predicate</strong> is a function which return true or false, usually according to its parameter, but not look at parsed object.
+<p>A <strong>predicate</strong> is a function which return True or False, usually according to its parameter, but not look at parsed object.
 below is some little utilities may be useful. Three version of some of them is provided.<br/>
 just remove them if you don&#39;t need them, except <strong>literal</strong>, which is depended by the matchers above.</p>
 
@@ -1062,9 +1098,12 @@ match a text string.<br/>
             </div>
             
             <div class="content"><div class='highlight'><pre>
-exports.literal = <span class="function"><span class="title">literal</span></span> = (string) -&gt; (start) -&gt;
-  len = string.length
-  <span class="keyword">if</span> text.slice(start, stop = start+len)==string <span class="keyword">then</span> cursor = stop; <span class="literal">true</span></pre></div></div>
+<span class="function"><span class="keyword">def</span> <span class="title">literal</span><span class="params">(string)</span>:</span> 
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">(start)</span>:</span>
+    <span class="keyword">global</span> cursor
+    len = string.length
+    stop = start+len
+    <span class="keyword">if</span> text[start:stop]==string: cursor = stop; <span class="keyword">return</span> <span class="built_in">True</span></pre></div></div>
             
         </li>
         
@@ -1080,9 +1119,13 @@ match a text string.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.literal_ = <span class="function"><span class="title">literal_</span></span> = (string) -&gt; (start) -&gt;
-  len = string.length
-  <span class="keyword">if</span> text.slice(cursor,  stop = cursor+len)==string <span class="keyword">then</span> cursor = stop; <span class="literal">true</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">iteral_</span><span class="params">(string)</span>:</span> 
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">(start)</span>:</span>
+    <span class="keyword">global</span> cursor
+    len = string.length
+    <span class="keyword">if</span> text.slice(cursor,  stop = cursor+len)==string: 
+      cursor = stop; <span class="keyword">return</span> <span class="built_in">True</span>
+  <span class="keyword">return</span> matcher</pre></div></div>
             
         </li>
         
@@ -1098,8 +1141,12 @@ match one character</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">char</span></span> = (c) -&gt; (start) -&gt;
-  <span class="keyword">if</span> text[start]==c <span class="keyword">then</span> cursor = start+<span class="number">1</span>; <span class="keyword">return</span> c</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">char</span><span class="params">(c)</span>:</span> 
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">(start)</span>:</span>
+    <span class="keyword">global</span> cursor
+    <span class="keyword">if</span> start&gt;=textLength: <span class="keyword">return</span>
+    <span class="keyword">if</span> text[start]==c: cursor = start+<span class="number">1</span>; <span class="keyword">return</span> c
+  <span class="keyword">return</span> matcher</pre></div></div>
             
         </li>
         
@@ -1115,8 +1162,11 @@ match one character</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">char_</span></span> = (c) -&gt; () -&gt;
-  <span class="keyword">if</span> text[cursor]==c <span class="keyword">then</span> cursor++; <span class="keyword">return</span> c</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">char_</span><span class="params">(c)</span>:</span> 
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">()</span>:</span>
+    <span class="keyword">global</span> cursor
+    <span class="keyword">if</span> text[cursor]==c: cursor += <span class="number">1</span>; <span class="keyword">return</span> c
+  <span class="keyword">return</span> matcher</pre></div></div>
             
         </li>
         
@@ -1147,15 +1197,17 @@ zero or more whitespaces, ie. space or tab.<br/></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">spaces</span></span> = (start) -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">spaces</span><span class="params">(start)</span>:</span>
+  <span class="keyword">global</span> cursor
   len = <span class="number">0</span>
   cursor = start
   text = text
-  <span class="keyword">while</span> <span class="number">1</span>
-    <span class="keyword">switch</span> text[cursor++]
-      <span class="keyword">when</span> <span class="string">' '</span> <span class="keyword">then</span> len++
-      <span class="keyword">when</span> <span class="string">'\t'</span> <span class="keyword">then</span> len += tabWidth
-      <span class="keyword">else</span> <span class="keyword">break</span>
+  <span class="keyword">while</span> <span class="number">1</span>:
+    c = text[cursor]
+    cursor += <span class="number">1</span>
+    <span class="keyword">if</span> c==<span class="string">' '</span>: len += <span class="number">1</span>
+    <span class="keyword">elif</span> c==<span class="string">'\t'</span>: len += tabWidth
+    <span class="keyword">else</span>: <span class="keyword">break</span>
   <span class="keyword">return</span> len</pre></div></div>
             
         </li>
@@ -1172,15 +1224,17 @@ zero or more whitespaces, ie. space or tab.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.spaces_ = () -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">spaces_</span><span class="params">()</span>:</span>
+  <span class="keyword">global</span> cursor
   len = <span class="number">0</span>
   text = text
-  <span class="keyword">while</span> <span class="number">1</span>
-    <span class="keyword">switch</span> text[cursor++]
-      <span class="keyword">when</span> <span class="string">' '</span> <span class="keyword">then</span> len++
-      <span class="keyword">when</span> <span class="string">'\t'</span> <span class="keyword">then</span> len += tabWidth
-      <span class="keyword">else</span> <span class="keyword">break</span>
-  len</pre></div></div>
+  <span class="keyword">while</span> <span class="number">1</span>:
+    c = text[cursor]
+    cursor += <span class="number">1</span>
+    <span class="keyword">if</span> c==<span class="string">' '</span>: len += <span class="number">1</span>
+    <span class="keyword">elif</span> c==<span class="string">'\t'</span>: len += tabWidth
+    <span class="keyword">else</span>: <span class="keyword">break</span>
+  <span class="keyword">return</span> len</pre></div></div>
             
         </li>
         
@@ -1196,16 +1250,18 @@ one or more whitespaces, ie. space or tab.<br/></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">spaces1</span></span> = (start) -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">spaces1</span><span class="params">(start)</span>:</span>
+  <span class="keyword">global</span> cursor
   len = <span class="number">0</span>
   cursor = start
   text = text
-  <span class="keyword">while</span> <span class="number">1</span>
-    <span class="keyword">switch</span> text[cursor++]
-      <span class="keyword">when</span> <span class="string">' '</span> <span class="keyword">then</span> len++
-      <span class="keyword">when</span> <span class="string">'\t'</span> <span class="keyword">then</span> len += tabWidth
-      <span class="keyword">else</span> <span class="keyword">break</span>
-  <span class="keyword">if</span> len <span class="keyword">then</span> <span class="keyword">return</span> cursor = cursor; len</pre></div></div>
+  <span class="keyword">while</span> <span class="number">1</span>:
+    c = text[cursor]
+    cursor += <span class="number">1</span>
+    <span class="keyword">if</span> c==<span class="string">' '</span>: len += <span class="number">1</span>
+    <span class="keyword">elif</span> c==<span class="string">'\t'</span>: len += tabWidth
+    <span class="keyword">else</span>: <span class="keyword">break</span>
+  <span class="keyword">if</span> len: <span class="keyword">return</span> len</pre></div></div>
             
         </li>
         
@@ -1221,15 +1277,16 @@ one or more whitespaces, ie. space or tab.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.spaces1_ = () -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">spaces1_</span><span class="params">()</span>:</span>
+  <span class="keyword">global</span> cursor
   len = <span class="number">0</span>
-  cursor = start
-  <span class="keyword">while</span> <span class="number">1</span>
-    <span class="keyword">switch</span> text[cursor++]
-      <span class="keyword">when</span> <span class="string">' '</span> <span class="keyword">then</span> len++
-      <span class="keyword">when</span> <span class="string">'\t'</span> <span class="keyword">then</span> len += tabWidth
-      <span class="keyword">else</span> <span class="keyword">break</span>
-  <span class="keyword">if</span> len <span class="keyword">then</span> <span class="keyword">return</span> cursor = cursor; len</pre></div></div>
+  <span class="keyword">while</span> <span class="number">1</span>:
+    c = text[cursor]
+    cursor += <span class="number">1</span>
+    <span class="keyword">if</span> c==<span class="string">' '</span>: len += <span class="number">1</span>
+    <span class="keyword">elif</span> c==<span class="string">'\t'</span>: len += tabWidth
+    <span class="keyword">else</span>: <span class="keyword">break</span>
+  <span class="keyword">if</span> len: <span class="keyword">return</span> len</pre></div></div>
             
         </li>
         
@@ -1241,14 +1298,18 @@ one or more whitespaces, ie. space or tab.</p>
                 <a class="pilcrow" href="#section-64">&#182;</a>
               </div>
               <p>matcher <strong>wrap</strong>, normal version<br/>
-match left, then match item, match right at last</p>
+match left,: match item, match right at last</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">wrap</span></span> = (item, left=spaces, right=spaces) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(item)
-  (start) -&gt;
-     <span class="keyword">if</span> left(start) <span class="keyword">and</span> result = item(cursor) <span class="keyword">and</span> right(cursor) <span class="keyword">then</span> result</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">wrap</span><span class="params">(item, left=spaces, right=spaces)</span>:</span>
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item): item = literal(item)
+  <span class="function"><span class="keyword">def</span> <span class="title">matcher</span><span class="params">(start)</span>:</span>
+    <span class="keyword">global</span> cursor
+    <span class="keyword">if</span> <span class="keyword">not</span> left(start): <span class="keyword">return</span>
+    result = item(cursor)
+    <span class="keyword">if</span> result <span class="keyword">and</span> right(cursor): <span class="keyword">return</span> result
+  <span class="keyword">return</span> matcher</pre></div></div>
             
         </li>
         
@@ -1265,11 +1326,13 @@ javascript style, &#39;$&#39; is a identifierLetter_<br/></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre><span class="function"><span class="title">identifierLetter</span></span> = (start) -&gt;
-  start = cursor
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">identifierLetter</span><span class="params">(start)</span>:</span>
+  <span class="keyword">global</span> cursor
+  cursor = start
   c = text[cursor]
-  <span class="keyword">if</span> c <span class="keyword">is</span> <span class="string">'$'</span> <span class="keyword">or</span> c <span class="keyword">is</span> <span class="string">'_'</span> <span class="keyword">or</span> <span class="string">'a'</span>&lt;=c&lt;<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span>
-    cursor++; <span class="literal">true</span></pre></div></div>
+  <span class="keyword">if</span> c <span class="keyword">is</span> <span class="string">'$'</span> <span class="keyword">or</span> c <span class="keyword">is</span> <span class="string">'_'</span> <span class="keyword">or</span> <span class="string">'a'</span>&lt;=c&lt;<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span>:
+    cursor += <span class="number">1</span>; 
+    <span class="keyword">return</span> <span class="built_in">True</span></pre></div></div>
             
         </li>
         
@@ -1286,10 +1349,12 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>identifierLetter_ = () -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">identifierLetter_</span><span class="params">()</span>:</span>
+  <span class="keyword">global</span> cursor
   c = text[cursor]
-  <span class="keyword">if</span> c <span class="keyword">is</span> <span class="string">'$'</span> <span class="keyword">or</span> c <span class="keyword">is</span> <span class="string">'_'</span> <span class="keyword">or</span> <span class="string">'a'</span>&lt;=c&lt;<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span>
-    cursor++; <span class="literal">true</span></pre></div></div>
+  <span class="keyword">if</span> c <span class="keyword">is</span> <span class="string">'$'</span> <span class="keyword">or</span> c <span class="keyword">is</span> <span class="string">'_'</span> <span class="keyword">or</span> <span class="string">'a'</span>&lt;=c&lt;<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span>:
+    cursor += <span class="number">1</span>; 
+    <span class="keyword">return</span> <span class="built_in">True</span></pre></div></div>
             
         </li>
         
@@ -1306,11 +1371,11 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>followIdentifierLetter_ = () -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">followIdentifierLetter_</span><span class="params">()</span>:</span>
   c = text[cursor]
-  c <span class="keyword">is</span> <span class="string">'$'</span> <span class="keyword">or</span> c <span class="keyword">is</span> <span class="string">'_'</span> <span class="keyword">or</span> <span class="string">'a'</span>&lt;=c&lt;<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span>
+  <span class="keyword">return</span> c <span class="keyword">is</span> <span class="string">'$'</span> <span class="keyword">or</span> c <span class="keyword">is</span> <span class="string">'_'</span> <span class="keyword">or</span> <span class="string">'a'</span>&lt;=c&lt;<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span>
 
-<span class="function"><span class="title">isIdentifierLetter</span></span> = (c) -&gt; <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'$'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span></pre></div></div>
+<span class="function"><span class="keyword">def</span> <span class="title">isIdentifierLetter</span><span class="params">(c)</span>:</span> <span class="keyword">return</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'$'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span></pre></div></div>
             
         </li>
         
@@ -1325,7 +1390,7 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">isdigit</span></span> = (c) -&gt; <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">isdigit</span><span class="params">(c)</span>:</span> <span class="keyword">return</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span></pre></div></div>
             
         </li>
         
@@ -1340,8 +1405,10 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">digit</span></span> = (start) -&gt;
-  c = text[start];  <span class="keyword">if</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">then</span> cursor = start+<span class="number">1</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">digit</span><span class="params">(start)</span>:</span>
+  <span class="keyword">global</span> cursor
+  c = text[start];  
+  <span class="keyword">if</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span>: cursor = start+<span class="number">1</span>; <span class="keyword">return</span> <span class="built_in">True</span></pre></div></div>
             
         </li>
         
@@ -1356,8 +1423,10 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.digit_ = () -&gt;
-  c = text[cursor];  <span class="keyword">if</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">then</span> cursor++</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">digit_</span><span class="params">()</span>:</span>
+  <span class="keyword">global</span> cursor
+  c = text[cursor];  
+  <span class="keyword">if</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span>: cursor += <span class="number">1</span>; <span class="keyword">return</span> <span class="built_in">True</span></pre></div></div>
             
         </li>
         
@@ -1372,7 +1441,8 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.isletter = exports.<span class="function"><span class="title">isalpha</span></span> = (c) -&gt; <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">isalpha</span><span class="params">(c)</span>:</span> <span class="keyword">return</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span>
+isletter = isalpha</pre></div></div>
             
         </li>
         
@@ -1387,8 +1457,11 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.letter = exports.<span class="function"><span class="title">alpha</span></span> = (start) -&gt;
-  c = text[start]; <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">then</span> cursor = start+<span class="number">1</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">alpha</span><span class="params">(start)</span>:</span>
+  <span class="keyword">global</span> cursor
+  c = text[start]; 
+  <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span>: cursor = start+<span class="number">1</span>; <span class="keyword">return</span> <span class="built_in">True</span>
+letter = alpha</pre></div></div>
             
         </li>
         
@@ -1403,8 +1476,11 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.letter_ = exports.alpha_ = () -&gt;
-  c = text[cursor]; <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">then</span> cursor++</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">alpha_</span><span class="params">()</span>:</span>
+  <span class="keyword">global</span> cursor
+  c = text[cursor]; 
+  <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span>: cursor += <span class="number">1</span>; <span class="keyword">return</span> <span class="built_in">True</span>
+letter_ = alpha_</pre></div></div>
             
         </li>
         
@@ -1419,7 +1495,7 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">islower</span></span> = (c) -&gt; <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">islower</span><span class="params">(c)</span>:</span> <span class="keyword">return</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span></pre></div></div>
             
         </li>
         
@@ -1434,8 +1510,10 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">lower</span></span> = (start) -&gt;
-  c = text[start]; <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">then</span> cursor = start+<span class="number">1</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">lower</span><span class="params">(start)</span>:</span>
+  <span class="keyword">global</span> cursor
+  c = text[start]; 
+  <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span>: cursor = start+<span class="number">1</span>; <span class="keyword">return</span> <span class="built_in">True</span></pre></div></div>
             
         </li>
         
@@ -1450,10 +1528,12 @@ javascript style, &#39;$&#39; is a identifierLetter_</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.lower_ = () -&gt;
-  c = text[cursor]; <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">then</span> cursor++
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">lower_</span><span class="params">()</span>:</span>
+  <span class="keyword">global</span> cursor
+  c = text[cursor]; 
+  <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span>: cursor += <span class="number">1</span>; <span class="keyword">return</span> <span class="built_in">True</span>
 
-exports.<span class="function"><span class="title">isupper</span></span> = (c) -&gt;<span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span></pre></div></div>
+<span class="function"><span class="keyword">def</span> <span class="title">isupper</span><span class="params">(c)</span>:</span> <span class="keyword">return</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span></pre></div></div>
             
         </li>
         
@@ -1468,7 +1548,10 @@ exports.<span class="function"><span class="title">isupper</span></span> = (c) -
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">upper</span></span> = (start) -&gt;  c = text[start]; <span class="keyword">if</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">then</span> cursor = start+<span class="number">1</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">upper</span><span class="params">(start)</span>:</span> 
+  <span class="keyword">global</span> cursor
+  c = text[start]; 
+  <span class="keyword">if</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span>: cursor = start+<span class="number">1</span></pre></div></div>
             
         </li>
         
@@ -1483,7 +1566,10 @@ exports.<span class="function"><span class="title">isupper</span></span> = (c) -
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">upper_</span></span> = (start) -&gt; c = text[cursor]; <span class="keyword">if</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">then</span> cursor++</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">upper_</span><span class="params">(start)</span>:</span> 
+  <span class="keyword">global</span> cursor
+  c = text[cursor]; 
+  <span class="keyword">if</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span>: cursor += <span class="number">1</span></pre></div></div>
             
         </li>
         
@@ -1498,16 +1584,17 @@ exports.<span class="function"><span class="title">isupper</span></span> = (c) -
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">identifier</span></span> = (start) -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">identifier</span><span class="params">(start)</span>:</span>
+  <span class="keyword">global</span> cursor
   cursor = start
   c = text[cursor]
-  <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'$'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span> <span class="keyword">then</span> cursor++
-  <span class="keyword">else</span> <span class="keyword">return</span>
-  <span class="keyword">while</span> <span class="number">1</span>
+  <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'$'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span>: cursor += <span class="number">1</span>
+  <span class="keyword">else</span>: <span class="keyword">return</span>
+  <span class="keyword">while</span> <span class="number">1</span>:
     c = text[cursor]
-    <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'$'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span> <span class="keyword">then</span> cursor++
-    <span class="keyword">else</span> <span class="keyword">break</span>
-  <span class="literal">true</span></pre></div></div>
+    <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'$'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span>: cursor += <span class="number">1</span>
+    <span class="keyword">else</span>: <span class="keyword">break</span>
+  <span class="built_in">True</span></pre></div></div>
             
         </li>
         
@@ -1522,15 +1609,16 @@ exports.<span class="function"><span class="title">isupper</span></span> = (c) -
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.<span class="function"><span class="title">identifier_</span></span> = (start) -&gt;
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">identifier_</span><span class="params">(start)</span>:</span>
+  <span class="keyword">global</span> cursor
   c = text[cursor]
-  <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'$'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span> <span class="keyword">then</span> cursor++
-  <span class="keyword">else</span> <span class="keyword">return</span>
-  <span class="keyword">while</span> <span class="number">1</span>
+  <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'$'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span>: cursor += <span class="number">1</span>
+  <span class="keyword">else</span>: <span class="keyword">return</span>
+  <span class="keyword">while</span> <span class="number">1</span>:
     c = text[cursor]
-    <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'$'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span> <span class="keyword">then</span> cursor++
-    <span class="keyword">else</span> <span class="keyword">break</span>
-  <span class="literal">true</span></pre></div></div>
+    <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'$'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span>: cursor += <span class="number">1</span>
+    <span class="keyword">else</span>: <span class="keyword">break</span>
+  <span class="built_in">True</span></pre></div></div>
             
         </li>
         
@@ -1577,7 +1665,7 @@ text is a string object.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.gettext = () -&gt; text</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">gettext</span><span class="params">()</span>:</span> <span class="keyword">return</span> text</pre></div></div>
             
         </li>
         
@@ -1588,12 +1676,15 @@ text is a string object.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-84">&#182;</a>
               </div>
-              <p>If you use this file to contain the grammar rules, just directly use <code>cursor</code> or <code>cursor = n</code> or <code>cursor++</code> or <code>cursor--</code></p>
+              <p>If you use this file to contain the grammar rules, just directly use <code>cursor</code> or <code>cursor = n</code> or <code>cursor += 1</code> or <code>cursor--</code></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.getcursor = exports.cur = () -&gt; cursor
-exports.setcursor = exports.<span class="function"><span class="title">setcur</span></span> = (pos) -&gt; cursor = pos</pre></div></div>
+            <div class="content"><div class='highlight'><pre><span class="function"><span class="keyword">def</span> <span class="title">cur</span><span class="params">()</span>:</span> <span class="keyword">return</span> cursor
+<span class="function"><span class="keyword">def</span> <span class="title">setcur</span><span class="params">(pos)</span>:</span> 
+  <span class="keyword">global</span> cursor
+  cursor = pos
+  <span class="keyword">return</span> cursor</pre></div></div>
             
         </li>
         
