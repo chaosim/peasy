@@ -1,5 +1,8 @@
 ## What's new in peasy
 
+### what's new in 0.2.3
+  * just for test npm readme
+
 ### what's new in 0.2.2
   * just for test npm readme
 

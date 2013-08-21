@@ -1,18 +1,13 @@
 # Peasy: an easy but powerful parser
 ### Parsing is easy!
-readme.md
 
 With Peasy, you write the parser by hand, just like to write any other kind of program.
 You need not play [many balls like that any more.](https://raw.github.com/chaosim/peasy/master/ballacrobatics.jpg)
 You just play [one ball like so!](https://raw.github.com/chaosim/peasy/master/dolphinball.jpg),
 
-To use Peasy, just copy this file to your project, read it, modify it, write rules for the grammar, and
-remove any unnessary stuffs when you are sure that, and parse the object with the grammar.
-See [here](#peasysample) for a sample grammar in Peasy.
-
-### What's new in Peasy
-### what's new in 0.2.2
-  * just for test npm readme
+To use Peasy, just copy the module to your project, read it, modify it, write the grammar rules,, and remove any unnecessary
+stuffs in Peasy, and parse with the grammar.<br/>
+See [here](http://chaosim.github.io/peasy/doc/peasy.html#peasysample) for a sample grammar in Peasy.<br/>
 
 ### Documentation
 The [annotated peasy.coffee](http://chaosim.github.io/peasy/doc/peasy.html) is best document for Peasy at the moment.
