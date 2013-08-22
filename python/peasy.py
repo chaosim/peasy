@@ -674,21 +674,34 @@ def setcur(pos):
 
 # It's a pity that assign in python is a statement and can not occur in expression.<br/>
 # So We can not write x = Additive(start) and op = Op(cursor) and y = Multiply(cursor) and op(x, y)<br/>
-# As a workaround, we assign some Var beforehand, e.g. x = Var('x'); m = Var('x')
+# As a workaround, we assign some Var beforehand, e.g. x, y, op = vars(3)
 # and then we can write like this:<br/> 
-# x.set(Additive(start)) and op.set(Op(cursor)) and y.set(Multiply(cursor)) and op(x, y)
+# x.set(Additive(start)) and op << Op(cursor) and y << Multiply(cursor) and op(x, y)
 # we can also wrtie like below:<br/> 
-# x.set(Additive(start)) and op.set(Op(cursor)) and y.set(Multiply(cursor)) and op.v(x.v, y.v)<br/> 
-# You may remove any overload definitions below if you do not need it.<br/> 
+# x << Additive(start) and op << Op(cursor) and y << Multiply(cursor) and op.v(x.v, y.v)<br/> 
+# If you do not need them, you may remove any overload definitions below except left shift. <br/> 
 # And you can use var.v at every place and remove all of the overload definitions, and that will make program faster.
+
+def vars(n): [Var() for i in range(n)]
 
 class Var:
   def __init__(self, name=''):
     # name is unnecessary attribute. remove it if you like.
     self.name = name
     self.v = None
-    
-  def set(self, v): self.v = v; return v
+  
+  # faked assignment  
+  def __lshift__(self, y): 
+    if isinstance(y, Var): y = y.y
+    return self.v<<y
+  # had best to reserve the truth overloading.
+  # class Rules
+  #   def Add(self, start):
+  #      x, op, y = vars(3)
+  #      return x << memo('Add')(start) and op << Op(cursor) and y << Mul(cursor) and op.v(x.v, y.v) \
+  #             or x\
+  #             or Mul(start)
+  def __nonzero__(self): return self.v
   
   def __repr__(self): self.name+':'+repr(self.v)
   
@@ -748,9 +761,6 @@ class Var:
   def __pow__(self, y): 
     if isinstance(y, Var): y = y.y
     return self.v**y
-  def __lshift__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v<<y
   def __rshift__(self, y): 
     if isinstance(y, Var): y = y.y
     return self.v>>y
@@ -842,4 +852,3 @@ class Var:
   def __pos__(self): return +self.v
   def __abs__(self): return abs(self.v)
   def __invert__(self): return ~self.v
-  def __nonzero__(self): return self.v

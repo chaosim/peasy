@@ -2,17 +2,17 @@
 ### Parsing is easy!
 
 With Peasy, you write the parser by hand, just like to write any other kind of program.
-You need not play [many balls like that any more.](https://raw.github.com/chaosim/peasy/master/ballacrobatics.jpg)
-You just play [one ball like so!](https://raw.github.com/chaosim/peasy/master/dolphinball.jpg),
+You need not play ![many balls like that any more.](https://raw.github.com/chaosim/peasy/master/ballacrobatics.jpg)
+You just play ![one ball like so!](https://raw.github.com/chaosim/peasy/master/dolphinball.jpg),
 
 To use Peasy, just copy the module to your project, read it, modify it, write the grammar rules,, and remove any unnecessary
 stuffs in Peasy, and parse with the grammar.<br/>
 See [here](http://chaosim.github.io/peasy/doc/peasy.html#peasysample) for a sample grammar in Peasy.<br/>
 
 ### Documentation
-The [annotated peasy.coffee](http://chaosim.github.io/peasy/doc/peasy.html) is best document for Peasy at the moment.
-If you're a pythoner, maybe you'd like to see the [annotated peasy.py](http://chaosim.github.io/peasy/doc/pypeasy.html).
-See the tests in /test, and you'll see some samples of left recursive grammars and how to parse them.
+The [annotated peasy.coffee](http://chaosim.github.io/peasy/doc/peasy.html) is best document for Peasy at the moment.<br/>
+If you're a pythoner, maybe you'd like to see the [annotated peasy.py](http://chaosim.github.io/peasy/doc/pypeasy.html).<br/>
+See the tests in /test for samples of left recursive grammars and how to parse them.
 
 ### Web sites
 the project's repository is on github <https://github.com/chaosim/peasy>.
