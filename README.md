@@ -2,8 +2,8 @@
 ### Parsing is easy!
 
 With Peasy, you write the parser by hand, just like to write any other kind of program.
-You need not play [many balls like that any more.>](https://raw.github.com/chaosim/peasy/master/doc/ballacrobatics.jpg),
-You just play [one ball like so:](https://raw.github.com/chaosim/peasy/master/doc/dolphinball.jpg).
+You need not play [many balls like that any more.](https://raw.github.com/chaosim/peasy/master/doc/ballacrobatics.jpg),
+You just play [one ball like so](https://raw.github.com/chaosim/peasy/master/doc/dolphinball.jpg).
 
 To use Peasy, just copy the module to your project, read it, modify it, write the grammar rules,, and remove any unnecessary
 stuffs in Peasy, and parse with the grammar.<br/>
