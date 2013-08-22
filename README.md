@@ -13,6 +13,13 @@ See [here](http://chaosim.github.io/peasy/doc/peasy.html#peasysample) for a samp
 The [annotated peasy.coffee](http://chaosim.github.io/peasy/doc/peasy.html) is best document for Peasy at the moment.<br/>
 If you're a pythoner, maybe you'd like to see the [annotated peasy.py](http://chaosim.github.io/peasy/doc/pypeasy.html).<br/>
 See the tests in /test for samples of left recursive grammars and how to parse them.
+For arithemetic expression, [here is a sample:](https://github.com/chaosim/peasy/blob/master/samples/arithmatic.js)
+The sample parser for a real language, here is [my translation from coffeescript's jison grammar:]
+(https://github.com/chaosim/coffee-script/blob/master/src/parser.js)
+and it's transcompiled from [this coffeescript source:]
+(https://github.com/chaosim/coffee-script/blob/master/src/parser.coffee)
+The original grammar.coffee, [from which lib/coffeescript/parser.js is generated:)
+(https://github.com/jashkenas/coffee-script/blob/master/src/grammar.coffee)
 
 ### Web sites
 the project's repository is on github <https://github.com/chaosim/peasy>.
