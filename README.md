@@ -13,9 +13,9 @@ The [annotated peasy.coffee](http://chaosim.github.io/peasy/doc/peasy.html) is b
 If you're a pythoner, maybe you'd like to see the [annotated peasy.py](http://chaosim.github.io/peasy/doc/pypeasy.html).<br/>
 See the tests in /test for samples of left recursive grammars and how to parse them.<br/>
 See [here](http://chaosim.github.io/peasy/doc/peasy.html#peasysample) for a sample grammar in Peasy.<br/>
-For arithemetic expression, [here is a sample:](https://github.com/chaosim/peasy/blob/master/samples/arithmatic.js)<br/>
+For arithemetic expression, [here is a sample:](https://github.com/chaosim/peasy/blob/master/samples/arithmatic.coffee)<br/>
 The sample parser for a real language, here is [my translation from coffeescript's jison grammar:] <br/>
-(https://github.com/chaosim/coffee-script/blob/master/src/parser.js) <br/>
+(https://github.com/chaosim/coffee-script/blob/master/src/parser.coffee) <br/>
 and it's transcompiled from [this coffeescript source:] <br/>
 (https://github.com/chaosim/coffee-script/blob/master/src/parser.coffee)<br/>
 The original grammar.coffee, [from which lib/coffeescript/parser.js is generated:]<br/>
