@@ -1738,13 +1738,11 @@ And you can use var.v at every place and remove all of the overload definitions,
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-87">&#182;</a>
               </div>
-              <p>faked assignment  </p>
+              <p>faked assignment, let we can write in rules like so: x &lt;&lt; memo(&#39;Add&#39;)(start) and op &lt;&lt; Op(cursor) <br/>   </p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">__lshift__</span><span class="params">(self, y)</span>:</span> 
-    <span class="keyword">if</span> isinstance(y, Var): y = y.y
-    <span class="keyword">return</span> self.v&lt;&lt;y</pre></div></div>
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">__lshift__</span><span class="params">(self, y)</span>:</span> selv.v = y; y</pre></div></div>
             
         </li>
         
@@ -1755,12 +1753,12 @@ And you can use var.v at every place and remove all of the overload definitions,
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-88">&#182;</a>
               </div>
-              <p>had best to reserve the truth overloading.
-class Rules
-  def Add(self, start):
+              <p>had best reserve the overloading to <strong>nonzero</strong>. and then you can write like below: <br/> 
+class Rules<br/> 
+  def Add(self, start):<br/> 
      x, op, y = vars(3)
-     return x &lt;&lt; memo(&#39;Add&#39;)(start) and op &lt;&lt; Op(cursor) and y &lt;&lt; Mul(cursor) and op.v(x.v, y.v) \
-            or x\
+     return x &lt;&lt; memo(&#39;Add&#39;)(start) and op &lt;&lt; Op(cursor) and y &lt;&lt; Mul(cursor) and op.v(x.v, y.v) \<br/> 
+            or x\<br/> 
             or Mul(start)</p>
 
             </div>
