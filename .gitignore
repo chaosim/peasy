@@ -5,3 +5,6 @@
 *.bak
 /*.log
 /-p
+
+/python/peasy.egg*/*
+/python/peasy.egg-info/top_level.txt

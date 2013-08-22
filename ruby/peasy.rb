@@ -2,7 +2,7 @@
 # ###### Peasy means parsing is easy
 # ###### an easy but powerful parser
 
-# To use Peasy, just copy this file to your project, read it, modify it, write the grammar rules, and
+# To use Peasy, just copy this file to your project, read it, modify it, write the grammar rules,, and
 # remove any unnecessary stuffs in Peasy, and parse with the grammar.<br/>
 # See [here](#peasysample) for a sample grammar in Peasy.<br/>
 
@@ -37,7 +37,7 @@
 # At first you write grammar rules in this manner: replace one and only one of
 # grmmar.symbol in the grammar rule with memo(symbol) for every left recursive circles. Before parsing, you first call
 # intialize(), and tell which symbol are left call or left recursive by calling  addParentChildrens(grammar, parentChildren)
-# and/or addRecursiveCircles(grammar, recursiveCircles...), and: call computeLeftRecursives(grammar), now
+# and/or addRecursiveCircles(grammar, recursiveCircles...), and then call computeLeftRecursives(grammar), now
 # everything about left recursive symbols is computed and you can call parse(data, grammar, root) to do the work.
 
 # The notation **@name** in the comment below means a global variable, and **$name** means a parameter. <br/>
@@ -51,40 +51,38 @@
 
 # the text which is being parsed<br/>
 # *Don't be confused by the variable name, it could be not only text strings but also array, sequence, tree, graph,etc.*
-global text
+text = ''
 # the length of @text
-global textLength
+textLength = 0
 # the current position of parsing, use text[cursor] to get current character in parsed stream
-global cursor
+cursor = 0
 
 # the grammar object which contains all of rules defined for the symbol in grammar.
-global grammar
+grammar = undefined
 # saved the original rules of the grammar.
-global originalRules
+originalRules = {}
 
 # store the wrapped function to rule of the left recursive symbol with `recursive`, and before entering them, store it in grammar too.
 # when entering them, `grammar[symbol]` is unwrapped to `originalRules[symbol]` or `memorizeRecursives[symbol]`
-global recursiveRules
-global symbolDescedentsMap
+recursiveRules = {}
+symbolDescedentsMap = {}
 
 # if you would like to use just symbol itself as the hash head, remove these four lines below and other correlative stuffs.<br/>
 # {symbol: tag}, from rule symbol map to a shorter memo tag, for memory efficeny
-global symbolToTagMap
-# {tag: True}, record tags that has been used to avoid conflict
-global tags
+symbolToTagMap = {}
+# {tag: true}, record tags that has been used to avoid conflict
+tags = {}
 
-global parseCache # {tag+start: [result, cursor]}, memorized parser result
-global functionCache # memorized normal function result
+parseCache = {} # {tag+start: [result, cursor]}, memorized parser result
+functionCache = {} # memorized normal function result
+
+hasOwnProperty = Object.hasOwnProperty
 
 # #### helper functions
 # some functions is helpful to make the parser.
 
 # **intialize**: clear global varialbes. you should call `intialize()` at first.
-def initialize(aGrammar):
-  global grammar, parseCache, functionCache, originalRules, recursiveRules, symbolDescedentsMap,\
-         symbolToTagMap, tags
-  grammar = aGrammar
-  grammar.parentToChildren = {}
+exports.initialize = () ->
   parseCache = {}
   functionCache = {}
   originalRules = {}
@@ -92,38 +90,39 @@ def initialize(aGrammar):
   symbolDescedentsMap = {}
   symbolToTagMap = {}
   tags = {}
+  parseCache = {}
 
 # **_parse**: parse **$data** from **$root** with **$aGrammar**.<br/>
 # before parsing, you should tell the informations about left recursion in grammar.
-def parse(data, aGrammar, root=None):
-  global text, textLength, cursor 
+exports.parse = _parse = (data, aGrammar, root) ->
   text = data
-  textLength = len(text)
+  textLength = text.length
   cursor = 0
   root = root or aGrammar.rootSymbol
-  return getattr(grammar, root)(0)
+  grammar = aGrammar
+  grammar[root](0)
 
 # <a id="peasysample"></a>
 # **parse**: this is a sample parse function to demonstrate on how to write your own grammar rules yourself.<br/>
 # notice that there exists indirect left recursion in the grammar.
-def parseSample(text):
+parse = (text) ->
   # generate the matchers by the combinators in advance for better performance.<br/>
   # if you don't mind performance, you can write them in the rule directly.
   a = char('a'); b = char('b'); x = char('x')
   memoA = memo('A')
   # the grammar rules object.
-  class rules:
-    rootSymbol = 'A'    
-    def A(self,start):
+  rules =
+    A: (start) ->
       # *add `or memoResult` to prevent executing nonrecursive part more than once.*
-      memoResult = m = rules.B(start)
-      return (m and x(p.cur()) and m+'x' or memoResult) or a(start)
-    def B(self,start): return rules.C(start)
-    def C(self,start): return memoA(start) or b(start)
+      (memoResult = m = rules.B(start)) and x(p.cur()) and m+'x' or memoResult\
+      or a(start)
+    B: (start) -> rules.C(start)
+    C: (start) -> memoA(start) or b(start)
+    rootSymbol: 'A'
   initialize()
   addRecursiveCircles(rules, ['A', 'B', 'C'])
   computeLeftRecursives(rules)
-  parse(text, rules)
+  _parse(text, rules)
 
 # ##### stuffs for left recursives
 # use `addParentChildren(grammar, parentChildrens)` or `addRecursiveCircles(grammar, recursiveCircles...)` to tell
@@ -131,45 +130,47 @@ def parseSample(text):
 
 # **addParentChildrens**: add direct left call parent->children relation for **$parentChildrens** to **@symbolToParentsMap**<br/>
 # e.g. `addRecursiveCircles(grammar, {A:['B'], B:['A', 'B']})`
-def addParentChildrens(grammar, parentChildren):
-  map = grammar.parentToChildren
-  for parent, children in parentChildren:
-    list = map.setdefault(parent, [])
-    for name in children:
-      if name not in list: list.append(name)
+exports.addParentChildrens = (grammar, parentChildren) ->
+  map = grammar.parentToChildren ?= {}
+  for parent, children of parentChildren
+    list = map[parent] ?= []
+    for name in children
+      if name not in list then list.push name
+  null
 
 # **addRecursiveCircles**: add left recursive parent->children relation to `grammar.parentToChildren` for symbols in **@recursiveCircles**<br/>
 # e.g. `addRecursiveCircles(grammar, ['A', 'B'], ['B'])` tell the same left recursive relations as above sample.
-def addRecursiveCircles(grammar, *recursiveCircles):
-  map = grammar.parentToChildren
-  for circle in recursiveCircles:
-    length = len(circle)
-    for i in range(length):
-      if i==length-1: j = 0 
-      else: j = i+1
+exports.addRecursiveCircles = (grammar, recursiveCircles...) ->
+  map = grammar.parentToChildren ?= {}
+  for circle in recursiveCircles
+    i = 0
+    length = circle.length
+    while i<length
+      if i==length-1 then j = 0 else j = i+1
       name = circle[i]
       parent = circle[j]
-      list = map.setdefault(parent, [])
-      if name not in list: list.append(name)
+      list = map[parent] ?= []
+      if name not in list then list.push name
+      i++
+  null
 
 # **computeLeftRecursives**: after telling left recursive relations, compute the left recsives group and wrap symbol in
 # them with `recursive` function<br/>
-def computeLeftRecursives(grammar):
-  global symbolDescedentsMap, originalRules
+exports.computeLeftRecursives = (grammar) ->
   parentToChildren = grammar.parentToChildren
-  def addDescendents(symbol, meetTable, descedents):
+  addDescendents = (symbol, meetTable, descedents) ->
     children =  parentToChildren[symbol]
-    for child in children:
-      if child not in descedents: descedents.append(child)
-      if child not in meetTable: addDescendents(child, meetTable, descedents)
+    for child in children
+      if child not in descedents then descedents.push child
+      if not meetTable[child] then addDescendents(child, meetTable, descedents)
   symbolDescedentsMap = {}
-  for symbol in parentToChildren:
-    meetTable = {}; meetTable[symbol] = True
+  for symbol of parentToChildren
+    meetTable = {}; meetTable[symbol] = true
     descendents = symbolDescedentsMap[symbol] = []
     addDescendents(symbol, meetTable, descendents)
-    if symbol in descendents:
-      originalRules[symbol] = getattr(grammar, symbol)
-      setattr(grammar, symbol, recursive(symbol))
+    if symbol in descendents
+      originalRules[symbol] = grammar[symbol]
+      grammar[symbol] = recursive(symbol)
   symbolDescedentsMap
 
 # **recursive**: this is the key function to left recursive.<br/>
@@ -177,77 +178,72 @@ def computeLeftRecursives(grammar):
 # when recursiv(symbol)(start) is executed, first let `rule = grammar[symbol]`, `grammar[symbol] = originalRules[child]` for
 # all symbols in left recursive circles and loop computing rule(start) until no changes happened, and
 # restore all symbols in left recursive cirle to `recursiveRules[symbol]` at last.,
-def recursive(symbol):
+exports.recursive = recursive = (symbol) ->
   rule = originalRules[symbol]
-  def matcher(start):
-    global cursor
-    for child in symbolDescedentsMap[symbol]:
-      setattr(grammar, child, originalRules[child])
-    hash = symbol+str(start)
-    m = parseCache.setdefault(hash, [None, -1])
-    if m[1]>=0: cursor = m[1]; return m[0]
-    while 1:
+  (start) ->
+    for child in symbolDescedentsMap[symbol]
+      grammar[child] = originalRules[child]
+    hash = symbol+start
+    m = parseCache[hash] ?= [undefined, -1]
+    if m[1]>=0 then cursor = m[1]; return m[0]
+    while 1
       result = rule(start)
-      if m[1]<0:
+      if m[1]<0
         m[0] = result
-        if result:  m[1] = cursor
-        else: m[1] = start
-      else:
-        if m[1]==cursor: m[0] = result; return result
-        elif cursor<m[1]: m[0] = result; cursor = m[1]; return result
-        else: m[0] = result; m[1] = cursor
-    for child in symbolDescedentsMap[symbol]:
+        if result then  m[1] = cursor
+        else m[1] = start
+      else
+        if m[1]==cursor then m[0] = result; return result
+        else if cursor<m[1] then m[0] = result; cursor = m[1]; return result
+        else m[0] = result; m[1] = cursor
+    for child in symbolDescedentsMap[symbol]
       grammar[child] = recursiveRules[child]
-    return result
-  return matcher
+    result
 
 # ##### memorization
 
 # **memo**: lookup the memorized result and reached cursor for **$symbol** at the position of **$start**<br/>
 # It is set up automaticly by `computeLeftRecursives(grammar)` for the symbols which is left recursive.<br/>
 # For other symbol, you should be able to call this in rule mannually.
-def memo(symbol):
-  def matcher(start):
-    global parseCache, cursor
-    hash = symbol+str(start)
-    try: 
-      m = parseCache[hash]
-      if m: cursor = m[1]; return m[0]
-    except: return       
-  return matcher
+exports.memo = memo = (symbol) ->
+  (start) ->
+    hash = symbol+start
+    m = parseCache[hash]
+    if m then m[0]
 
 # **setMemorizeRules**: set the symbols in grammar which  memorize their rule's result.<br/>
 # this function should be used only for the symbols which is not left recursives.<br/>
 # you can do this after `initialize()` and before `parse(...)`.
-def setMemorizeRules(grammar, symbols):
-  for symbol in symbols:
+setMemorizeRules = (grammar, symbols) ->
+  for symbol in symbols
     originalRules[symbol] = grammar[symbol]
     grammar[symbol] = memorize(symbol)
 
 # **memorize**: memorize result and cursor for **$symbol** which is not left recursive.<br/>
 # *The symbols which is left recursive should be wrapped by `recursive(symbol)`, not `memorize(symbol)`!!!*
-def memorize(symbol):
+memorize = (symbol) ->
   tag = symbolToTagMap[symbol]
   rule = originalRules[symbol]
-  def matcher(start):
+  (start) ->
     hash = tag+start
     m = parseCache[hash]
-    if m: cursor = m[1]; return m[0]
-    else:
+    if m then cursor = m[1]; m[0]
+    else
       result = rule(start)
       parseCache[hash] = [result, cursor]
-      return result
-  return matcher
+      result
 
 # **setMemoTag**: find a shorter part of symbol as the head of hash tag to index **@parseCache** <br/>
 # It exists just for performance reason. If you don't like this idea, you can remove the stuffs about memo tag yourself and
 # just use symbol itself as the head of hash tag.
-def setMemoTag(symbol):
-  for i in range(len(symbol)):
-    if symbol[0:i] not in tags: break
-  tag = symbol[0:i]
+setMemoTag = (symbol) ->
+  i = 1
+  while 1
+    if hasOwnProperty.call(tags, symbol.slice(0, i)) then i++
+    else break
+  tag = symbol.slice(0, i)
   symbolToTagMap[symbol] = tag
-  tags[tag] = True
+  tags[tag] = true
 
 # #### matchers and matcher combinators<br/>
 
@@ -258,7 +254,7 @@ def setMemoTag(symbol):
 # there are other matcher generator besides the standard combinators described as above, like `recursive`, `memo`, `memorize`,
 # which we have met above.
 
-def isMatcher(item):  return hasattr(obj, '__call__')
+isMatcher = (item) ->  typeof(item)=="function"
 
 # combinator **andp**<br/>
 # execute item(cursor) in sequence, return the result of the last one. <br/>
@@ -267,18 +263,14 @@ def isMatcher(item):  return hasattr(obj, '__call__')
 # In fact, you maybe would rather like to use `item1(start) and item2(cursor) ..` when you write the grammar rule in the
 # manner of Peasy. That would be simpler, faster and more elegant. <br/>
 # And in that manner, you would have more control on your grammar rule, say like below: <br/>
-# `if (x=item1(start) and (x>100) and item2(cursor) and not item3(cursor) and (y = item(cursor)): doSomething()`
-def andp(items):
-  items1 = []
-  for item in items:
-    if not isMatcher(item): items1.append(literal(item))
-    else: items1.append(item)
-  def matcher(start):
-    global cursor
+# `if (x=item1(start) and (x>100) and item2(cursor) and not item3(cursor) and (y = item(cursor)) then doSomething()`
+exports.andp = (items) ->
+  items = for item in items
+    if not isMatcher(item) then literal(item) else item
+  (start) ->
     cursor = start
-    for item in items1:
-      result = item(cursor)
-      if not(result): return
+    for item in items
+      if not(result = item(cursor)) then return
     return result
 
 # combinator **orp** <br/>
@@ -288,126 +280,98 @@ def andp(items):
 # In fact, you maybe would rather like to use `item1(start) or item2(cursor) ..` when you write the grammar rule in the
 # manner of Peasy. That would be simpler, faster and more elegant. <br/>
 # And in that manner, you would have more control on your grammar rule, say like below: <br/>
-# `if ((x=item1(start) and (x>100)) or (item2(cursor) and not item3(cursor)) or (y = item(cursor)): doSomething()`
-def orp(*items):
-  items1 = []
-  for item in items:
-    if not isMatcher(item): items1.append(literal(item))
-    else: items1.append(item)
-  def matcher(start):
-    for item in items1:
-      result = item(start)
-      if result: return result
-    return result
+# `if ((x=item1(start) and (x>100)) or (item2(cursor) and not item3(cursor)) or (y = item(cursor)) then doSomething()`
+exports.orp = (items...) ->
+  items = for item in items
+    if not isMatcher(item) then literal(item) else item
+  (start) ->
+    for item in items
+      if result = item(start) then return result
+    result
 
 # combinator **notp**<br/>
 # `notp` is not useful except being used in other combinators, just like this: `andp(item1, notp(item2))`.<br/>
 # *It's unnessary, low effecient and ugly to write `notp(item)(start)`, just write `not item(start)`.*
-def notp(item):
-  if not isMatcher(item): item = literal(item)
-  def matcher(start): return not item(start)
-  return matcher
+exports.notp = (item) ->
+  if not isMatcher(item) then item = literal(item)
+  (start) -> not item(start)
 
 # combinator **any**: zero or more times of `item(cursor)`
-def any(item):
-  if not isMatcher(item): item = literal(item)
-  def matcher(start):
-    global cursor
+exports.any = (item) ->
+  if not isMatcher(item) then item = literal(item)
+  (start) ->
     result = []; cursor = start
-    while 1:
-      x = item(cursor)
-      if x: result.append(x)
-      else: break
-    return result
-  return matcher
+    while ( x = item(cursor)) then result.push(x)
+    result
 
 # combinator **some**: one or more times of `item(cursor)`
-def some(item):
-  if not isMatcher(item): item = literal(item)
-  def matcher(start):
-    global cursor
+exports.some = (item) ->
+  if not isMatcher(item) then item = literal(item)
+  (start) ->
     result = []; cursor = start
-    x = item(cursor)
-    if not x: return x
-    while 1:
-      result.append(x)
+    if not (x = item(cursor)) then return x
+    while 1
+      result.push(x)
       x = item(cursor)
-      if not x: break
-    return result
-  return matcher
+      if not x then break
+    result
 
 # combinator  **may**: a.k.a optional <br/>
 # try to match `item(cursor)`, wether `item(cursor)` succeed or not, `maybe(item)(start)` succeed.
-def optional(item):
-  if not isMatcher(item): item = literal(item)
-  def matcher(start):
-    global cursor
+exports.may = exports.optional = (item) ->
+  if not isMatcher(item) then item = literal(item)
+  (start) ->
     cursor = start
-    x = item(cursor)
-    if x: return x
-    else: cursor = start; return True
-  return matcher
+    if x = item(cursor) then x
+    else cursor = start; true
 
 # combinator **follow** <br/>
 # try to match `item(start)`, if succeed, reset cursor and return the value of item(start) <br/>
 # whether succeed or not, cursor is reset to start
-def follow(item):
-  if not isMatcher(item): item = literal(item)
-  def matcher(start):
-    global cursor
+exports.follow = (item) ->
+  if not isMatcher(item) then item = literal(item)
+  (start) ->
     cursor = start
-    x = item(cursor)
-    if x: cursor = start; return x
-  return matcher
+    if x = item(cursor) then cursor = start; x
 
 # combinator **times**: match **$n** times item(cursor), n>=1
-def times(item, n):
-  if not isMatcher(item): item = literal(item)
-  def matcher(start):
-    global cursor
-    cursor = start
-    for i in range(n):
-      x = item(cursor)
-      if x: result.append(x)
-      else: return
-    return result
-  return matcher
+exports.times = (item, n) ->
+  if not isMatcher(item) then item = literal(item)
+  (start) ->
+    cursor = start; i = 0
+    while i++<n
+      if x = item(cursor) then result.push(x)
+      else return
+    result
 
 # combinator **seperatedList**: some times item(cursor), separated by @separator
-def seperatedList(item, separator=None):
-  if separator is None: separator = spaces
-  if not isMatcher(item): item = literal(item)
-  if not isMatcher(separator): separator = literal(separator)
-  def matcher(start):
-    global cursor
+exports.seperatedList = (item, separator=spaces) ->
+  if not isMatcher(item) then item = literal(item)
+  if not isMatcher(separator) then separator = literal(separator)
+  (start) ->
     cursor = start
     result = []
     x = item(cursor)
-    if not x: return
-    while 1:
-      result.append(x)
-      x = item(cursor)
-      if not(x): break
-    return result
-  return matcher
+    if not x then return
+    while 1
+      result.push(x)
+      if not(x = item(cursor)) then break
+    result
 
 # combinator **timesSeperatedList**: given @n times $item separated by @separator, n>=1
-def timesSeperatedList(item, n, separator=None):
-  if separator is None: separator = spaces
-  if not isMatcher(item): item = literal(item)
-  if not isMatcher(separator): separator = literal(separator)
-  def matcher(start):
-    global cursor
+exports.timesSeperatedList = (item, n, separator=spaces) ->
+  if not isMatcher(item) then item = literal(item)
+  if not isMatcher(separator) then separator = literal(separator)
+  (start) ->
     cursor = start
     result = []
     x = item(cursor)
-    if not x: return
-    for i in ranges(n-1):
-      result.append(x)
-      x = item(cursor)
-      if not x: break
-    return result
-  return matcher
+    if not x then return
+    i = 1
+    while i++<n
+      result.push(x)
+      if not(x = item(cursor)) then break
+    result
 
 # As the same as andp, orp, in the manner of Peasy, you would rather to write youself a loop to do the things, instead
 # of useing the combinators like any, some, times, seperatedList,etc. and that would be simpler, faster and more elegant. <br/>
@@ -428,7 +392,7 @@ def timesSeperatedList(item, n, separator=None):
 # *Don't use the faster version in orp, any, some, times, separatedList, timesSeparatedList.* <br/><br/>
 
 # #### some other matchers, combinators and predicate<br/>
-# A **predicate** is a function which return True or False, usually according to its parameter, but not look at parsed object.
+# A **predicate** is a function which return true or false, usually according to its parameter, but not look at parsed object.
 # below is some little utilities may be useful. Three version of some of them is provided.<br/>
 # just remove them if you don't need them, except **literal**, which is depended by the matchers above.
 
@@ -436,39 +400,25 @@ def timesSeperatedList(item, n, separator=None):
 # match a text string.<br/>
 # `notice: some combinators like andp, orp, notp, any, some, etc. use literal to wrap a object which is not a matcher.
 
-def literal(string): 
-  def matcher(start):
-    global cursor
-    len = string.length
-    stop = start+len
-    if text[start:stop]==string: cursor = stop; return True
+exports.literal = literal = (string) -> (start) ->
+  len = string.length
+  if text.slice(start, stop = start+len)==string then cursor = stop; true
 
 # matcher **literal_**, faster version<br/>
 # match a text string.
-def iteral_(string): 
-  def matcher(start):
-    global cursor
-    len = string.length
-    if text.slice(cursor,  stop = cursor+len)==string: 
-      cursor = stop; return True
-  return matcher
+exports.literal_ = literal_ = (string) -> (start) ->
+  len = string.length
+  if text.slice(cursor,  stop = cursor+len)==string then cursor = stop; true
 
 # matcher **char**, normal version<br/>
 # match one character
-def char(c): 
-  def matcher(start):
-    global cursor
-    if start>=textLength: return
-    if text[start]==c: cursor = start+1; return c
-  return matcher
+exports.char = (c) -> (start) ->
+  if text[start]==c then cursor = start+1; return c
 
 # matcher **char_**, normal version <br/>
 # match one character
-def char_(c): 
-  def matcher():
-    global cursor
-    if text[cursor]==c: cursor += 1; return c
-  return matcher
+exports.char_ = (c) -> () ->
+  if text[cursor]==c then cursor++; return c
 
 # In spaces, spaces_, spaces1, spaces1_, a tat('\t') is seen as tabWidth spaces, <br/>
 # which is used in indent style language, such as coffeescript, python, haskell, etc. <br/>
@@ -476,181 +426,142 @@ def char_(c):
 
 # matcher **spaces**, normal version<br/>
 # zero or more whitespaces, ie. space or tab.<br/>
-def spaces(start):
-  global cursor
+exports.spaces = (start) ->
   len = 0
   cursor = start
   text = text
-  while 1:
-    c = text[cursor]
-    cursor += 1
-    if c==' ': len += 1
-    elif c=='\t': len += tabWidth
-    else: break
+  while 1
+    switch text[cursor++]
+      when ' ' then len++
+      when '\t' then len += tabWidth
+      else break
   return len
 
 # matcher **spaces_**, faster version<br/>
 # zero or more whitespaces, ie. space or tab.
-def spaces_():
-  global cursor
+exports.spaces_ = () ->
   len = 0
   text = text
-  while 1:
-    c = text[cursor]
-    cursor += 1
-    if c==' ': len += 1
-    elif c=='\t': len += tabWidth
-    else: break
-  return len
+  while 1
+    switch text[cursor++]
+      when ' ' then len++
+      when '\t' then len += tabWidth
+      else break
+  len
 
 # matcher **spaces1**, normal version<br/>
 # one or more whitespaces, ie. space or tab.<br/>
-def spaces1(start):
-  global cursor
+exports.spaces1 = (start) ->
   len = 0
   cursor = start
   text = text
-  while 1:
-    c = text[cursor]
-    cursor += 1
-    if c==' ': len += 1
-    elif c=='\t': len += tabWidth
-    else: break
-  if len: return len
+  while 1
+    switch text[cursor++]
+      when ' ' then len++
+      when '\t' then len += tabWidth
+      else break
+  if len then return cursor = cursor; len
 
 # matcher **spaces1_**, faster version<br/>
 # one or more whitespaces, ie. space or tab.
-def spaces1_():
-  global cursor
+exports.spaces1_ = () ->
   len = 0
-  while 1:
-    c = text[cursor]
-    cursor += 1
-    if c==' ': len += 1
-    elif c=='\t': len += tabWidth
-    else: break
-  if len: return len
+  cursor = start
+  while 1
+    switch text[cursor++]
+      when ' ' then len++
+      when '\t' then len += tabWidth
+      else break
+  if len then return cursor = cursor; len
 
 # matcher **wrap**, normal version<br/>
-# match left,: match item, match right at last
-def wrap(item, left=spaces, right=spaces):
-  if not isMatcher(item): item = literal(item)
-  def matcher(start):
-    global cursor
-    if not left(start): return
-    result = item(cursor)
-    if result and right(cursor): return result
-  return matcher
+# match left, then match item, match right at last
+exports.wrap = (item, left=spaces, right=spaces) ->
+  if not isMatcher(item) then item = literal(item)
+  (start) ->
+     if left(start) and result = item(cursor) and right(cursor) then result
 
 # matcher **identifierLetter**: normal version<br/>
 # is a letter than can be used in identifer?<br/>
 # javascript style, '$' is a identifierLetter_<br/>
-def identifierLetter(start):
-  global cursor
-  cursor = start
+identifierLetter = (start) ->
+  start = cursor
   c = text[cursor]
-  if c is '$' or c is '_' or 'a'<=c<'z' or 'A'<=c<='Z' or '0'<=c<='9':
-    cursor += 1; 
-    return True
+  if c is '$' or c is '_' or 'a'<=c<'z' or 'A'<=c<='Z' or '0'<=c<='9'
+    cursor++; true
 
 # matcher **identifierLetter_**, version<br/>
 # is a letter that can be used in identifer? <br/>
 # javascript style, '$' is a identifierLetter_
-def identifierLetter_():
-  global cursor
+identifierLetter_ = () ->
   c = text[cursor]
-  if c is '$' or c is '_' or 'a'<=c<'z' or 'A'<=c<='Z' or '0'<=c<='9':
-    cursor += 1; 
-    return True
+  if c is '$' or c is '_' or 'a'<=c<'z' or 'A'<=c<='Z' or '0'<=c<='9'
+    cursor++; true
 
 # matcher **followIdentifierLetter_**, faster version<br/>
 # lookahead whether the following character is a letter used in identifer. don't change cursor. <br/>
 # javascript style, '$' is a identifierLetter_
-def followIdentifierLetter_():
+followIdentifierLetter_ = () ->
   c = text[cursor]
-  return c is '$' or c is '_' or 'a'<=c<'z' or 'A'<=c<='Z' or '0'<=c<='9'
+  c is '$' or c is '_' or 'a'<=c<'z' or 'A'<=c<='Z' or '0'<=c<='9'
 
-def isIdentifierLetter(c): return 'a'<=c<='z' or 'A'<=c<='Z' or '0'<=c<='9' or 'c'=='$' or 'c'=='_'
+isIdentifierLetter = (c) -> 'a'<=c<='z' or 'A'<=c<='Z' or '0'<=c<='9' or 'c'=='$' or 'c'=='_'
 
 # predicate isdigit<br/>
-def isdigit(c): return '0'<=c<='9'
+exports.isdigit = (c) -> '0'<=c<='9'
 # matcher digit, normal version<br/>
-def digit(start):
-  global cursor
-  c = text[start];  
-  if '0'<=c<='9': cursor = start+1; return True
+exports.digit = (start) ->
+  c = text[start];  if '0'<=c<='9' then cursor = start+1
 # matcher digit_, faster version<br/>
-def digit_():
-  global cursor
-  c = text[cursor];  
-  if '0'<=c<='9': cursor += 1; return True
+exports.digit_ = () ->
+  c = text[cursor];  if '0'<=c<='9' then cursor++
 
 # predicate isletter<br/>
-def isalpha(c): return 'a'<=c<='z' or 'A'<=c<='Z'
-isletter = isalpha
+exports.isletter = exports.isalpha = (c) -> 'a'<=c<='z' or 'A'<=c<='Z'
 # matcher letter, normal version<br/>
-def alpha(start):
-  global cursor
-  c = text[start]; 
-  if 'a'<=c<='z' or 'A'<=c<='Z': cursor = start+1; return True
-letter = alpha
-
+exports.letter = exports.alpha = (start) ->
+  c = text[start]; if 'a'<=c<='z' or 'A'<=c<='Z' then cursor = start+1
 # matcher letter, faster version<br/>
-def alpha_():
-  global cursor
-  c = text[cursor]; 
-  if 'a'<=c<='z' or 'A'<=c<='Z': cursor += 1; return True
-letter_ = alpha_
+exports.letter_ = exports.alpha_ = () ->
+  c = text[cursor]; if 'a'<=c<='z' or 'A'<=c<='Z' then cursor++
 
 # predicate: islower
-def islower(c): return 'a'<=c<='z'
+exports.islower = (c) -> 'a'<=c<='z'
 # matcher lower, normal version
-def lower(start):
-  global cursor
-  c = text[start]; 
-  if 'a'<=c<='z': cursor = start+1; return True
+exports.lower = (start) ->
+  c = text[start]; if 'a'<=c<='z' then cursor = start+1
 #matcher lower_, faster version
-def lower_():
-  global cursor
-  c = text[cursor]; 
-  if 'a'<=c<='z': cursor += 1; return True
+exports.lower_ = () ->
+  c = text[cursor]; if 'a'<=c<='z' then cursor++
 
-def isupper(c): return 'A'<=c<='Z'
+exports.isupper = (c) ->'A'<=c<='Z'
 # matcher upper, normal version
-def upper(start): 
-  global cursor
-  c = text[start]; 
-  if 'A'<=c<='Z': cursor = start+1
+exports.upper = (start) ->  c = text[start]; if 'A'<=c<='Z' then cursor = start+1
 #matcher upper_, faster version
-def upper_(start): 
-  global cursor
-  c = text[cursor]; 
-  if 'A'<=c<='Z': cursor += 1
+exports.upper_ = (start) -> c = text[cursor]; if 'A'<=c<='Z' then cursor++
 
 # matcher identifier, normal version
-def identifier(start):
-  global cursor
+exports.identifier = (start) ->
   cursor = start
   c = text[cursor]
-  if 'a'<=c<='z' or 'A'<=c<='Z' or 'c'=='$' or 'c'=='_': cursor += 1
-  else: return
-  while 1:
+  if 'a'<=c<='z' or 'A'<=c<='Z' or 'c'=='$' or 'c'=='_' then cursor++
+  else return
+  while 1
     c = text[cursor]
-    if 'a'<=c<='z' or 'A'<=c<='Z' or '0'<=c<='9' or 'c'=='$' or 'c'=='_': cursor += 1
-    else: break
-  True
+    if 'a'<=c<='z' or 'A'<=c<='Z' or '0'<=c<='9' or 'c'=='$' or 'c'=='_' then cursor++
+    else break
+  true
 
 # matcher identifier_, faster version
-def identifier_(start):
-  global cursor
+exports.identifier_ = (start) ->
   c = text[cursor]
-  if 'a'<=c<='z' or 'A'<=c<='Z' or 'c'=='$' or 'c'=='_': cursor += 1
-  else: return
-  while 1:
+  if 'a'<=c<='z' or 'A'<=c<='Z' or 'c'=='$' or 'c'=='_' then cursor++
+  else return
+  while 1
     c = text[cursor]
-    if 'a'<=c<='z' or 'A'<=c<='Z' or '0'<=c<='9' or 'c'=='$' or 'c'=='_': cursor += 1
-    else: break
-  True
+    if 'a'<=c<='z' or 'A'<=c<='Z' or '0'<=c<='9' or 'c'=='$' or 'c'=='_' then cursor++
+    else break
+  true
 
 # The utilites above is just for providing some examples on how to write matchers for Peasy.<br/>
 # In fact, It's realy easy peasy to write the matchers for your grammar rule yourself.<br/>
@@ -663,183 +574,10 @@ def identifier_(start):
 # If you use this file to contain the grammar rules, just directly use `text`<br/>
 # and use `text[cursor]` to get current character, `text.slice(cursor, cursor+n)` to get substring of the text, if
 # text is a string object.
-def gettext(): return text
+exports.gettext = () -> text
 
-# If you use this file to contain the grammar rules, just directly use `cursor` or `cursor = n` or `cursor += 1` or `cursor--`
-def cur(): return cursor
-def setcur(pos): 
-  global cursor
-  cursor = pos
-  return cursor
+# If you use this file to contain the grammar rules, just directly use `cursor` or `cursor = n` or `cursor++` or `cursor--`
+exports.getcursor = exports.cur = () -> cursor
+exports.setcursor = exports.setcur = (pos) -> cursor = pos
 
-# It's a pity that assign in python is a statement and can not occur in expression.<br/>
-# So We can not write x = Additive(start) and op = Op(cursor) and y = Multiply(cursor) and op(x, y)<br/>
-# As a workaround, we assign some Var beforehand, e.g. x = Var('x'); m = Var('x')
-# and then we can write like this:<br/> 
-# x.set(Additive(start)) and op.set(Op(cursor)) and y.set(Multiply(cursor)) and op(x, y)
-# we can also wrtie like below:<br/> 
-# x.set(Additive(start)) and op.set(Op(cursor)) and y.set(Multiply(cursor)) and op.v(x.v, y.v)<br/> 
-# You may remove any overload definitions below if you do not need it.<br/> 
-# And you can use var.v at every place and remove all of the overload definitions, and that will make program faster.
 
-class Var:
-  def __init__(self, name=''):
-    # name is unnecessary attribute. remove it if you like.
-    self.name = name
-    self.v = None
-    
-  def set(self, v): self.v = v; return v
-  
-  def __repr__(self): self.name+':'+repr(self.v)
-  
-  # You can overload the attribute of Var on demand.<br/>
-  # Or overload none of them.
-  def __lt__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v<y
-  def __le__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v<=y
-  def __eq__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v==y
-  def __ne__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v!=y
-  def __gt__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v>y
-  def __ge__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v>=y
-  def __setattr__(self, attr, value): 
-    if attr=='set': self.v = value; return self
-    return getattr(self.v, attr, value)
-  def __getattr__(self, attr): 
-    return getattr(self.v, attr)
-  def __call__(self, *args, **kwargs): 
-    args = [(arg.v if isinstance(arg, Var) else arg) for arg in args]
-    kwargs = {k:(v.v if isinstance(v, Value) else v) for k, v in kwargs}
-    return self.v(*args, **kwargs); 
-  def __getitem__(self, key): 
-    if isinstance(y, Var): y = y.y
-    return self.v[key]
-  def __add__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v+y
-  def __sub__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v-y
-  def __mul__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v*y
-  def __floordiv__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v//y
-  def __div__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v/y
-  def __truediv__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v//y
-  def __mod__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v%y
-  def __pow__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v**y
-  def __lshift__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v<<y
-  def __rshift__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v>>y
-  def __and__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v&y
-  def __xor__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v^y
-  def __or__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v|y
-  def __radd__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return y+self.v
-  def __rsub__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return y-self.v
-  def __rmul__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return y*self.v
-  def __rfloordiv__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return y//self.v
-  def __rdiv__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return y/self.v
-  def __rtruediv__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return y/self.v
-  def __rmod__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return y&self.v
-  def __rpow__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return y**self.v
-  def __rlshift__(self, y): 
-    return y<<self.vr
-  def __rshift__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return y>>self.v
-  def __rand__(self, y): 
-    return y&self.v
-  def __rxor__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return y^self.v
-  def __ror__(self, y): 
-    return y|self.v;
-  def __iadd__(self, y): 
-    self.v += y; return self
-  def __isub__(self, y): 
-    self.v -= y; return self
-  def __imul__(self, y): 
-    if isinstance(y, Var): y = y.y
-    self.v *= y; return self
-  def __ifloordiv__(self, y): 
-    if isinstance(y, Var): y = y.y
-    self.v//=y; return self
-  def __idiv__(self, y): 
-    if isinstance(y, Var): y = y.y
-    self.v/=y; return self
-  def __itruediv__(self, y): 
-    if isinstance(y, Var): y = y.y
-    self.v/=y; return self
-  def __imod__(self, y): 
-    if isinstance(y, Var): y = y.y
-    self.v%=y; return self
-  def __ipow__(self, y): 
-    if isinstance(y, Var): y = y.y
-    self.v**=y; return self
-  def __ilshift__(self, y): 
-    if isinstance(y, Var): y = y.y
-    self.v<<=y; return self
-  def __irshift__(self, y): 
-    if isinstance(y, Var): y = y.y
-    self.v>>=y; return self
-  def __iand__(self, y): 
-    if isinstance(y, Var): y = y.y
-    self.v&=y; return self
-  def __ixor__(self, y): 
-    if isinstance(y, Var): y = y.y
-    self.v^=y; return self
-  def __ior__(self, y): 
-    if isinstance(y, Var): y = y.y
-    self.v|=y; return self
-
-  def __iter__(self): return iter(self.v)
-  def __neg__(self):  return -self.v>=y
-  def __pos__(self): return +self.v
-  def __abs__(self): return abs(self.v)
-  def __invert__(self): return ~self.v
-  def __nonzero__(self): return self.v

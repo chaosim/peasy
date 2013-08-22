@@ -11,6 +11,7 @@ See [here](http://chaosim.github.io/peasy/doc/peasy.html#peasysample) for a samp
 
 ### Documentation
 The [annotated peasy.coffee](http://chaosim.github.io/peasy/doc/peasy.html) is best document for Peasy at the moment.
+If you're a pythoner, maybe you'd like to see the [annotated peasy.py](http://chaosim.github.io/peasy/doc/pypeasy.html).
 See the tests in /test, and you'll see some samples of left recursive grammars and how to parse them.
 
 ### Web sites

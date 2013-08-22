@@ -6,6 +6,8 @@ a = char('a'); b = char('b'); x = char('x')
 
 memoA = memo('A')
 
+#x1 = Var('x1'); m = Var('m')
+
 def parse1(text):
   class Rules:
     rootSymbol = 'A'
@@ -13,6 +15,7 @@ def parse1(text):
     def A(self, start):
       m = memoA(start)
       return m and x(p.cur()) and m+'x' or m or a(start)
+      #return let(m, memoA(start)) and x(p.cur()) and m+'x' or m or a(start)
   rules = Rules()
   initialize(rules)
   addRecursiveCircles(rules, ['A'])
@@ -25,6 +28,7 @@ def parse2(text):
     def A(self, start):
       m =  rules.B(start)
       return m and x(p.cur()) and m+'x' or m or a(start)
+      #return m.set(rules.B(start)) and x(p.cur()) and m+'x' or m or a(start)
     def B(self, start): return memoA(start) or b(start)
   rules = Rules()
   initialize(rules)
@@ -39,6 +43,8 @@ def parse3(text):
       m =  rules.B(start)
       return m and x(p.cur()) and m+'x' or m\
       or a(start)
+      #return m.set(rules.B(start)) and x(p.cur()) and m+'x' or m.v\
+         #or a(start)
     def B(self, start): return rules.C(start)
     def C(self, start): return memoA(start) or b(start)
   rules = Rules()
