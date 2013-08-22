@@ -1688,6 +1688,215 @@ text is a string object.</p>
             
         </li>
         
+        
+        <li id="section-85">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-85">&#182;</a>
+              </div>
+              <p>It&#39;s a pity that assign in python is a statement and can not occur in expression.<br/>
+So We can not write x = Additive(start) and op = Op(cursor) and y = Multiply(cursor) and op(x, y)<br/>
+As a workaround, we assign some Var beforehand, e.g. x = Var(&#39;x&#39;); m = Var(&#39;x&#39;)
+and then we can write like this:<br/> 
+x.set(Additive(start)) and op.set(Op(cursor)) and y.set(Multiply(cursor)) and op(x, y)
+we can also wrtie like below:<br/> 
+x.set(Additive(start)) and op.set(Op(cursor)) and y.set(Multiply(cursor)) and op.v(x.v, y.v)<br/> 
+You may remove any overload definitions below if you do not need it.<br/> 
+And you can use var.v at every place and remove all of the overload definitions, and that will make program faster.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>
+<span class="class"><span class="keyword">class</span> <span class="title">Var</span>:</span>
+  <span class="function"><span class="keyword">def</span> <span class="title">__init__</span><span class="params">(self, name=<span class="string">''</span>)</span>:</span></pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-86">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-86">&#182;</a>
+              </div>
+              <p>name is unnecessary attribute. remove it if you like.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>    self.name = name
+    self.v = <span class="built_in">None</span>
+    
+  <span class="function"><span class="keyword">def</span> <span class="title">set</span><span class="params">(self, v)</span>:</span> self.v = v; <span class="keyword">return</span> v
+  
+  <span class="function"><span class="keyword">def</span> <span class="title">__repr__</span><span class="params">(self)</span>:</span> self.name+<span class="string">':'</span>+repr(self.v)</pre></div></div>
+            
+        </li>
+        
+        
+        <li id="section-87">
+            <div class="annotation">
+              
+              <div class="pilwrap ">
+                <a class="pilcrow" href="#section-87">&#182;</a>
+              </div>
+              <p>You can overload the attribute of Var on demand.<br/>
+Or overload none of them.</p>
+
+            </div>
+            
+            <div class="content"><div class='highlight'><pre>  <span class="function"><span class="keyword">def</span> <span class="title">__lt__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v&lt;y
+  <span class="function"><span class="keyword">def</span> <span class="title">__le__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v&lt;=y
+  <span class="function"><span class="keyword">def</span> <span class="title">__eq__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v==y
+  <span class="function"><span class="keyword">def</span> <span class="title">__ne__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v!=y
+  <span class="function"><span class="keyword">def</span> <span class="title">__gt__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v&gt;y
+  <span class="function"><span class="keyword">def</span> <span class="title">__ge__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v&gt;=y
+  <span class="function"><span class="keyword">def</span> <span class="title">__setattr__</span><span class="params">(self, attr, value)</span>:</span> 
+    <span class="keyword">if</span> attr==<span class="string">'set'</span>: self.v = value; <span class="keyword">return</span> self
+    <span class="keyword">return</span> getattr(self.v, attr, value)
+  <span class="function"><span class="keyword">def</span> <span class="title">__getattr__</span><span class="params">(self, attr)</span>:</span> 
+    <span class="keyword">return</span> getattr(self.v, attr)
+  <span class="function"><span class="keyword">def</span> <span class="title">__call__</span><span class="params">(self, *args, **kwargs)</span>:</span> 
+    args = [(arg.v <span class="keyword">if</span> isinstance(arg, Var) <span class="keyword">else</span> arg) <span class="keyword">for</span> arg <span class="keyword">in</span> args]
+    kwargs = {k:(v.v <span class="keyword">if</span> isinstance(v, Value) <span class="keyword">else</span> v) <span class="keyword">for</span> k, v <span class="keyword">in</span> kwargs}
+    <span class="keyword">return</span> self.v(*args, **kwargs); 
+  <span class="function"><span class="keyword">def</span> <span class="title">__getitem__</span><span class="params">(self, key)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v[key]
+  <span class="function"><span class="keyword">def</span> <span class="title">__add__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v+y
+  <span class="function"><span class="keyword">def</span> <span class="title">__sub__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v-y
+  <span class="function"><span class="keyword">def</span> <span class="title">__mul__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v*y
+  <span class="function"><span class="keyword">def</span> <span class="title">__floordiv__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v//y
+  <span class="function"><span class="keyword">def</span> <span class="title">__div__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v/y
+  <span class="function"><span class="keyword">def</span> <span class="title">__truediv__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v//y
+  <span class="function"><span class="keyword">def</span> <span class="title">__mod__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v%y
+  <span class="function"><span class="keyword">def</span> <span class="title">__pow__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v**y
+  <span class="function"><span class="keyword">def</span> <span class="title">__lshift__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v&lt;&lt;y
+  <span class="function"><span class="keyword">def</span> <span class="title">__rshift__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v&gt;&gt;y
+  <span class="function"><span class="keyword">def</span> <span class="title">__and__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v&amp;y
+  <span class="function"><span class="keyword">def</span> <span class="title">__xor__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v^y
+  <span class="function"><span class="keyword">def</span> <span class="title">__or__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> self.v|y
+  <span class="function"><span class="keyword">def</span> <span class="title">__radd__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> y+self.v
+  <span class="function"><span class="keyword">def</span> <span class="title">__rsub__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> y-self.v
+  <span class="function"><span class="keyword">def</span> <span class="title">__rmul__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> y*self.v
+  <span class="function"><span class="keyword">def</span> <span class="title">__rfloordiv__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> y//self.v
+  <span class="function"><span class="keyword">def</span> <span class="title">__rdiv__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> y/self.v
+  <span class="function"><span class="keyword">def</span> <span class="title">__rtruediv__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> y/self.v
+  <span class="function"><span class="keyword">def</span> <span class="title">__rmod__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> y&amp;self.v
+  <span class="function"><span class="keyword">def</span> <span class="title">__rpow__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> y**self.v
+  <span class="function"><span class="keyword">def</span> <span class="title">__rlshift__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">return</span> y&lt;&lt;self.vr
+  <span class="function"><span class="keyword">def</span> <span class="title">__rshift__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> y&gt;&gt;self.v
+  <span class="function"><span class="keyword">def</span> <span class="title">__rand__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">return</span> y&amp;self.v
+  <span class="function"><span class="keyword">def</span> <span class="title">__rxor__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    <span class="keyword">return</span> y^self.v
+  <span class="function"><span class="keyword">def</span> <span class="title">__ror__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">return</span> y|self.v;
+  <span class="function"><span class="keyword">def</span> <span class="title">__iadd__</span><span class="params">(self, y)</span>:</span> 
+    self.v += y; <span class="keyword">return</span> self
+  <span class="function"><span class="keyword">def</span> <span class="title">__isub__</span><span class="params">(self, y)</span>:</span> 
+    self.v -= y; <span class="keyword">return</span> self
+  <span class="function"><span class="keyword">def</span> <span class="title">__imul__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    self.v *= y; <span class="keyword">return</span> self
+  <span class="function"><span class="keyword">def</span> <span class="title">__ifloordiv__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    self.v//=y; <span class="keyword">return</span> self
+  <span class="function"><span class="keyword">def</span> <span class="title">__idiv__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    self.v/=y; <span class="keyword">return</span> self
+  <span class="function"><span class="keyword">def</span> <span class="title">__itruediv__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    self.v/=y; <span class="keyword">return</span> self
+  <span class="function"><span class="keyword">def</span> <span class="title">__imod__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    self.v%=y; <span class="keyword">return</span> self
+  <span class="function"><span class="keyword">def</span> <span class="title">__ipow__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    self.v**=y; <span class="keyword">return</span> self
+  <span class="function"><span class="keyword">def</span> <span class="title">__ilshift__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    self.v&lt;&lt;=y; <span class="keyword">return</span> self
+  <span class="function"><span class="keyword">def</span> <span class="title">__irshift__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    self.v&gt;&gt;=y; <span class="keyword">return</span> self
+  <span class="function"><span class="keyword">def</span> <span class="title">__iand__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    self.v&amp;=y; <span class="keyword">return</span> self
+  <span class="function"><span class="keyword">def</span> <span class="title">__ixor__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    self.v^=y; <span class="keyword">return</span> self
+  <span class="function"><span class="keyword">def</span> <span class="title">__ior__</span><span class="params">(self, y)</span>:</span> 
+    <span class="keyword">if</span> isinstance(y, Var): y = y.y
+    self.v|=y; <span class="keyword">return</span> self
+
+  <span class="function"><span class="keyword">def</span> <span class="title">__iter__</span><span class="params">(self)</span>:</span> <span class="keyword">return</span> iter(self.v)
+  <span class="function"><span class="keyword">def</span> <span class="title">__neg__</span><span class="params">(self)</span>:</span>  <span class="keyword">return</span> -self.v&gt;=y
+  <span class="function"><span class="keyword">def</span> <span class="title">__pos__</span><span class="params">(self)</span>:</span> <span class="keyword">return</span> +self.v
+  <span class="function"><span class="keyword">def</span> <span class="title">__abs__</span><span class="params">(self)</span>:</span> <span class="keyword">return</span> abs(self.v)
+  <span class="function"><span class="keyword">def</span> <span class="title">__invert__</span><span class="params">(self)</span>:</span> <span class="keyword">return</span> ~self.v
+  <span class="function"><span class="keyword">def</span> <span class="title">__nonzero__</span><span class="params">(self)</span>:</span> <span class="keyword">return</span> self.v</pre></div></div>
+            
+        </li>
+        
     </ul>
   </div>
 </body>
