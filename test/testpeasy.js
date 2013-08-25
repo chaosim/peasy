@@ -125,6 +125,23 @@
     }
   };
 
+  exports.Test = {
+    "test class member": function(test) {
+      var A;
+
+      A = (function() {
+        function A() {}
+
+        A.prototype.a = 1;
+
+        return A;
+
+      })();
+      test.equal(A.prototype.a, 1);
+      return test.done();
+    }
+  };
+
 }).call(this);
 
 /*

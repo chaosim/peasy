@@ -690,16 +690,15 @@ class Var:
     self.name = name
     self.v = None
   
-  # faked assignment  
-  def __lshift__(self, y): 
-    if isinstance(y, Var): y = y.y
-    return self.v<<y
-  # had best to reserve the truth overloading.
-  # class Rules
-  #   def Add(self, start):
+  # faked assignment, let we can write in rules like so: x << memo('Add')(start) and op << Op(cursor) <br/>   
+  def __lshift__(self, y): selv.v = y; y
+  
+  # had best reserve the overloading to __nonzero__. and then you can write like below: <br/> 
+  # class Rules<br/> 
+  #   def Add(self, start):<br/> 
   #      x, op, y = vars(3)
-  #      return x << memo('Add')(start) and op << Op(cursor) and y << Mul(cursor) and op.v(x.v, y.v) \
-  #             or x\
+  #      return x << memo('Add')(start) and op << Op(cursor) and y << Mul(cursor) and op.v(x.v, y.v) \<br/> 
+  #             or x\<br/> 
   #             or Mul(start)
   def __nonzero__(self): return self.v
   

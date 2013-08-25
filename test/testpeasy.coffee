@@ -87,3 +87,10 @@ exports.Test =
     test.equal parse('fg'), undefined
     test.equal parse(''), undefined
     test.done()
+
+exports.Test =
+  "test class member": (test) ->
+    class A
+      a: 1
+    test.equal A::a, 1
+    test.done()
