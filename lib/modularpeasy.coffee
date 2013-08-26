@@ -50,50 +50,23 @@ hasOwnProperty = Object.hasOwnProperty
 isMatcher = (item) ->  typeof(item)=="function"
 
 # ##### stuffs for left recursives
-# use `addParentChildren(grammar, parentChildrens)` or `addRecursiveCircles(grammar, recursiveCircles...)` to tell
-# the left calling relations between symbols in the grammar<br/>
 
-recursiveGrammar = (info, rules) ->
-  addRecursiveCircles(rules)
-  computeLeftRecursives(info, rules)
+exports.setupGrammar = (info, rules) ->
+  rules.parseCache = {}
+  rules.__parsingSymbols = {}
+  if rules.__originalRules then return rules
+  originalRules = rules.__originalRules = {}
+  recursiveSymbols = rules.__leftRecursives
+  if recursiveSymbols
+    for symbol in recursiveSymbols
+      originalRules[symbol] = rules[symbol]
+      rules[symbol] = recursive(info, rules, symbol)
+  memorizeSymbols = rules.__memorizeSymbols
+  if memorizeSymbols
+    for symbol in memorizeSymbols
+      originalRules[symbol] = rules[symbol]
+      rules[symbol] = memorize(info, rules, symbol)
   rules
-
-# **addRecursiveCircles**: add left recursive parent->children relation to `@parentToChildren` for symbols in **@recursiveCircles**<br/>
-# e.g. `addRecursiveCircles(grammar, ['A', 'B'], ['B'])` tell the same left recursive relations as above sample.
-addRecursiveCircles = (rules) ->
-  map = rules.__parentToChildren ?= {}
-  circles = rules.__RecursiveCircles
-  if not circles then return
-  for circle in circles
-    i = 0
-    length = circle.length
-    while i<length
-      if i==length-1 then j = 0 else j = i+1
-      name = circle[i]
-      parent = circle[j]
-      list = map[parent] ?= []
-      if name not in list then list.push name
-      i++
-  return
-
-# **computeLeftRecursives**: after telling left recursive relations, compute the left recsives group and wrap symbol in
-# them with `recursive` function<br/>
-computeLeftRecursives = (info, rules) ->
-  parentToChildren = rules.__parentToChildren
-  addDescendents = (symbol, meetTable, descedents) ->
-    children =  parentToChildren[symbol]
-    for child in children
-      if child not in descedents then descedents.push child
-      if not meetTable[child] then addDescendents(child, meetTable, descedents)
-  symbolDescedentsMap = rules.__symbolDescedentsMap = {}
-  for symbol of parentToChildren
-    meetTable = {}; meetTable[symbol] = true
-    descendents = symbolDescedentsMap[symbol] = []
-    addDescendents(symbol, meetTable, descendents)
-    if symbol in descendents
-      rules.__originalRules[symbol] = @[symbol]
-      rules[symbol] = rules.__recursiveRules[symbol] = recursive(info, rules, symbol)
-  return
 
 # **recursive**: this is the key function to left recursive.<br/>
 # Make **$symbol** a left recursive symbol, which means to wrap `@originalRules[symbol]` with recursive.
@@ -101,57 +74,29 @@ computeLeftRecursives = (info, rules) ->
 # all symbols in left recursive circles and loop computing rule(start) until no changes happened, and
 # restore all symbols in left recursive cirle to `@recursiveRules[symbol]` at last.,
 recursive = (info, rules, symbol) ->
-  recursiveRules = rules.__recursiveRules
-  symbolDescedentsMap = rules.__symbolDescedentsMap
-  originalRules = rules.__originalRules
-  rule = originalRules[symbol]
-  (start) ->
-    for child in symbolDescedentsMap[symbol]
-      rules[child] = originalRules[child]
-    hash = symbol+start
-    m = rules.parseCache[hash] ?= [undefined, -1]
-    if m[1]>=0 then info.cursor = m[1]; return m[0]
-    while 1
-      result = rule(start)
-      if m[1]<0
-        m[0] = result
-        if result then  m[1] = @cursor
-        else m[1] = start
-      else
-        if m[1]==info.cursor then m[0] = result; return result
-        else if info.cursor<m[1] then m[0] = result; info.cursor = m[1]; return result
-        else m[0] = result; m[1] = parsercursor
-    for child in symbolDescedentsMap[symbol]
-      rules[child] = recursiveRules[child]
-    result
-
-# **memorize**: memorize result and @cursor for **$symbol** which is not left recursive.<br/>
-# *The symbols which is left recursive should be wrapped by `recursive(symbol)`, not `memorize(symbol)`!!!*
-rec = (info, rules, symbol) ->
-  tag = rules.symbolToTagMap[symbol]
   rule = rules.__originalRules[symbol]
-  parseCache = rules.parseCache
   (start) ->
-    hash = tag+start
-    m = parseCache[hash]
-    if m
+    hash = symbol+start
+    callPath = rules.__parsingSymbols[start] ?= []
+    if symbol not in callPath
+      callPath.push(symbol)
+      m = rules.parseCache[hash] = [undefined, -1]
       while 1
         result = rule(start)
-        if m[1]<0
-          m[0] = result
-          if result then  m[1] = @cursor
-          else m[1] = start
-        else
-          if m[1]==info.cursor then m[0] = result; return result
-          else if info.cursor<m[1] then m[0] = result; info.cursor = m[1]; return result
-          else m[0] = result; m[1] = parsercursor
-        info.cursor = m[1]; m[0]
+#        if m[1]<0
+#          m[0] = result
+#          if result then  m[1] = info.cursor
+#          else m[1] = start
+#        else
+        if m[1]==info.cursor then m[0] = result; break
+#          else if info.cursor<m[1] then m[0] = result; info.cursor = m[1]; break
+        else m[0] = result; m[1] = info.cursor
+      callPath.pop()
+      result
     else
-      parseCache[hash] = [undefined, -1]
-      rule(start)
-    for child in symbolDescedentsMap[symbol]
-      rules[child] = recursiveRules[child]
-    result
+      m = rules.parseCache[hash]
+      if m[1]>=0 then info.cursor = m[1]; m[0]
+      else info.cursor = start;  m[0]
 
 # ##### memorization
 
@@ -167,7 +112,7 @@ setMemorizeRules = (info, rules) ->
 
 # **memorize**: memorize result and @cursor for **$symbol** which is not left recursive.<br/>
 # *The symbols which is left recursive should be wrapped by `recursive(symbol)`, not `memorize(symbol)`!!!*
-memorize = (info, rules, symbol) ->
+exports.memorize = (info, rules, symbol) ->
   tag = rules.symbolToTagMap[symbol]
   rule = rules.__originalRules[symbol]
   parseCache = rules.parseCache
@@ -220,7 +165,7 @@ setMemoTag = (rules, symbol) ->
 # manner of Peasy. That would be simpler, faster and more elegant. <br/>
 # And in that manner, you would have more control on your grammar rule, say like below: <br/>
 # `if (x=item1(start) and (x>100) and item2(info.cursor) and not item3(info.cursor) and (y = item(info.cursor)) then doSomething()`
-andp: (info, items...) ->
+exports.andp = (info, items...) ->
   items = for item in items
     if not isMatcher(item) then literal(info, item) else item
   (start) ->
@@ -237,7 +182,7 @@ andp: (info, items...) ->
 # manner of Peasy. That would be simpler, faster and more elegant. <br/>
 # And in that manner, you would have more control on your grammar rule, say like below: <br/>
 # `if ((x=item1(start) and (x>100)) or (item2(info.cursor) and not item3(info.cursor)) or (y = item(info.cursor)) then doSomething()`
-orp: (info, items...) ->
+exports.orp = (info, items...) ->
   items = for item in items
     if not isMatcher(item) then literal(infor, item) else item
   (start) ->
@@ -247,14 +192,14 @@ orp: (info, items...) ->
     result
 
 # combinator **notp**<br/>
-# `notp` is not useful except being used in other combinators, just like this: `andp(item1, notp(item2))`.<br/>
+# `notp` is not useful except being used in other combinators, just like this = `andp(item1, notp(item2))`.<br/>
 # *It's unnessary, low effecient and ugly to write `notp(item)(start)`, just write `not item(start)`.*
-notp: (info, item) ->
+exports.notp = (info, item) ->
   if not isMatcher(item) then item = literal(info, item)
   (start) -> not item(start)
 
 # combinator **any**: zero or more times of `item(info.cursor)`
-any: (info, item) ->
+exports.any = (info, item) ->
   if not isMatcher(item) then item = literal(info, item)
   (start) ->
     result = []; info.cursor = start
@@ -262,7 +207,7 @@ any: (info, item) ->
     result
 
 # combinator **some**: one or more times of `item(info.cursor)`
-some: (info, item) ->
+exports.some = (info, item) ->
   if not isMatcher(item) then item = literal(info, item)
   (start) ->
     result = []; info.cursor = start
@@ -275,7 +220,7 @@ some: (info, item) ->
 
 # combinator  **may**: a.k.a optional <br/>
 # try to match `item(info.cursor)`, wether `item(info.cursor)` succeed or not, `maybe(item)(start)` succeed.
-may: (info, item) ->
+exports.may = (info, item) ->
   if not isMatcher(item) then item = literal(info, item)
   (start) ->
     info.cursor = start
@@ -285,14 +230,14 @@ may: (info, item) ->
 # combinator **follow** <br/>
 # try to match `item(start)`, if succeed, reset info.cursor and return the value of item(start) <br/>
 # whether succeed or not, info.cursor is reset to start
-follow: (info, item) ->
+exports.follow = (info, item) ->
   if not isMatcher(item) then item = literal(info, item)
   (start) ->
     info.cursor = start
     if x = item(info.cursor) then info.cursor = start; x
 
 # combinator **times**: match **$n** times item(info.cursor), n>=1
-times: (info, item, n) ->
+exports.times = (info, item, n) ->
   if not isMatcher(item) then item = literal(info, item)
   (start) ->
     info.cursor = start; i = 0
@@ -302,7 +247,7 @@ times: (info, item, n) ->
     result
 
 # combinator **seperatedList**: some times item(info.cursor), separated by info.separator
-seperatedList: (info, item, separator=spaces) ->
+exports.seperatedList = (info, item, separator=spaces) ->
   if not isMatcher(item) then item = literal(info, item)
   if not isMatcher(separator) then separator = literal(separator)
   (start) ->
@@ -316,7 +261,7 @@ seperatedList: (info, item, separator=spaces) ->
     result
 
 # combinator **timesSeperatedList**: given info.n times $item separated by info.separator, n>=1
-timesSeperatedList: (info, item, n, separator=spaces) ->
+exports.timesSeperatedList = (info, item, n, separator=spaces) ->
   if not isMatcher(item) then item = literal(info, item)
   if not isMatcher(separator) then separator = literal(separator)
   (start) ->
@@ -358,23 +303,23 @@ timesSeperatedList: (info, item, n, separator=spaces) ->
 # matcher **literal**, normal version<br/>
 # match a text string.<br/>
 # `notice = some combinators like andp, orp, notp, any, some, etc. use literal to wrap a object which is not a matcher.
-literal = (info, string) -> (start) ->
+exports.literal = (info, string) -> (start) ->
   len = string.length
   if info.data.slice(start, stop = start+len)==string then info.cursor = stop; true
 
 # matcher **literal_**, faster version<br/>
 # match a text string.
-literal_ = (info, string) -> (start) ->
+exports.literal_ = (info, string) -> (start) ->
   len = string.length
   if info.data.slice(info.cursor,  stop = info.cursor+len)==string then info.cursor = stop; true
 
 # matcher **char**, normal version<br/>
 # match one character
-char = (info, c) -> (start) -> if info.data[start]==c then info.cursor = start+1; return c
+exports.char = (info, c) -> (start) -> if info.data[start]==c then info.cursor = start+1; return c
 
 # matcher **char_**, normal version <br/>
 # match one character
-char_ = (info, c) -> () -> if info.data[info.cursor]==c then info.cursor++; return c
+exports.char_ = (info, c) -> () -> if info.data[info.cursor]==c then info.cursor++; return c
 
 # In spaces, spaces_, spaces1, spaces1_, a tat('\t') is seen as tabWidth spaces, <br/>
 # which is used in indent style language, such as coffeescript, python, haskell, etc. <br/>
@@ -382,7 +327,7 @@ char_ = (info, c) -> () -> if info.data[info.cursor]==c then info.cursor++; retu
 
 # matcher **spaces**, normal version<br/>
 # zero or more whitespaces, ie. space or tab.<br/>
-spaces = (info) -> (start) ->
+exports.spaces = (info) -> (start) ->
   len = 0
   info.cursor = start
   while 1
@@ -394,7 +339,7 @@ spaces = (info) -> (start) ->
 
 # matcher **spaces_**, faster version<br/>
 # zero or more whitespaces, ie. space or tab.
-spaces_ = (info) -> () ->
+exports.spaces_ = (info) -> () ->
   len = 0
   while 1
     switch info.data[info.cursor++]
@@ -405,7 +350,7 @@ spaces_ = (info) -> () ->
 
 # matcher **spaces1**, normal version<br/>
 # one or more whitespaces, ie. space or tab.<br/>
-spaces1 = (info) -> (start) ->
+exports.spaces1 = (info) -> (start) ->
   len = 0
   info.cursor = start
   while 1
@@ -417,7 +362,7 @@ spaces1 = (info) -> (start) ->
 
 # matcher **spaces1_**, faster version<br/>
 # one or more whitespaces, ie. space or tab.
-spaces1_ = (info) -> () ->
+exports.spaces1_ = (info) -> () ->
   len = 0
   info.cursor = start
   while 1
@@ -429,7 +374,7 @@ spaces1_ = (info) -> () ->
 
 # matcher **wrap**, normal version<br/>
 # match left, then match item, match right at last
-wrap = (info) -> (item, left=spaces, right=spaces) ->
+exports.wrap = (info) -> (item, left=spaces, right=spaces) ->
   if not isMatcher(item) then item = literal(info, item)
   (start) ->
      if left(start) and result = item(info.cursor) and right(info.cursor) then result
@@ -437,7 +382,7 @@ wrap = (info) -> (item, left=spaces, right=spaces) ->
 # matcher **identifierLetter** = normal version<br/>
 # is a letter than can be used in identifer?<br/>
 # javascript style, '$' is a identifierLetter_<br/>
-identifierLetter = (info) -> (start) ->
+exports.identifierLetter = (info) -> (start) ->
   start = info.cursor
   c = info.data[info.cursor]
   if c is '$' or c is '_' or 'a'<=c<'z' or 'A'<=c<='Z' or '0'<=c<='9'
@@ -446,7 +391,7 @@ identifierLetter = (info) -> (start) ->
 # matcher **identifierLetter_**, version<br/>
 # is a letter that can be used in identifer? <br/>
 # javascript style, '$' is a identifierLetter_
-identifierLetter_ = (info) -> () ->
+exports.identifierLetter_ = (info) -> () ->
   c = info.data[info.cursor]
   if c is '$' or c is '_' or 'a'<=c<'z' or 'A'<=c<='Z' or '0'<=c<='9'
     info.cursor++; true
@@ -454,32 +399,32 @@ identifierLetter_ = (info) -> () ->
 # matcher **followIdentifierLetter_**, faster version<br/>
 # lookahead whether the following character is a letter used in identifer. don't change info.cursor. <br/>
 # javascript style, '$' is a identifierLetter_
-followIdentifierLetter_ = (info) -> () ->
+exports.followIdentifierLetter_ = (info) -> () ->
   c = info.data[info.cursor]
   c is '$' or c is '_' or 'a'<=c<'z' or 'A'<=c<='Z' or '0'<=c<='9'
 
 # matcher digit_, normal version<br/>
-digit = (info) -> (start) -> c = info.data[start];  if '0'<=c<='9' then info.cursor = start+1
+exports.digit = (info) -> (start) -> c = info.data[start];  if '0'<=c<='9' then info.cursor = start+1
 # matcher digit_, faster version<br/>
-digit_ = (info) -> () -> c = info.data[info.cursor];  if '0'<=c<='9' then info.cursor++
+exports.digit_ = (info) -> () -> c = info.data[info.cursor];  if '0'<=c<='9' then info.cursor++
 
 # matcher letter, normal version<br/>
-letter = (info) -> (start) -> c = info.data[start]; if 'a'<=c<='z' or 'A'<=c<='Z' then info.cursor = start+1
+exports.letter = (info) -> (start) -> c = info.data[start]; if 'a'<=c<='z' or 'A'<=c<='Z' then info.cursor = start+1
 # matcher letter, faster version<br/>
-letter_ = (info) -> () -> c = info.data[info.cursor]; if 'a'<=c<='z' or 'A'<=c<='Z' then info.cursor++
+exports.letter_ = (info) -> () -> c = info.data[info.cursor]; if 'a'<=c<='z' or 'A'<=c<='Z' then info.cursor++
 
 # matcher lower, normal version
-lower = (info) -> (start) -> c = info.data[start]; if 'a'<=c<='z' then info.cursor = start+1
+exports.lower = (info) -> (start) -> c = info.data[start]; if 'a'<=c<='z' then info.cursor = start+1
 #matcher lower_, faster version
-lower_ = (info) -> () -> c = info.data[info.cursor]; if 'a'<=c<='z' then info.cursor++
+exports.lower_ = (info) -> () -> c = info.data[info.cursor]; if 'a'<=c<='z' then info.cursor++
 
 # matcher upper, normal version
-upper = (info) -> (start) ->  c = info.data[start]; if 'A'<=c<='Z' then info.cursor = start+1
+exports.upper = (info) -> (start) ->  c = info.data[start]; if 'A'<=c<='Z' then info.cursor = start+1
 #matcher upper_, faster version
-upper_ = (info) -> () -> c = info.data[info.cursor]; if 'A'<=c<='Z' then info.cursor++
+exports.upper_ = (info) -> () -> c = info.data[info.cursor]; if 'A'<=c<='Z' then info.cursor++
 
 # matcher identifier, normal version
-identifier = (info) -> (start) ->
+exports.identifier = (info) -> (start) ->
   info.cursor = start
   c = info.data[info.cursor]
   if 'a'<=c<='z' or 'A'<=c<='Z' or 'c'=='$' or 'c'=='_' then info.cursor++
@@ -491,7 +436,7 @@ identifier = (info) -> (start) ->
   true
 
 # matcher identifier_, faster version
-identifier_ = (info) -> () ->
+exports.identifier_ = (info) -> () ->
   c = info.data[info.cursor]
   if 'a'<=c<='z' or 'A'<=c<='Z' or 'c'=='$' or 'c'=='_' then info.cursor++
   else return
