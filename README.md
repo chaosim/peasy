@@ -8,8 +8,11 @@ You just play [one ball like so](https://raw.github.com/chaosim/peasy/master/doc
 To use Peasy, just copy the module to your project, read it, modify it, write the grammar rules,, and remove any unnecessary
 stuffs in Peasy, and parse with the grammar.<br/>
 
-### what's new in 0.2.4
-  * classpeasy: which provides class Parser and TextParser
+### what's new in 0.2.5
+  * classpeasy become modular Peasy, and becomes the default module peasy.js(peasy.coffee for coffeescript)
+  * original peasy.js(coffee) become nonmodularpeasy.js(coffee)
+  * document on modular [Peasy](http://chaosim.github.io/peasy/doc/peasy.html)
+  * document on nonmodular [Peasy](http://chaosim.github.io/peasy/doc/nonmodularpeasy.html)
 
 ### Documentation
 The [annotated peasy.coffee](http://chaosim.github.io/peasy/doc/peasy.html) is best document for Peasy at the moment.<br/>
