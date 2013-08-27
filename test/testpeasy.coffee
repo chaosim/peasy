@@ -1,6 +1,4 @@
-{makeInfo, letters, recursive} = parser = p  = require "../lib/peasy.js"
-
-hasOwnProperty = Object.hasOwnProperty
+{makeInfo, letters, recursive} = require "../lib/peasy.js"
 
 parse1 = (text) ->
   makeGrammar = (info) ->

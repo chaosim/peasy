@@ -34,8 +34,6 @@
 # The notation *@name* below means a parameter. <br/>
 # all occurences of *@info* refer to the parsed object and the cursor, e.g. it's initial value can be {data: text, cursor:0}
 
-hasOwnProperty = Object.hasOwnProperty
-
 # A *matcher* is a function which matches the data being parsed and move cursor directly.<br/>
 isMatcher = (item) ->  typeof(item)=="function"
 
@@ -103,7 +101,7 @@ exports.memorize = memorize = (info) -> (rule) ->
 # `if (x=item1(start) and (x>100) and item2(info.cursor) and not item3(info.cursor) and (y = item(info.cursor)) then doSomething()`
 exports.andp = andp = (info) -> (items...) ->
   items = for item in items
-    if not isMatcher(item) then literal(info, item) else item
+    if not isMatcher(item) then literal(info)(item) else item
   (start) ->
     info.cursor = start
     for item in items
@@ -120,7 +118,7 @@ exports.andp = andp = (info) -> (items...) ->
 # `if ((x=item1(start) and (x>100)) or (item2(info.cursor) and not item3(info.cursor)) or (y = item(info.cursor)) then doSomething()`
 exports.orp = orp = (info) -> (items...) ->
   items = for item in items
-    if not isMatcher(item) then literal(infor, item) else item
+    if not isMatcher(item) then literal(info)(item) else item
   (start) ->
     for item in items
       info.cursor = start
@@ -131,13 +129,13 @@ exports.orp = orp = (info) -> (items...) ->
 # `notp` is not useful except being used in other combinators, just like this = `andp(item1, notp(item2))`.<br/>
 # *It's unnessary, low effecient and ugly to write `notp(item)(start)`, just write `not item(start)`.*
 exports.notp = notp = (info) -> (item) ->
-  if not isMatcher(item) then item = literal(info, item)
+  if not isMatcher(item) then item = literal(info)(item)
   (start) -> not item(start)
 
 # combinator  *may*: a.k.a optional <br/>
 # try to match `item(info.cursor)`, wether `item(info.cursor)` succeed or not, `maybe(item)(start)` succeed.
 exports.may = may = (info) -> (item) ->
-  if not isMatcher(item) then item = literal(info, item)
+  if not isMatcher(item) then item = literal(info)(item)
   (start) ->
     info.cursor = start
     if x = item(info.cursor) then x
@@ -145,7 +143,7 @@ exports.may = may = (info) -> (item) ->
 
 # combinator *any*: zero or more times of `item(info.cursor)`
 exports.any = any = (info) -> (item) ->
-  if not isMatcher(item) then item = literal(info, item)
+  if not isMatcher(item) then item = literal(info)(item)
   (start) ->
     result = []; info.cursor = start
     while ( x = item(info.cursor)) then result.push(x)
@@ -153,7 +151,7 @@ exports.any = any = (info) -> (item) ->
 
 # combinator *some*: one or more times of `item(info.cursor)`
 exports.some = some = (info) -> (item) ->
-  if not isMatcher(item) then item = literal(info, item)
+  if not isMatcher(item) then item = literal(info)(item)
   (start) ->
     result = []; info.cursor = start
     if not (x = item(info.cursor)) then return x
@@ -165,7 +163,7 @@ exports.some = some = (info) -> (item) ->
 
 # combinator *times*: match *@n* times item(info.cursor), n>=1
 exports.times = times = (info) -> (item, n) ->
-  if not isMatcher(item) then item = literal(info, item)
+  if not isMatcher(item) then item = literal(info)(item)
   (start) ->
     info.cursor = start; i = 0
     while i++<n
@@ -175,8 +173,8 @@ exports.times = times = (info) -> (item, n) ->
 
 # combinator *seperatedList*: some times item(info.cursor), separated by info.separator
 exports.seperatedList = seperatedList = (info) -> (item, separator=spaces) ->
-  if not isMatcher(item) then item = literal(info, item)
-  if not isMatcher(separator) then separator = literal(separator)
+  if not isMatcher(item) then item = literal(info)(item)
+  if not isMatcher(separator) then separator = literal(info)(separator)
   (start) ->
     info.cursor = start
     result = []
@@ -189,8 +187,8 @@ exports.seperatedList = seperatedList = (info) -> (item, separator=spaces) ->
 
 # combinator *timesSeperatedList*: given info.n times @item separated by info.separator, n>=1
 exports.timesSeperatedList = timesSeperatedList = (info) -> (item, n, separator=spaces) ->
-  if not isMatcher(item) then item = literal(info, item)
-  if not isMatcher(separator) then separator = literal(separator)
+  if not isMatcher(item) then item = literal(info)(item)
+  if not isMatcher(separator) then separator = literal(info)(separator)
   (start) ->
     info.cursor = start
     result = []
@@ -204,7 +202,7 @@ exports.timesSeperatedList = timesSeperatedList = (info) -> (item, n, separator=
 
 # combinator *follow* <br/>
 exports.follow = follow = (info) -> (item) ->
-  if not isMatcher(item) then item = literal(info, item)
+  if not isMatcher(item) then item = literal(info)(item)
   (start) ->
     info.cursor = start
     if x = item(info.cursor) then info.cursor = start; x
@@ -320,13 +318,13 @@ exports.spaces1_ = spaces1_ = (info) -> () ->
 
 # matcher *wrap*, normal version<br/>
 # match left, then match item, match right at last
-exports.wrap = wrap = (info) -> (item, left=spaces, right=spaces) ->
-  if not isMatcher(item) then item = literal(info, item)
+exports.wrap = wrap = (info) -> (item, left=spaces(info), right=spaces(info)) ->
+  if not isMatcher(item) then item = literal(info)(item)
   (start) ->
      if left(start) and result = item(info.cursor) and right(info.cursor) then result
 
-exports.wrap_ = wrap_ = (info) -> (item, left=spaces, right=spaces) ->
-  if not isMatcher(item) then item = literal(info, item)
+exports.wrap_ = wrap_ = (info) -> (item, left=spaces(info), right=spaces(info)) ->
+  if not isMatcher(item) then item = literal(info)(item)
   () ->
     if left(info.cursor) and result = item(info.cursor) and right(info.cursor) then result
 
