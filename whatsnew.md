@@ -1,5 +1,9 @@
 ## What's new in peasy
 
+### what's new in 0.2.6
+  * better support to modular grammar
+  * simpler method to declare left recursive rule and memorized rule
+
 ### what's new in 0.2.5
   * classpeasy become modular Peasy, and becomes the default module peasy.js(peasy.coffee for coffeescript)
   * original peasy.js(coffee) become nonmodularpeasy.js(coffee)

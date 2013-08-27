@@ -1,73 +1,68 @@
-{setupGrammar, char} = parser = p  = require "../lib/peasy.js"
+{makeInfo, letters, recursive} = parser = p  = require "../lib/peasy.js"
 
 hasOwnProperty = Object.hasOwnProperty
 
 parse1 = (text) ->
   makeGrammar = (info) ->
-    a = char(info, 'a'); b = char(info, 'b'); x = char(info, 'x')
+    {a, b, x} = letters(info)
+    rec = recursive(info)
     rules =
-      A: (start) ->
+      A: rec (start) ->
         (m = rules.A(start)) and x(info.cursor) and m+'x' or m\
         or a(start)
-      __leftRecursives: ['A']
-    setupGrammar(info, rules)
-  grammar = makeGrammar({data:text, cursor:0})
+  grammar = makeGrammar(makeInfo(text))
   grammar.A(0)
 
 parse2 = (text) ->
   makeGrammar = (info) ->
-    a = char(info, 'a'); b = char(info, 'b'); x = char(info, 'x')
+    {a, b, x} = letters(info)
+    rec = recursive(info)
     rules =
-      A: (start) ->
+      A: rec (start) ->
         (m =  rules.B(start)) and x(info.cursor) and m+'x' or m\
         or a(start)
-      B: (start) -> rules.A(start) or b(start)
-      __leftRecursives: ['A', 'B']
-    setupGrammar(info, rules)
-  grammar = makeGrammar({data:text, cursor:0})
+      B: rec (start) -> rules.A(start) or b(start)
+  grammar = makeGrammar(makeInfo(text))
   grammar.A(0)
 
 parse3 = (text) ->
   makeGrammar = (info) ->
-    a = char(info, 'a'); b = char(info, 'b'); x = char(info, 'x')
+    {a, b, x} = letters(info)
+    rec = recursive(info)
     rules =
-      A: (start) ->
+      A: rec (start) ->
         (m =  rules.B(start)) and x(info.cursor) and m+'x' or m\
         or a(start)
-      B: (start) -> rules.C(start)
-      C: (start) -> rules.A(start) or b(start)
-      __leftRecursives: ['A', 'B', 'C']
-    setupGrammar(info, rules)
-  grammar = makeGrammar({data:text, cursor:0})
+      B: rec (start) -> rules.C(start)
+      C: rec (start) -> rules.A(start) or b(start)
+  grammar = makeGrammar(makeInfo(text))
   grammar.A(0)
 
 parse4 = (text) ->
   makeGrammar = (info) ->
-    a = char(info, 'a'); b = char(info, 'b'); x = char(info, 'x'); y = char(info, 'y')
+    {a, b, x, y} = letters(info)
+    rec = recursive(info)
     rules =
-      A: (start) ->
+      A: rec (start) ->
         (m =  rules.B(start)) and x(info.cursor) and m+'x' or m\
         or a(start)
-      B: (start) ->(m = rules.A(start))  and y(info.cursor) and m+'y'or rules.C(start)
-      C: (start) -> rules.A(start) or b(start)
-      __leftRecursives: ['A', 'B', 'C']
-    setupGrammar(info, rules)
-  grammar = makeGrammar({data:text, cursor:0})
+      B: rec (start) ->(m = rules.A(start))  and y(info.cursor) and m+'y'or rules.C(start)
+      C: rec (start) -> rules.A(start) or b(start)
+  grammar = makeGrammar(makeInfo(text))
   grammar.A(0)
 
 parse5 = (text) ->
   makeGrammar = (info) ->
-    a = char(info, 'a'); b = char(info, 'b'); x = char(info, 'x'); y = char(info, 'y'); z = char(info, 'z')
+    {a, b, x, y, z} = letters(info)
+    rec = recursive(info)
     rules =
       Root: (start) -> (m = rules.A(start)) and z(info.cursor) and m+'z'
-      A: (start) ->
+      A: rec (start) ->
         (m =  rules.B(start)) and x(info.cursor) and m+'x' or m\
         or a(start)
-      B: (start) ->(m = rules.A(start))  and y(info.cursor) and m+'y'or rules.C(start)
-      C: (start) -> rules.A(start) or b(start)
-      __leftRecursives: ['A', 'B', 'C']
-    setupGrammar(info, rules)
-  grammar = makeGrammar({data:text, cursor:0})
+      B: rec (start) ->(m = rules.A(start))  and y(info.cursor) and m+'y'or rules.C(start)
+      C: rec (start) -> rules.A(start) or b(start)
+  grammar = makeGrammar(makeInfo(text))
   grammar.Root(0)
 
 xexports = {}
