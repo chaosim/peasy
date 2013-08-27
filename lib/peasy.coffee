@@ -210,7 +210,7 @@ exports.follow = follow = (info) -> (item) ->
 exports.combinators = combinators = (info) ->
   rec: recursive(info), memo: memorize(info),
   andp: andp(info), orp: orp(info), notp: notp(info)
-  may: may(info), any: any(info), some: some(infor), times: times(info)
+  may: may(info), any: any(info), some: some(info), times: times(info)
   seperatedList: seperatedList(info), timesSeperatedList: timesSeperatedList(info)
   follow: follow(info)
 
@@ -272,10 +272,11 @@ exports.char_ = char_ = (info) -> (c) -> () -> if info.data[info.cursor]==c then
 # matcher *spaces*, normal version<br/>
 # zero or more whitespaces, ie. space or tab.<br/>
 exports.spaces = spaces = (info) -> (start) ->
+  data = info.data
   len = 0
   info.cursor = start
   while 1
-    switch info.data[info.cursor++]
+    switch data[info.cursor++]
       when ' ' then len++
       when '\t' then len += tabWidth
       else break
@@ -284,9 +285,10 @@ exports.spaces = spaces = (info) -> (start) ->
 # matcher *spaces_*, faster version<br/>
 # zero or more whitespaces, ie. space or tab.
 exports.spaces_ = spaces_ = (info) -> () ->
+  data = info.data
   len = 0
   while 1
-    switch info.data[info.cursor++]
+    switch data[info.cursor++]
       when ' ' then len++
       when '\t' then len += tabWidth
       else break
@@ -295,10 +297,11 @@ exports.spaces_ = spaces_ = (info) -> () ->
 # matcher *spaces1*, normal version<br/>
 # one or more whitespaces, ie. space or tab.<br/>
 exports.spaces1 = spaces1 = (info) -> (start) ->
+  data = info.data
   len = 0
   info.cursor = start
   while 1
-    switch info.data[info.cursor++]
+    switch data[info.cursor++]
       when ' ' then len++
       when '\t' then len += tabWidth
       else break
@@ -307,10 +310,11 @@ exports.spaces1 = spaces1 = (info) -> (start) ->
 # matcher *spaces1_*, faster version<br/>
 # one or more whitespaces, ie. space or tab.
 exports.spaces1_ = spaces1_ = (info) -> () ->
+  data = info.data
   len = 0
   info.cursor = start
   while 1
-    switch info.data[info.cursor++]
+    switch data[info.cursor++]
       when ' ' then len++
       when '\t' then len += tabWidth
       else break
@@ -374,23 +378,25 @@ exports.upper_ = upper_ = (info) -> () -> c = info.data[info.cursor]; if 'A'<=c<
 
 # matcher identifier, normal version
 exports.identifier = identifier = (info) -> (start) ->
+  data = info.data
   info.cursor = start
-  c = info.data[info.cursor]
+  c = data[info.cursor]
   if 'a'<=c<='z' or 'A'<=c<='Z' or 'c'=='@' or 'c'=='_' then info.cursor++
   else return
   while 1
-    c = info.data[info.cursor]
+    c = data[info.cursor]
     if 'a'<=c<='z' or 'A'<=c<='Z' or '0'<=c<='9' or 'c'=='@' or 'c'=='_' then info.cursor++
     else break
   true
 
 # matcher identifier_, faster version
 exports.identifier_ = identifier_ = (info) -> () ->
-  c = info.data[info.cursor]
+  data = info.data
+  c = data[info.cursor]
   if 'a'<=c<='z' or 'A'<=c<='Z' or 'c'=='@' or 'c'=='_' then info.cursor++
   else return
   while 1
-    c = info.data[info.cursor]
+    c =data[info.cursor]
     if 'a'<=c<='z' or 'A'<=c<='Z' or '0'<=c<='9' or 'c'=='@' or 'c'=='_' then info.cursor++
     else break
   true

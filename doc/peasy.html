@@ -149,9 +149,6 @@ all occurences of <em>@info</em> refer to the parsed object and the cursor, e.g.
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>
-hasOwnProperty = Object.hasOwnProperty</pre></div></div>
-            
         </li>
         
         
@@ -289,7 +286,7 @@ And in that manner, you would have more control on your grammar rule, say like b
             
             <div class="content"><div class='highlight'><pre>exports.andp = <span class="function"><span class="title">andp</span></span> = (info) -&gt; (items...) -&gt;
   items = <span class="keyword">for</span> item <span class="keyword">in</span> items
-    <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> literal(info, item) <span class="keyword">else</span> item
+    <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> literal(info)(item) <span class="keyword">else</span> item
   (start) -&gt;
     info.cursor = start
     <span class="keyword">for</span> item <span class="keyword">in</span> items
@@ -318,7 +315,7 @@ And in that manner, you would have more control on your grammar rule, say like b
             
             <div class="content"><div class='highlight'><pre>exports.orp = <span class="function"><span class="title">orp</span></span> = (info) -&gt; (items...) -&gt;
   items = <span class="keyword">for</span> item <span class="keyword">in</span> items
-    <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> literal(infor, item) <span class="keyword">else</span> item
+    <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> literal(info)(item) <span class="keyword">else</span> item
   (start) -&gt;
     <span class="keyword">for</span> item <span class="keyword">in</span> items
       info.cursor = start
@@ -341,7 +338,7 @@ And in that manner, you would have more control on your grammar rule, say like b
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.notp = <span class="function"><span class="title">notp</span></span> = (info) -&gt; (item) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info, item)
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
   (start) -&gt; <span class="keyword">not</span> item(start)</pre></div></div>
             
         </li>
@@ -359,7 +356,7 @@ try to match <code>item(info.cursor)</code>, wether <code>item(info.cursor)</cod
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.may = <span class="function"><span class="title">may</span></span> = (info) -&gt; (item) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info, item)
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
   (start) -&gt;
     info.cursor = start
     <span class="keyword">if</span> x = item(info.cursor) <span class="keyword">then</span> x
@@ -379,7 +376,7 @@ try to match <code>item(info.cursor)</code>, wether <code>item(info.cursor)</cod
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.any = <span class="function"><span class="title">any</span></span> = (info) -&gt; (item) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info, item)
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
   (start) -&gt;
     result = []; info.cursor = start
     <span class="keyword">while</span> ( x = item(info.cursor)) <span class="keyword">then</span> result.push(x)
@@ -399,7 +396,7 @@ try to match <code>item(info.cursor)</code>, wether <code>item(info.cursor)</cod
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.some = <span class="function"><span class="title">some</span></span> = (info) -&gt; (item) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info, item)
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
   (start) -&gt;
     result = []; info.cursor = start
     <span class="keyword">if</span> <span class="keyword">not</span> (x = item(info.cursor)) <span class="keyword">then</span> <span class="keyword">return</span> x
@@ -423,7 +420,7 @@ try to match <code>item(info.cursor)</code>, wether <code>item(info.cursor)</cod
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.times = <span class="function"><span class="title">times</span></span> = (info) -&gt; (item, n) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info, item)
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
   (start) -&gt;
     info.cursor = start; i = <span class="number">0</span>
     <span class="keyword">while</span> i++&lt;n
@@ -445,8 +442,8 @@ try to match <code>item(info.cursor)</code>, wether <code>item(info.cursor)</cod
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.seperatedList = <span class="function"><span class="title">seperatedList</span></span> = (info) -&gt; (item, separator=spaces) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info, item)
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(separator) <span class="keyword">then</span> separator = literal(separator)
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(separator) <span class="keyword">then</span> separator = literal(info)(separator)
   (start) -&gt;
     info.cursor = start
     result = []
@@ -471,8 +468,8 @@ try to match <code>item(info.cursor)</code>, wether <code>item(info.cursor)</cod
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.timesSeperatedList = <span class="function"><span class="title">timesSeperatedList</span></span> = (info) -&gt; (item, n, separator=spaces) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info, item)
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(separator) <span class="keyword">then</span> separator = literal(separator)
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(separator) <span class="keyword">then</span> separator = literal(info)(separator)
   (start) -&gt;
     info.cursor = start
     result = []
@@ -498,7 +495,7 @@ try to match <code>item(info.cursor)</code>, wether <code>item(info.cursor)</cod
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.follow = <span class="function"><span class="title">follow</span></span> = (info) -&gt; (item) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info, item)
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
   (start) -&gt;
     info.cursor = start
     <span class="keyword">if</span> x = item(info.cursor) <span class="keyword">then</span> info.cursor = start; x
@@ -800,13 +797,13 @@ match left, then match item, match right at last</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.wrap = <span class="function"><span class="title">wrap</span></span> = (info) -&gt; (item, left=spaces, right=spaces) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info, item)
+            <div class="content"><div class='highlight'><pre>exports.wrap = <span class="function"><span class="title">wrap</span></span> = (info) -&gt; (item, left=spaces(info), right=spaces(info)) -&gt;
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
   (start) -&gt;
      <span class="keyword">if</span> left(start) <span class="keyword">and</span> result = item(info.cursor) <span class="keyword">and</span> right(info.cursor) <span class="keyword">then</span> result
 
-exports.wrap_ = <span class="function"><span class="title">wrap_</span></span> = (info) -&gt; (item, left=spaces, right=spaces) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info, item)
+exports.wrap_ = <span class="function"><span class="title">wrap_</span></span> = (info) -&gt; (item, left=spaces(info), right=spaces(info)) -&gt;
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
   () -&gt;
     <span class="keyword">if</span> left(info.cursor) <span class="keyword">and</span> result = item(info.cursor) <span class="keyword">and</span> right(info.cursor) <span class="keyword">then</span> result</pre></div></div>
             
