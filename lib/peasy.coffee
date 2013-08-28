@@ -37,9 +37,17 @@
 # A *matcher* is a function which matches the data being parsed and move cursor directly.<br/>
 isMatcher = (item) ->  typeof(item)=="function"
 
+# provide logic feature for Peasy
+# if you don't need it, just remove it and lines about Trail in exports.orp
+{Trail } = require('./logic')
+
 exports.makeInfo = makeInfo = (data, options={cursor:0, tabWidth:2}) ->
-  {data:data, cursor:options.cursor or 0, tabWidth: options.tabWidth or 2,
-  parsingLeftRecursives: {}, parseCache: {}}
+  data:data,
+  cursor:options.cursor or 0,
+  tabWidth: options.tabWidth or 2,
+  parsingLeftRecursives: {},
+  parseCache: {},
+  trail: new Trail
 
 memoSymbolIndex = 0
 
@@ -118,9 +126,12 @@ exports.orp = orp = (info) -> (items...) ->
     if not isMatcher(item) then literal(info)(item) else item
   ->
     start = info.cursor
-    for item in items
+    length = items.length
+    for i in [0...length]
       info.cursor = start
-      if result = item() then return result
+      info.trail = new Trail
+      if result = items[i]() then return result
+      if i!= length-1 then info.trail.undo()
     result
 
 # combinator *notp*<br/>
