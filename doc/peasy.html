@@ -164,7 +164,9 @@ all occurences of <em>@info</em> refer to the parsed object and the cursor, e.g.
             
             <div class="content"><div class='highlight'><pre><span class="function"><span class="title">isMatcher</span></span> = (item) -&gt;  <span class="keyword">typeof</span>(item)==<span class="string">"function"</span>
 
-exports.makeInfo = <span class="function"><span class="title">makeInfo</span></span> = (data) -&gt; {data:data, cursor:<span class="number">0</span>, parsingLeftRecursives: {}, parseCache: {}}
+exports.makeInfo = <span class="function"><span class="title">makeInfo</span></span> = (data, options={cursor:<span class="number">0</span>, tabWidth:<span class="number">2</span>}) -&gt;
+  {data:data, cursor:options.cursor <span class="keyword">or</span> <span class="number">0</span>, tabWidth: options.tabWidth <span class="keyword">or</span> <span class="number">2</span>,
+  parsingLeftRecursives: {}, parseCache: {}}
 
 memoSymbolIndex = <span class="number">0</span></pre></div></div>
             
@@ -179,7 +181,7 @@ memoSymbolIndex = <span class="number">0</span></pre></div></div>
               </div>
               <p><em>recursive</em>: this is the key function to left recursive.<br/>
 Make <em>@symbol</em> a left recursive symbol, which means to wrap <code>@originalRules[symbol]</code> with recursive.
-when recursiv(info, rules, symbol)(start) is executed, loop computing rule(start) until no changes happened</p>
+when recursiv(info, rules, symbol)() is executed, loop computing rule() until no changes happened</p>
 
             </div>
             
@@ -189,13 +191,15 @@ when recursiv(info, rules, symbol)(start) is executed, loop computing rule(start
   memoSymbolIndex++
   parsingLeftRecursives = info.parsingLeftRecursives
   parseCache = info.parseCache[tag] = {}
-  (start) -&gt;
+  -&gt;
+    start = info.cursor
     callPath = parsingLeftRecursives[start] ?= []
     <span class="keyword">if</span> tag <span class="keyword">not</span> <span class="keyword">in</span> callPath
       callPath.push(tag)
       m = parseCache[start] ?= [<span class="literal">undefined</span>, start]
       <span class="keyword">while</span> <span class="number">1</span>
-        result = rule(start)
+        info.cursor = start
+        result = rule()
         <span class="keyword">if</span> <span class="keyword">not</span> result <span class="keyword">then</span> result = m[<span class="number">0</span>]; info.cursor = m[<span class="number">1</span>]; <span class="keyword">break</span>
         <span class="keyword">if</span> m[<span class="number">1</span>]==info.cursor <span class="keyword">then</span> m[<span class="number">0</span>] = result; <span class="keyword">break</span>
         <span class="keyword">else</span> m[<span class="number">0</span>] = result; m[<span class="number">1</span>] = info.cursor
@@ -225,11 +229,12 @@ when recursiv(info, rules, symbol)(start) is executed, loop computing rule(start
   tag = index+<span class="string">':'</span>
   memoSymbolIndex++
   parseCache = info.parseCache[tag] = {}
-  (start) -&gt;
+  -&gt;
+    start = info.cursor
     m = parseCache[start]
     <span class="keyword">if</span> m <span class="keyword">then</span> info.cursor = m[<span class="number">1</span>]; m[<span class="number">0</span>]
     <span class="keyword">else</span>
-      result = rule(start)
+      result = rule()
       parseCache[start] = [result, info.cursor]
       result</pre></div></div>
             
@@ -259,7 +264,7 @@ when recursiv(info, rules, symbol)(start) is executed, loop computing rule(start
 All matcher should return truth value on succeed, and return falsic value on fail.<br/>
 A <em>combinator</em> is a function which receive zero or more matchers as parameter(maybe plus some other parameters
 which are not matchers), and generate a new matchers.<br/>
-there are other matcher generator besides the standard combinators described as above, like <code>recursive</code>, <code>memo</code>, <code>memorize</code>,
+there are other matcher generator besides the standard combinators described as above, like <code>recursive</code>, <code>memorize</code>,
 which we have met above.</p>
 
             </div>
@@ -274,23 +279,22 @@ which we have met above.</p>
                 <a class="pilcrow" href="#section-15">&#182;</a>
               </div>
               <p>combinator <em>andp</em><br/>
-execute item(info.cursor) in sequence, return the result of the last one. <br/>
+execute item() in sequence, return the result of the last one. <br/>
 when <code>andp</code> is used to combined of the matchers, the effect is the same as by using the Short-circuit evaluation, like below:<br/>
-<code>item1(start) and item2(info.cursor] ... and itemn(info.cursor).</code>  <br/>
-In fact, you maybe would rather like to use <code>item1(start) and item2(info.cursor) ..</code> when you write the grammar rule in the
+<code>item1() and item2() ... and itemn().</code>  <br/>
+In fact, you maybe would rather like to use <code>item1() and item2(info.cursor) ..</code> when you write the grammar rule in the
 manner of Peasy. That would be simpler, faster and more elegant. <br/>
 And in that manner, you would have more control on your grammar rule, say like below: <br/>
-<code>if (x=item1(start) and (x&gt;100) and item2(info.cursor) and not item3(info.cursor) and (y = item(info.cursor)) then doSomething()</code></p>
+<code>if (x=item1() and (x&gt;100) and item2() and not item3() and (y = item()) then doSomething()</code></p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.andp = <span class="function"><span class="title">andp</span></span> = (info) -&gt; (items...) -&gt;
   items = <span class="keyword">for</span> item <span class="keyword">in</span> items
     <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> literal(info)(item) <span class="keyword">else</span> item
-  (start) -&gt;
-    info.cursor = start
+  -&gt;
     <span class="keyword">for</span> item <span class="keyword">in</span> items
-      <span class="keyword">if</span> <span class="keyword">not</span>(result = item(info.cursor)) <span class="keyword">then</span> <span class="keyword">return</span>
+      <span class="keyword">if</span> <span class="keyword">not</span> (result = item()) <span class="keyword">then</span> <span class="keyword">return</span>
     result</pre></div></div>
             
         </li>
@@ -302,24 +306,18 @@ And in that manner, you would have more control on your grammar rule, say like b
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-16">&#182;</a>
               </div>
-              <p>combinator <em>orp</em> <br/>
-execute <code>item(start)</code> one by one, until the first item which is evaluated to truth value and return the value.<br/>
-when orp is used to combined of the matchers, the effect is the same as by using the Short-circuit evaluation, like below:<br/>
-item1(start) or item2(info.cursor] ... or itemn(info.cursor) <br/>
-In fact, you maybe would rather like to use <code>item1(start) or item2(info.cursor) ..</code> when you write the grammar rule in the
-manner of Peasy. That would be simpler, faster and more elegant. <br/>
-And in that manner, you would have more control on your grammar rule, say like below: <br/>
-<code>if ((x=item1(start) and (x&gt;100)) or (item2(info.cursor) and not item3(info.cursor)) or (y = item(info.cursor)) then doSomething()</code></p>
+              <p>combinator <em>orp</em> <br/></p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.orp = <span class="function"><span class="title">orp</span></span> = (info) -&gt; (items...) -&gt;
   items = <span class="keyword">for</span> item <span class="keyword">in</span> items
     <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> literal(info)(item) <span class="keyword">else</span> item
-  (start) -&gt;
+  -&gt;
+    start = info.cursor
     <span class="keyword">for</span> item <span class="keyword">in</span> items
       info.cursor = start
-      <span class="keyword">if</span> result = item(start) <span class="keyword">then</span> <span class="keyword">return</span> result
+      <span class="keyword">if</span> result = item() <span class="keyword">then</span> <span class="keyword">return</span> result
     result</pre></div></div>
             
         </li>
@@ -333,13 +331,13 @@ And in that manner, you would have more control on your grammar rule, say like b
               </div>
               <p>combinator <em>notp</em><br/>
 <code>notp</code> is not useful except being used in other combinators, just like this = <code>andp(item1, notp(item2))</code>.<br/>
-<em>It&#39;s unnessary, low effecient and ugly to write <code>notp(item)(start)</code>, just write <code>not item(start)</code>.</em></p>
+<em>It&#39;s unnessary, low effecient and ugly to write <code>notp(item)()</code>, just write <code>not item()</code>.</em></p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.notp = <span class="function"><span class="title">notp</span></span> = (info) -&gt; (item) -&gt;
   <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
-  (start) -&gt; <span class="keyword">not</span> item(start)</pre></div></div>
+  -&gt; <span class="keyword">not</span> item()</pre></div></div>
             
         </li>
         
@@ -351,15 +349,15 @@ And in that manner, you would have more control on your grammar rule, say like b
                 <a class="pilcrow" href="#section-18">&#182;</a>
               </div>
               <p>combinator  <em>may</em>: a.k.a optional <br/>
-try to match <code>item(info.cursor)</code>, wether <code>item(info.cursor)</code> succeed or not, <code>maybe(item)(start)</code> succeed.</p>
+try to match <code>item()</code>, wether <code>item()</code> succeed or not, <code>maybe(item)()</code> succeed.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.may = <span class="function"><span class="title">may</span></span> = (info) -&gt; (item) -&gt;
   <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
-  (start) -&gt;
-    info.cursor = start
-    <span class="keyword">if</span> x = item(info.cursor) <span class="keyword">then</span> x
+  -&gt;
+    start = info.cursor
+    <span class="keyword">if</span> x = item() <span class="keyword">then</span> x
     <span class="keyword">else</span> info.cursor = start; <span class="literal">true</span></pre></div></div>
             
         </li>
@@ -371,15 +369,15 @@ try to match <code>item(info.cursor)</code>, wether <code>item(info.cursor)</cod
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-19">&#182;</a>
               </div>
-              <p>combinator <em>any</em>: zero or more times of <code>item(info.cursor)</code></p>
+              <p>combinator <em>any</em>: zero or more times of <code>item()</code></p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.any = <span class="function"><span class="title">any</span></span> = (info) -&gt; (item) -&gt;
   <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
-  (start) -&gt;
-    result = []; info.cursor = start
-    <span class="keyword">while</span> ( x = item(info.cursor)) <span class="keyword">then</span> result.push(x)
+  -&gt;
+    result = []
+    <span class="keyword">while</span> (x = item()) <span class="keyword">then</span> result.push(x)
     result</pre></div></div>
             
         </li>
@@ -391,19 +389,16 @@ try to match <code>item(info.cursor)</code>, wether <code>item(info.cursor)</cod
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-20">&#182;</a>
               </div>
-              <p>combinator <em>some</em>: one or more times of <code>item(info.cursor)</code></p>
+              <p>combinator <em>some</em>: one or more times of <code>item()</code></p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.some = <span class="function"><span class="title">some</span></span> = (info) -&gt; (item) -&gt;
   <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
-  (start) -&gt;
-    result = []; info.cursor = start
-    <span class="keyword">if</span> <span class="keyword">not</span> (x = item(info.cursor)) <span class="keyword">then</span> <span class="keyword">return</span> x
-    <span class="keyword">while</span> <span class="number">1</span>
-      result.push(x)
-      x = item(info.cursor)
-      <span class="keyword">if</span> <span class="keyword">not</span> x <span class="keyword">then</span> <span class="keyword">break</span>
+  -&gt;
+    <span class="keyword">if</span> <span class="keyword">not</span> (x = item()) <span class="keyword">then</span> <span class="keyword">return</span>
+    result = [x]
+    <span class="keyword">while</span> (x = item()) <span class="keyword">then</span> result.push(x)
     result</pre></div></div>
             
         </li>
@@ -415,16 +410,16 @@ try to match <code>item(info.cursor)</code>, wether <code>item(info.cursor)</cod
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-21">&#182;</a>
               </div>
-              <p>combinator <em>times</em>: match <em>@n</em> times item(info.cursor), n&gt;=1</p>
+              <p>combinator <em>times</em>: match <em>@n</em> times item(), n&gt;=1</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>exports.times = <span class="function"><span class="title">times</span></span> = (info) -&gt; (item, n) -&gt;
   <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
-  (start) -&gt;
-    info.cursor = start; i = <span class="number">0</span>
+  -&gt;
+    i = <span class="number">0</span>
     <span class="keyword">while</span> i++&lt;n
-      <span class="keyword">if</span> x = item(info.cursor) <span class="keyword">then</span> result.push(x)
+      <span class="keyword">if</span> x = item() <span class="keyword">then</span> result.push(x)
       <span class="keyword">else</span> <span class="keyword">return</span>
     result</pre></div></div>
             
@@ -437,21 +432,17 @@ try to match <code>item(info.cursor)</code>, wether <code>item(info.cursor)</cod
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-22">&#182;</a>
               </div>
-              <p>combinator <em>seperatedList</em>: some times item(info.cursor), separated by info.separator</p>
+              <p>combinator <em>seperatedList</em>: some times item(), separated by info.separator</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.seperatedList = <span class="function"><span class="title">seperatedList</span></span> = (info) -&gt; (item, separator=spaces) -&gt;
+            <div class="content"><div class='highlight'><pre>exports.seperatedList = <span class="function"><span class="title">seperatedList</span></span> = (info) -&gt; (item, separator=spaces(info)) -&gt;
   <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
   <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(separator) <span class="keyword">then</span> separator = literal(info)(separator)
-  (start) -&gt;
-    info.cursor = start
-    result = []
-    x = item(info.cursor)
-    <span class="keyword">if</span> <span class="keyword">not</span> x <span class="keyword">then</span> <span class="keyword">return</span>
-    <span class="keyword">while</span> <span class="number">1</span>
-      result.push(x)
-      <span class="keyword">if</span> <span class="keyword">not</span>(x = item(info.cursor)) <span class="keyword">then</span> <span class="keyword">break</span>
+  -&gt;
+    <span class="keyword">if</span> <span class="keyword">not</span> (x = item()) <span class="keyword">then</span> <span class="keyword">return</span>
+    result = [x]
+    <span class="keyword">while</span> separator() <span class="keyword">and</span> (x=item()) <span class="keyword">then</span> result.push(x)
     result</pre></div></div>
             
         </li>
@@ -467,18 +458,16 @@ try to match <code>item(info.cursor)</code>, wether <code>item(info.cursor)</cod
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.timesSeperatedList = <span class="function"><span class="title">timesSeperatedList</span></span> = (info) -&gt; (item, n, separator=spaces) -&gt;
+            <div class="content"><div class='highlight'><pre>exports.timesSeperatedList = <span class="function"><span class="title">timesSeperatedList</span></span> = (info) -&gt; (item, n, separator=spaces(info)) -&gt;
   <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
   <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(separator) <span class="keyword">then</span> separator = literal(info)(separator)
-  (start) -&gt;
-    info.cursor = start
-    result = []
-    x = item(info.cursor)
-    <span class="keyword">if</span> <span class="keyword">not</span> x <span class="keyword">then</span> <span class="keyword">return</span>
+  -&gt;
+    <span class="keyword">if</span> <span class="keyword">not</span> (x = item()) <span class="keyword">then</span> <span class="keyword">return</span>
+    result = [x]
     i = <span class="number">1</span>
     <span class="keyword">while</span> i++&lt;n
-      result.push(x)
-      <span class="keyword">if</span> <span class="keyword">not</span>(x = item(info.cursor)) <span class="keyword">then</span> <span class="keyword">break</span>
+      <span class="keyword">if</span> separator() <span class="keyword">and</span> (x=item()) <span class="keyword">then</span> result.push(x)
+      <span class="keyword">else</span> <span class="keyword">return</span>
     result</pre></div></div>
             
         </li>
@@ -496,14 +485,15 @@ try to match <code>item(info.cursor)</code>, wether <code>item(info.cursor)</cod
             
             <div class="content"><div class='highlight'><pre>exports.follow = <span class="function"><span class="title">follow</span></span> = (info) -&gt; (item) -&gt;
   <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
-  (start) -&gt;
-    info.cursor = start
-    <span class="keyword">if</span> x = item(info.cursor) <span class="keyword">then</span> info.cursor = start; x
+  -&gt;
+    start = info.cursor
+    <span class="keyword">if</span> x = item() <span class="keyword">then</span>  info.cursor = start; x
+    <span class="keyword">else</span> info.cursor = start; <span class="keyword">return</span>
 
 exports.combinators = <span class="function"><span class="title">combinators</span></span> = (info) -&gt;
   rec: recursive(info), memo: memorize(info),
   andp: andp(info), orp: orp(info), notp: notp(info)
-  may: may(info), any: any(info), some: some(infor), times: times(info)
+  may: may(info), any: any(info), some: some(info), times: times(info)
   seperatedList: seperatedList(info), timesSeperatedList: timesSeperatedList(info)
   follow: follow(info)</pre></div></div>
             
@@ -579,7 +569,7 @@ Some of the matchers below have two version, to demonstrate how to do that.
                 <a class="pilcrow" href="#section-29">&#182;</a>
               </div>
               <h4>other predicates, matchers, and combinators <br/></h4>
-<p>below is some little utilities which may be useful. Some of them is provided with both normal and faster version.<br/>
+<p>below is some little utilities which may be useful.<br/>
 just remove them if you don&#39;t need them, except <em>literal</em>, which is depended by the combinators above.</p>
 
             </div>
@@ -613,14 +603,15 @@ exports.<span class="function"><span class="title">isIdentifierLetter</span></sp
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-31">&#182;</a>
               </div>
-              <p>matcher <em>literal</em>, normal version<br/>
+              <p>matcher <em>literal</em><br/>
 match a text string.<br/>
 `notice = some combinators like andp, orp, notp, any, some, etc. use literal to wrap a object which is not a matcher.</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.literal = <span class="function"><span class="title">literal</span></span> = (info) -&gt; (string) -&gt; (start) -&gt;
+            <div class="content"><div class='highlight'><pre>exports.literal = <span class="function"><span class="title">literal</span></span> = (info) -&gt; (string) -&gt; -&gt;
   len = string.length
+  start = info.cursor
   <span class="keyword">if</span> info.data.slice(start, stop = start+len)==string <span class="keyword">then</span> info.cursor = stop; <span class="literal">true</span></pre></div></div>
             
         </li>
@@ -632,14 +623,11 @@ match a text string.<br/>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-32">&#182;</a>
               </div>
-              <p>matcher <em>literal_</em>, faster version<br/>
-match a text string.</p>
+              <p>matcher <em>char</em>: match one character<br/></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.literal_ = <span class="function"><span class="title">literal_</span></span> = (info) -&gt; (string) -&gt; (start) -&gt;
-  len = string.length
-  <span class="keyword">if</span> info.data.slice(info.cursor,  stop = info.cursor+len)==string <span class="keyword">then</span> info.cursor = stop; <span class="literal">true</span></pre></div></div>
+            <div class="content"><div class='highlight'><pre>exports.char = <span class="function"><span class="title">char</span></span> = (info) -&gt; (c) -&gt; -&gt; <span class="keyword">if</span> info.data[info.cursor]==c <span class="keyword">then</span> info.cursor++; <span class="keyword">return</span> c</pre></div></div>
             
         </li>
         
@@ -650,12 +638,11 @@ match a text string.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-33">&#182;</a>
               </div>
-              <p>matcher <em>char</em>, normal version<br/>
-match one character</p>
+              <p>In spaces, spaces1, a tab(&#39;\t&#39;) is computed as info.tabWidth spaces, <br/>
+which is used in indent style language, such as coffeescript, python, haskell, etc. <br/>
+If you don&#39;t need this feature, you can easily rewrite these utilities to remove the code about tab width yourself.<br/><br/></p>
 
             </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.char = <span class="function"><span class="title">char</span></span> = (info) -&gt; (c) -&gt; (start) -&gt; <span class="keyword">if</span> info.data[start]==c <span class="keyword">then</span> info.cursor = start+<span class="number">1</span>; <span class="keyword">return</span> c</pre></div></div>
             
         </li>
         
@@ -666,12 +653,22 @@ match one character</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-34">&#182;</a>
               </div>
-              <p>matcher <em>char_</em>, normal version <br/>
-match one character</p>
+              <p>matcher <em>spaces</em>: zero or more whitespaces, ie. space or tab.<br/></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.char_ = <span class="function"><span class="title">char_</span></span> = (info) -&gt; (c) -&gt; () -&gt; <span class="keyword">if</span> info.data[info.cursor]==c <span class="keyword">then</span> info.cursor++; <span class="keyword">return</span> c</pre></div></div>
+            <div class="content"><div class='highlight'><pre>exports.spaces = <span class="function"><span class="title">spaces</span></span> = (info) -&gt; -&gt;
+  data = info.data
+  len = <span class="number">0</span>
+  cursor = info.cursor
+  tabWidth = info.tabWidth
+  <span class="keyword">while</span> <span class="number">1</span>
+    <span class="keyword">switch</span> data[cursor++]
+      <span class="keyword">when</span> <span class="string">' '</span> <span class="keyword">then</span> len++
+      <span class="keyword">when</span> <span class="string">'\t'</span> <span class="keyword">then</span> len += tabWidth
+      <span class="keyword">else</span> <span class="keyword">break</span>
+  info.cursor = cursor
+  len+<span class="number">1</span></pre></div></div>
             
         </li>
         
@@ -682,11 +679,23 @@ match one character</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-35">&#182;</a>
               </div>
-              <p>In spaces, spaces<em>, spaces1, spaces1</em>, a tat(&#39;\t&#39;) is seen as tabWidth spaces, <br/>
-which is used in indent style language, such as coffeescript, python, haskell, etc. <br/>
-If you don&#39;t need this feature, you can easily rewrite these utilities to remove the code about tab width yourself.<br/><br/></p>
+              <p>matcher <em>spaces1</em><br/>
+one or more whitespaces, ie. space or tab.<br/></p>
 
             </div>
+            
+            <div class="content"><div class='highlight'><pre>exports.spaces1 = <span class="function"><span class="title">spaces1</span></span> = (info) -&gt; -&gt;
+  data = info.data
+  cursor = info.cursor
+  len = <span class="number">0</span>
+  tabWidth = info.tabWidth
+  <span class="keyword">while</span> <span class="number">1</span>
+    <span class="keyword">switch</span> data[cursor++]
+      <span class="keyword">when</span> <span class="string">' '</span> <span class="keyword">then</span> len++
+      <span class="keyword">when</span> <span class="string">'\t'</span> <span class="keyword">then</span> len += tabWidth
+      <span class="keyword">else</span> <span class="keyword">break</span>
+  info.cursor = cursor
+  len</pre></div></div>
             
         </li>
         
@@ -697,20 +706,15 @@ If you don&#39;t need this feature, you can easily rewrite these utilities to re
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-36">&#182;</a>
               </div>
-              <p>matcher <em>spaces</em>, normal version<br/>
-zero or more whitespaces, ie. space or tab.<br/></p>
+              <p>matcher <em>wrap</em><br/>
+match left, then match item, match right at last</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.spaces = <span class="function"><span class="title">spaces</span></span> = (info) -&gt; (start) -&gt;
-  len = <span class="number">0</span>
-  info.cursor = start
-  <span class="keyword">while</span> <span class="number">1</span>
-    <span class="keyword">switch</span> info.data[info.cursor++]
-      <span class="keyword">when</span> <span class="string">' '</span> <span class="keyword">then</span> len++
-      <span class="keyword">when</span> <span class="string">'\t'</span> <span class="keyword">then</span> len += tabWidth
-      <span class="keyword">else</span> <span class="keyword">break</span>
-  <span class="keyword">return</span> len</pre></div></div>
+            <div class="content"><div class='highlight'><pre>exports.wrap = <span class="function"><span class="title">wrap</span></span> = (info) -&gt; (item, left=spaces(info), right=spaces(info)) -&gt;
+  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
+  -&gt;
+     <span class="keyword">if</span> left() <span class="keyword">and</span> result = item() <span class="keyword">and</span> right() <span class="keyword">then</span> result</pre></div></div>
             
         </li>
         
@@ -721,19 +725,16 @@ zero or more whitespaces, ie. space or tab.<br/></p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-37">&#182;</a>
               </div>
-              <p>matcher <em>spaces_</em>, faster version<br/>
-zero or more whitespaces, ie. space or tab.</p>
+              <p>matcher <em>identifierLetter</em> = normal version<br/>
+is a letter than can be used in identifer?<br/>
+javascript style, &#39;@&#39; is a identifierLetter_<br/></p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.spaces_ = <span class="function"><span class="title">spaces_</span></span> = (info) -&gt; () -&gt;
-  len = <span class="number">0</span>
-  <span class="keyword">while</span> <span class="number">1</span>
-    <span class="keyword">switch</span> info.data[info.cursor++]
-      <span class="keyword">when</span> <span class="string">' '</span> <span class="keyword">then</span> len++
-      <span class="keyword">when</span> <span class="string">'\t'</span> <span class="keyword">then</span> len += tabWidth
-      <span class="keyword">else</span> <span class="keyword">break</span>
-  len</pre></div></div>
+            <div class="content"><div class='highlight'><pre>exports.identifierLetter = <span class="function"><span class="title">identifierLetter</span></span> = (info) -&gt; -&gt;
+  c = info.data[info.cursor]
+  <span class="keyword">if</span> c <span class="keyword">is</span> <span class="string">'@'</span> <span class="keyword">or</span> c <span class="keyword">is</span> <span class="string">'_'</span> <span class="keyword">or</span> <span class="string">'a'</span>&lt;=c&lt;<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span>
+    info.cursor++; <span class="literal">true</span></pre></div></div>
             
         </li>
         
@@ -744,20 +745,20 @@ zero or more whitespaces, ie. space or tab.</p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-38">&#182;</a>
               </div>
-              <p>matcher <em>spaces1</em>, normal version<br/>
-one or more whitespaces, ie. space or tab.<br/></p>
+              <p>matcher <em>followIdentifierLetter_</em>, faster version<br/>
+lookahead whether the following character is a letter used in identifer. don&#39;t change info.cursor. <br/>
+javascript style, &#39;@&#39; is a identifierLetter_</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.spaces1 = <span class="function"><span class="title">spaces1</span></span> = (info) -&gt; (start) -&gt;
-  len = <span class="number">0</span>
-  info.cursor = start
-  <span class="keyword">while</span> <span class="number">1</span>
-    <span class="keyword">switch</span> info.data[info.cursor++]
-      <span class="keyword">when</span> <span class="string">' '</span> <span class="keyword">then</span> len++
-      <span class="keyword">when</span> <span class="string">'\t'</span> <span class="keyword">then</span> len += tabWidth
-      <span class="keyword">else</span> <span class="keyword">break</span>
-  <span class="keyword">if</span> len <span class="keyword">then</span> <span class="keyword">return</span> info.cursor = info.cursor; len</pre></div></div>
+            <div class="content"><div class='highlight'><pre>exports.followIdentifierLetter_ = <span class="function"><span class="title">followIdentifierLetter_</span></span> = (info) -&gt; -&gt;
+  c = info.data[info.cursor]
+  (c <span class="keyword">is</span> <span class="string">'@'</span> <span class="keyword">or</span> c <span class="keyword">is</span> <span class="string">'_'</span> <span class="keyword">or</span> <span class="string">'a'</span>&lt;=c&lt;<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span>) <span class="keyword">and</span> c
+
+exports.digit = <span class="function"><span class="title">digit</span></span> = (info) -&gt; -&gt; c = info.data[info.cursor];  <span class="keyword">if</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">then</span> info.cursor++; c
+exports.letter = <span class="function"><span class="title">letter</span></span> = (info) -&gt; -&gt; c = info.data[info.cursor]; <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">then</span> info.cursor++; c
+exports.lower = <span class="function"><span class="title">lower</span></span> = (info) -&gt; -&gt; c = info.data[info.cursor]; <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">then</span> info.cursor++; c
+exports.upper = <span class="function"><span class="title">upper</span></span> = (info) -&gt; -&gt; c = info.data[info.cursor]; <span class="keyword">if</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">then</span> info.cursor++; c</pre></div></div>
             
         </li>
         
@@ -768,281 +769,28 @@ one or more whitespaces, ie. space or tab.<br/></p>
               <div class="pilwrap ">
                 <a class="pilcrow" href="#section-39">&#182;</a>
               </div>
-              <p>matcher <em>spaces1_</em>, faster version<br/>
-one or more whitespaces, ie. space or tab.</p>
+              <p>matcher identifier</p>
 
             </div>
             
-            <div class="content"><div class='highlight'><pre>exports.spaces1_ = <span class="function"><span class="title">spaces1_</span></span> = (info) -&gt; () -&gt;
-  len = <span class="number">0</span>
-  info.cursor = start
-  <span class="keyword">while</span> <span class="number">1</span>
-    <span class="keyword">switch</span> info.data[info.cursor++]
-      <span class="keyword">when</span> <span class="string">' '</span> <span class="keyword">then</span> len++
-      <span class="keyword">when</span> <span class="string">'\t'</span> <span class="keyword">then</span> len += tabWidth
-      <span class="keyword">else</span> <span class="keyword">break</span>
-  <span class="keyword">if</span> len <span class="keyword">then</span> <span class="keyword">return</span> info.cursor = info.cursor; len</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-40">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-40">&#182;</a>
-              </div>
-              <p>matcher <em>wrap</em>, normal version<br/>
-match left, then match item, match right at last</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.wrap = <span class="function"><span class="title">wrap</span></span> = (info) -&gt; (item, left=spaces(info), right=spaces(info)) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
-  (start) -&gt;
-     <span class="keyword">if</span> left(start) <span class="keyword">and</span> result = item(info.cursor) <span class="keyword">and</span> right(info.cursor) <span class="keyword">then</span> result
-
-exports.wrap_ = <span class="function"><span class="title">wrap_</span></span> = (info) -&gt; (item, left=spaces(info), right=spaces(info)) -&gt;
-  <span class="keyword">if</span> <span class="keyword">not</span> isMatcher(item) <span class="keyword">then</span> item = literal(info)(item)
-  () -&gt;
-    <span class="keyword">if</span> left(info.cursor) <span class="keyword">and</span> result = item(info.cursor) <span class="keyword">and</span> right(info.cursor) <span class="keyword">then</span> result</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-41">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-41">&#182;</a>
-              </div>
-              <p>matcher <em>identifierLetter</em> = normal version<br/>
-is a letter than can be used in identifer?<br/>
-javascript style, &#39;@&#39; is a identifierLetter_<br/></p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.identifierLetter = <span class="function"><span class="title">identifierLetter</span></span> = (info) -&gt; (start) -&gt;
-  start = info.cursor
-  c = info.data[info.cursor]
-  <span class="keyword">if</span> c <span class="keyword">is</span> <span class="string">'@'</span> <span class="keyword">or</span> c <span class="keyword">is</span> <span class="string">'_'</span> <span class="keyword">or</span> <span class="string">'a'</span>&lt;=c&lt;<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span>
-    info.cursor++; <span class="literal">true</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-42">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-42">&#182;</a>
-              </div>
-              <p>matcher <em>identifierLetter_</em>, version<br/>
-is a letter that can be used in identifer? <br/>
-javascript style, &#39;@&#39; is a identifierLetter_</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.identifierLetter_ = <span class="function"><span class="title">identifierLetter_</span></span> = (info) -&gt; () -&gt;
-  c = info.data[info.cursor]
-  <span class="keyword">if</span> c <span class="keyword">is</span> <span class="string">'@'</span> <span class="keyword">or</span> c <span class="keyword">is</span> <span class="string">'_'</span> <span class="keyword">or</span> <span class="string">'a'</span>&lt;=c&lt;<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span>
-    info.cursor++; <span class="literal">true</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-43">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-43">&#182;</a>
-              </div>
-              <p>matcher <em>followIdentifierLetter_</em>, faster version<br/>
-lookahead whether the following character is a letter used in identifer. don&#39;t change info.cursor. <br/>
-javascript style, &#39;@&#39; is a identifierLetter_</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.followIdentifierLetter_ = <span class="function"><span class="title">followIdentifierLetter_</span></span> = (info) -&gt; () -&gt;
-  c = info.data[info.cursor]
-  c <span class="keyword">is</span> <span class="string">'@'</span> <span class="keyword">or</span> c <span class="keyword">is</span> <span class="string">'_'</span> <span class="keyword">or</span> <span class="string">'a'</span>&lt;=c&lt;<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-44">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-44">&#182;</a>
-              </div>
-              <p>matcher digit_, normal version<br/></p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.digit = <span class="function"><span class="title">digit</span></span> = (info) -&gt; (start) -&gt; c = info.data[start];  <span class="keyword">if</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">then</span> info.cursor = start+<span class="number">1</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-45">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-45">&#182;</a>
-              </div>
-              <p>matcher digit_, faster version<br/></p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.digit_ = <span class="function"><span class="title">digit_</span></span> = (info) -&gt; () -&gt; c = info.data[info.cursor];  <span class="keyword">if</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">then</span> info.cursor++</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-46">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-46">&#182;</a>
-              </div>
-              <p>matcher letter, normal version<br/></p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.letter = <span class="function"><span class="title">letter</span></span> = (info) -&gt; (start) -&gt; c = info.data[start]; <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">then</span> info.cursor = start+<span class="number">1</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-47">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-47">&#182;</a>
-              </div>
-              <p>matcher letter, faster version<br/></p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.letter_ = <span class="function"><span class="title">letter_</span></span> = (info) -&gt; () -&gt; c = info.data[info.cursor]; <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">then</span> info.cursor++</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-48">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-48">&#182;</a>
-              </div>
-              <p>matcher lower, normal version</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.lower = <span class="function"><span class="title">lower</span></span> = (info) -&gt; (start) -&gt; c = info.data[start]; <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">then</span> info.cursor = start+<span class="number">1</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-49">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-49">&#182;</a>
-              </div>
-              <p>matcher lower_, faster version</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.lower_ = <span class="function"><span class="title">lower_</span></span> = (info) -&gt; () -&gt; c = info.data[info.cursor]; <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">then</span> info.cursor++</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-50">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-50">&#182;</a>
-              </div>
-              <p>matcher upper, normal version</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.upper = <span class="function"><span class="title">upper</span></span> = (info) -&gt; (start) -&gt;  c = info.data[start]; <span class="keyword">if</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">then</span> info.cursor = start+<span class="number">1</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-51">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-51">&#182;</a>
-              </div>
-              <p>matcher upper_, faster version</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.upper_ = <span class="function"><span class="title">upper_</span></span> = (info) -&gt; () -&gt; c = info.data[info.cursor]; <span class="keyword">if</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">then</span> info.cursor++</pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-52">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-52">&#182;</a>
-              </div>
-              <p>matcher identifier, normal version</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.identifier = <span class="function"><span class="title">identifier</span></span> = (info) -&gt; (start) -&gt;
-  info.cursor = start
-  c = info.data[info.cursor]
-  <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'@'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span> <span class="keyword">then</span> info.cursor++
+            <div class="content"><div class='highlight'><pre>exports.identifier = <span class="function"><span class="title">identifier</span></span> = (info) -&gt; -&gt;
+  data = info.data
+  cursor = info.cursor
+  c = data[cursor]
+  <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'@'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span> <span class="keyword">then</span> cursor++
   <span class="keyword">else</span> <span class="keyword">return</span>
   <span class="keyword">while</span> <span class="number">1</span>
-    c = info.data[info.cursor]
-    <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'@'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span> <span class="keyword">then</span> info.cursor++
+    c = data[cursor]
+    <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'@'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span> <span class="keyword">then</span> cursor++
     <span class="keyword">else</span> <span class="keyword">break</span>
-  <span class="literal">true</span></pre></div></div>
-            
-        </li>
-        
-        
-        <li id="section-53">
-            <div class="annotation">
-              
-              <div class="pilwrap ">
-                <a class="pilcrow" href="#section-53">&#182;</a>
-              </div>
-              <p>matcher identifier_, faster version</p>
-
-            </div>
-            
-            <div class="content"><div class='highlight'><pre>exports.identifier_ = <span class="function"><span class="title">identifier_</span></span> = (info) -&gt; () -&gt;
-  c = info.data[info.cursor]
-  <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'@'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span> <span class="keyword">then</span> info.cursor++
-  <span class="keyword">else</span> <span class="keyword">return</span>
-  <span class="keyword">while</span> <span class="number">1</span>
-    c = info.data[info.cursor]
-    <span class="keyword">if</span> <span class="string">'a'</span>&lt;=c&lt;=<span class="string">'z'</span> <span class="keyword">or</span> <span class="string">'A'</span>&lt;=c&lt;=<span class="string">'Z'</span> <span class="keyword">or</span> <span class="string">'0'</span>&lt;=c&lt;=<span class="string">'9'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'@'</span> <span class="keyword">or</span> <span class="string">'c'</span>==<span class="string">'_'</span> <span class="keyword">then</span> info.cursor++
-    <span class="keyword">else</span> <span class="keyword">break</span>
+  info.cursor = cursor
   <span class="literal">true</span>
 
 exports.matchers = <span class="function"><span class="title">matchers</span></span> = (info) -&gt;
-  literal: literal(info), literal_: literal_(info), char: char(info), char_: char_(info)
-  spaces: spaces(info), spaces_: spaces_(info),spaces1: spaces1(info),spaces1_: spaces1_(info)
-  wrap: wrap(info), wrap_: wrap_(info),
-  identifierLetter: identifierLetter(info), identifierLetter_: identifierLetter_(info)
-  followIdentifierLetter_: followIdentifierLetter_(info)
-  digit: digit(info), digit_: digit_(info), letter: letter(info), letter_: letter_(info),
-  lower: lower(info), lower_: lower_(info), upper: upper(info), upper_: upper_(info)
-  identifier: identifier(info), identifier_: identifier_(info)
+  literal: literal(info), char: char(info), spaces: spaces(info), spaces1: spaces1(info), wrap: wrap(info),
+  identifierLetter: identifierLetter(info), followIdentifierLetter: followIdentifierLetter(info)
+  digit: digit(info), letter: letter(info), lower: lower(info), upper: upper(info),
+  identifier: identifier(info)
 
 exports.digits = <span class="function"><span class="title">digits</span></span> = (info) -&gt;
   ch = char(info)
@@ -1063,11 +811,11 @@ exports.letters = <span class="function"><span class="title">letters</span></spa
         </li>
         
         
-        <li id="section-54">
+        <li id="section-40">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-54">&#182;</a>
+                <a class="pilcrow" href="#section-40">&#182;</a>
               </div>
               <p>The utilites above is just for providing some examples on how to write matchers for Peasy.<br/>
 In fact, It&#39;s realy easy peasy to write the matchers for your grammar rule yourself.<br/>
@@ -1078,11 +826,11 @@ see <a href="http://en.wiktionary.org/wiki/easy_peasy">easy peasy</a> <br/></p>
         </li>
         
         
-        <li id="section-55">
+        <li id="section-41">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-55">&#182;</a>
+                <a class="pilcrow" href="#section-41">&#182;</a>
               </div>
               <p><a id="peasysample"></a>
 <em>parse</em>: this is a sample parse function to demonstrate on how to write your own grammar rules yourself.<br/>
@@ -1096,11 +844,11 @@ notice that there exists indirect left recursion in the rules</p>
         </li>
         
         
-        <li id="section-56">
+        <li id="section-42">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-56">&#182;</a>
+                <a class="pilcrow" href="#section-42">&#182;</a>
               </div>
               <p>generate the matchers by the combinators in advance for better performance.<br/>
 if you don&#39;t mind performance, you can write them in the rule directly.</p>
@@ -1108,28 +856,26 @@ if you don&#39;t mind performance, you can write them in the rule directly.</p>
             </div>
             
             <div class="content"><div class='highlight'><pre>    {a, b, x, y} = letters(info)
-    rec = recursive(info) <span class="comment"># or {rec, memo, andp, orp} = combinators(info)</span></pre></div></div>
+    {rec, orp} = combinators(info)</pre></div></div>
             
         </li>
         
         
-        <li id="section-57">
+        <li id="section-43">
             <div class="annotation">
               
               <div class="pilwrap ">
-                <a class="pilcrow" href="#section-57">&#182;</a>
+                <a class="pilcrow" href="#section-43">&#182;</a>
               </div>
               <p>the grammar rules object.</p>
 
             </div>
             
             <div class="content"><div class='highlight'><pre>    rules =
-      Root: (start) -&gt; (m = rules.A(start)) <span class="keyword">and</span> z(info.cursor) <span class="keyword">and</span> m+<span class="string">'z'</span>
-      A: rec (start) -&gt;
-        (m =  rules.B(start)) <span class="keyword">and</span> x(info.cursor) <span class="keyword">and</span> m+<span class="string">'x'</span> <span class="keyword">or</span> m\
-        <span class="keyword">or</span> a(start)
-      B: rec (start) -&gt;(m = rules.A(start))  <span class="keyword">and</span> y(info.cursor) <span class="keyword">and</span> m+<span class="string">'y'</span><span class="keyword">or</span> rules.C(start)
-      C: rec (start) -&gt; rules.A(start) <span class="keyword">or</span> b(start)
+      Root: -&gt; (m = rules.A()) <span class="keyword">and</span> z() <span class="keyword">and</span> m+<span class="string">'z'</span>
+      A: rec orp((-&gt; (m =  rules.B()) <span class="keyword">and</span> x() <span class="keyword">and</span> m+<span class="string">'x'</span> <span class="keyword">or</span> m), a)
+      B: rec orp((-&gt; (m = rules.A())  <span class="keyword">and</span> y() <span class="keyword">and</span> m+<span class="string">'y'</span>), -&gt; rules.C())
+      C: rec orp((-&gt; rules.A()), b)
   grammar = makeGrammar(makeInfo(text))
   grammar.Root(<span class="number">0</span>)</pre></div></div>
             

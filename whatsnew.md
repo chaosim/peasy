@@ -1,5 +1,9 @@
 ## What's new in peasy
 
+### what's new in 0.2.7
+  * remove the parameter `start` from the matcher functions
+  * `orp` play well in testpeasy
+
 ### what's new in 0.2.6
   * better support to modular grammar
   * simpler method to declare left recursive rule and memorized rule

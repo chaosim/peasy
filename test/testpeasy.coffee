@@ -1,65 +1,56 @@
-{makeInfo, letters, recursive} = require "../lib/peasy.js"
+{makeInfo, letters, combinators} = require "../lib/peasy.js"
 
 parse1 = (text) ->
   makeGrammar = (info) ->
-    {a, b, x} = letters(info)
-    rec = recursive(info)
-    rules =
-      A: rec (start) ->
-        (m = rules.A(start)) and x(info.cursor) and m+'x' or m\
-        or a(start)
+    {a, x} = letters(info)
+    {rec, orp} = combinators(info)
+    rules = A: rec orp(( -> (m = rules.A()) and x() and m+'x' or m), a)
   grammar = makeGrammar(makeInfo(text))
   grammar.A(0)
 
 parse2 = (text) ->
   makeGrammar = (info) ->
     {a, b, x} = letters(info)
-    rec = recursive(info)
-    rules =
-      A: rec (start) ->
-        (m =  rules.B(start)) and x(info.cursor) and m+'x' or m\
-        or a(start)
-      B: rec (start) -> rules.A(start) or b(start)
+    {rec, orp} = combinators(info)
+    rules = {}
+    rules.A = rec orp((-> (m =  rules.B()) and x() and m+'x' or m), a)
+    rules.B = rec orp(rules.A, b)
+    rules
   grammar = makeGrammar(makeInfo(text))
   grammar.A(0)
 
 parse3 = (text) ->
   makeGrammar = (info) ->
     {a, b, x} = letters(info)
-    rec = recursive(info)
-    rules =
-      A: rec (start) ->
-        (m =  rules.B(start)) and x(info.cursor) and m+'x' or m\
-        or a(start)
-      B: rec (start) -> rules.C(start)
-      C: rec (start) -> rules.A(start) or b(start)
+    {rec, orp} = combinators(info)
+    rules = {}
+    rules.A = rec orp((-> (m =  rules.B()) and x() and m+'x' or m), a)
+    rules.B = rec -> rules.C()
+    rules.C = rec orp(rules.A, b)
+    rules
   grammar = makeGrammar(makeInfo(text))
   grammar.A(0)
 
 parse4 = (text) ->
   makeGrammar = (info) ->
     {a, b, x, y} = letters(info)
-    rec = recursive(info)
+    {rec, orp} = combinators(info)
     rules =
-      A: rec (start) ->
-        (m =  rules.B(start)) and x(info.cursor) and m+'x' or m\
-        or a(start)
-      B: rec (start) ->(m = rules.A(start))  and y(info.cursor) and m+'y'or rules.C(start)
-      C: rec (start) -> rules.A(start) or b(start)
+      A: rec -> orp((-> (m =  rules.B()) and x() and m+'x' or m), a)()
+      B: rec -> orp(( -> (m = rules.A())  and y() and m+'y'), rules.C)()
+      C: rec -> orp(rules.A, b)()
   grammar = makeGrammar(makeInfo(text))
   grammar.A(0)
 
 parse5 = (text) ->
   makeGrammar = (info) ->
     {a, b, x, y, z} = letters(info)
-    rec = recursive(info)
+    {rec, orp} = combinators(info)
     rules =
-      Root: (start) -> (m = rules.A(start)) and z(info.cursor) and m+'z'
-      A: rec (start) ->
-        (m =  rules.B(start)) and x(info.cursor) and m+'x' or m\
-        or a(start)
-      B: rec (start) ->(m = rules.A(start))  and y(info.cursor) and m+'y'or rules.C(start)
-      C: rec (start) -> rules.A(start) or b(start)
+      Root: -> (m = rules.A()) and z() and m+'z'
+      A: rec orp(( -> (m =  rules.B()) and x() and m+'x' or m), a)
+      B: rec orp((-> (m = rules.A())  and y() and m+'y'), -> rules.C())
+      C: rec orp((-> rules.A()), b)
   grammar = makeGrammar(makeInfo(text))
   grammar.Root(0)
 
