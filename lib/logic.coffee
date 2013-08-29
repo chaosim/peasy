@@ -251,7 +251,7 @@ exports.char = char = (info) -> (x) -> ->
   else
     if info.data[info.cursor]==x then info.cursor++; return x
 
-exports.digit = (info) -> ->
+exports.digit = (info) -> (x) -> ->
   c = info.data[info.cursor]
   if '0'<=c<='9'
     x = info.trail.deref(x)
@@ -263,7 +263,7 @@ exports.digit = (info) -> ->
       info.cursor++
       c
 
-exports.letter = (info) -> ->
+exports.letter = (info) -> (x) -> ->
   c = info.data[info.cursor]
   if 'a'<=x<='z' or 'A'<=x<='Z'
     x = info.trail.deref(x)
@@ -275,7 +275,7 @@ exports.letter = (info) -> ->
       info.cursor++
       c
 
-exports.lower = (info) -> ->
+exports.lower = (info) -> (x) -> ->
   c = info.data[info.cursor];
   if 'a'<=x<='z'
     x = info.trail.deref(x)
@@ -287,7 +287,7 @@ exports.lower = (info) -> ->
       info.cursor++
       c
 
-exports.upper = (info) -> ->
+exports.upper = (info) -> (x) -> ->
   c = info.data[info.cursor]
   if  'A'<=x<='Z'
     x = info.trail.deref(x)
@@ -299,7 +299,6 @@ exports.upper = (info) -> ->
       info.cursor++
       c
 
-# matcher identifier
 exports.identifier = (info) ->
   id = identifier(info)
   uni = unify(info)

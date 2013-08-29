@@ -8,10 +8,6 @@ You just play [one ball like so](https://raw.github.com/chaosim/peasy/master/doc
 To use Peasy, just require or copy the module to your project, read it, modify it, write the grammar rules,, and
 remove any unnecessary stuffs in Peasy, and parse with the grammar.<br/>
 
-### what's new in 0.2.7
-  * remove the parameter `start` from the matcher functions
-  * `orp` play well in testpeasy
-
 ### Documentation
 The [annotated peasy.coffee](http://chaosim.github.io/peasy/doc/peasy.html) is the best document for Peasy at the moment.<br/>
 If you're a pythoner, maybe you'd like to see the [annotated peasy.py](http://chaosim.github.io/peasy/doc/pypeasy.html).<br/>
@@ -25,18 +21,13 @@ and it's transcompiled from [this coffeescript source:] <br/>
 The original grammar.coffee, [from which lib/coffeescript/parser.js is generated:]<br/>
 (https://github.com/jashkenas/coffee-script/blob/master/src/grammar.coffee)
 
-### Web sites
-the project's repository is on github <https://github.com/chaosim/peasy>.
+### what's new in 0.2.8
+  * add logic features
 
-### Testing
-Peasy uses the nodeunit test framework, see the folder "test"
-
-### Bug reports
-To report or search for bugs, please goto <https://github.com/chaosim/peasy/issues>, or email to simeon.chaos@gmail.com
-
-### Platform notes
-peasy is developed and tested on Windows 7, node.js 0.10.0, coffeescript 1.6.2.
-
-### License
-MIT: see LICENSE
+### information on Peasy
+**Web sites**: the project's repository is on github <https://github.com/chaosim/peasy>.
+**Testing**: Peasy uses the nodeunit test framework, see the folder "test"
+**Bug reports**: To report or search for bugs, please goto <https://github.com/chaosim/peasy/issues>, or email to simeon.chaos@gmail.com
+**Platform notes**: peasy is developed and tested on Windows 7, node.js 0.10.0, coffeescript 1.6.2.
+**License**: MIT, see LICENSE
 

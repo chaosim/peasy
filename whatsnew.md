@@ -1,5 +1,8 @@
 ## What's new in peasy
 
+### what's new in 0.2.8
+  * add logic features
+
 ### what's new in 0.2.7
   * remove the parameter `start` from the matcher functions
   * `orp` play well in testpeasy
