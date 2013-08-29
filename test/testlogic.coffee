@@ -1,11 +1,10 @@
-{vari, cons, uarray, uobject} = logic = require "../lib/logic"
-{makeInfo} = peasy = require "../lib/peasy"
+{vari, cons, uarray, uobject, makeInfo} = logic = require "../lib/logic"
 
 xexports = {}
 
 makeCmd = ->
   info = makeInfo('')
-  {unify: logic.unify(info), orp: peasy.orp(info)}
+  {unify: logic.unify(info), orp: logic.orp(info)}
 
 exports.Test =
 #xexports.Test =

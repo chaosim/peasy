@@ -213,7 +213,7 @@ exports.bind = (info) -> (vari, term) ->
   vari.bind(info.trail.deref(term))
   true
 
-exports.unify = (info) -> (x, y, compare=(x, y) -> x==y) ->
+exports.unify = unify = (info) -> (x, y, compare=(x, y) -> x==y) ->
   info.trail.unify(x, y, compare)
 
 exports.unifyList = unifyList = (info) -> (xs, ys, compare=(x, y) -> x==y) ->
@@ -225,7 +225,100 @@ exports.unifyList = unifyList = (info) -> (xs, ys, compare=(x, y) -> x==y) ->
       if not _unify(xs[i], ys[i], compare) then return false
   true
 
+{isMatcher, identifier} = require "./peasy"
+
+# combinator *orp* <br/>
+exports.orp = orp = (info) -> (items...) ->
+  items = for item in items
+    if not isMatcher(item) then literal(info)(item) else item
+  ->
+    start = info.cursor
+    length = items.length
+    for i in [0...length]
+      info.cursor = start
+      info.trail = new Trail
+      if result = items[i]() then return result
+      if i!= length-1 then info.trail.undo()
+    result
+
+# matcher *char*: match one character<br/>
+exports.char = char = (info) -> (x) -> ->
+  x = info.trail.deref(x)
+  if x instanceof Var
+    c = info.data[info.cursor++]
+    x.bind(c)
+    c
+  else
+    if info.data[info.cursor]==x then info.cursor++; return x
+
+exports.digit = (info) -> ->
+  c = info.data[info.cursor]
+  if '0'<=c<='9'
+    x = info.trail.deref(x)
+    if x instanceof Var
+      info.cursor++
+      x.bind(c)
+      c
+    else if x==c
+      info.cursor++
+      c
+
+exports.letter = (info) -> ->
+  c = info.data[info.cursor]
+  if 'a'<=x<='z' or 'A'<=x<='Z'
+    x = info.trail.deref(x)
+    if x instanceof Var
+      info.cursor++
+      x.bind(c)
+      c
+    else if x==c
+      info.cursor++
+      c
+
+exports.lower = (info) -> ->
+  c = info.data[info.cursor];
+  if 'a'<=x<='z'
+    x = info.trail.deref(x)
+    if x instanceof Var
+      info.cursor++
+      x.bind(c)
+      c
+    else if x==c
+      info.cursor++
+      c
+
+exports.upper = (info) -> ->
+  c = info.data[info.cursor]
+  if  'A'<=x<='Z'
+    x = info.trail.deref(x)
+    if x instanceof Var
+      info.cursor++
+      x.bind(c)
+      c
+    else if x==c
+      info.cursor++
+      c
+
+# matcher identifier
+exports.identifier = (info) ->
+  id = identifier(info)
+  uni = unify(info)
+  (x) -> ->
+    if n = id() and uni(x, n) then return n
+
 exports.combinators = (info) ->
   bind: exports.bind(info)
-  unify: exports.unify(info)
+  unify: unify(info)
   unifyList: exports.unifyList(info)
+  char: exports.char(info)
+  digit: exports.digit(info), letter: exports.letter(info)
+  lower: exports.lower(info), upper: exports.upper(info),
+  identifier: exports.identifier(info)
+
+exports.makeInfo = makeInfo = (data, options={cursor:0, tabWidth:2}) ->
+  data:data,
+  cursor:options.cursor or 0,
+  tabWidth: options.tabWidth or 2,
+  parsingLeftRecursives: {},
+  parseCache: {},
+  trail: new Trail

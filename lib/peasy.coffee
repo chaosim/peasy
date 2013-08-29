@@ -34,20 +34,15 @@
 # The notation *@name* below means a parameter. <br/>
 # all occurences of *@info* refer to the parsed object and the cursor, e.g. it's initial value can be {data: text, cursor:0}
 
-# A *matcher* is a function which matches the data being parsed and move cursor directly.<br/>
-isMatcher = (item) ->  typeof(item)=="function"
-
-# provide logic feature for Peasy
-# if you don't need it, just remove it and lines about Trail in exports.orp
-{Trail } = require('./logic')
-
 exports.makeInfo = makeInfo = (data, options={cursor:0, tabWidth:2}) ->
-  data:data,
-  cursor:options.cursor or 0,
-  tabWidth: options.tabWidth or 2,
-  parsingLeftRecursives: {},
-  parseCache: {},
-  trail: new Trail
+  data:data
+  cursor:options.cursor or 0
+  tabWidth: options.tabWidth or 2
+  parsingLeftRecursives: {}
+  parseCache: {}
+
+# A *matcher* is a function which matches the data being parsed and move cursor directly.<br/>
+exports.isMatcher = isMatcher = (item) ->  typeof(item)=="function"
 
 memoSymbolIndex = 0
 
@@ -129,9 +124,7 @@ exports.orp = orp = (info) -> (items...) ->
     length = items.length
     for i in [0...length]
       info.cursor = start
-      info.trail = new Trail
       if result = items[i]() then return result
-      if i!= length-1 then info.trail.undo()
     result
 
 # combinator *notp*<br/>
@@ -321,7 +314,7 @@ exports.identifier = identifier = (info) -> ->
   data = info.data
   cursor = info.cursor
   c = data[cursor]
-  if 'a'<=c<='z' or 'A'<=c<='Z' or 'c'=='@' or 'c'=='_' then cursor++
+  if 'a'<=c<='z' or 'A'<=c<='Z' or 'c'=='$' or 'c'=='_' then cursor++
   else return
   while 1
     c = data[cursor]
