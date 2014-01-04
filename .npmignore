@@ -3,3 +3,6 @@ doc
 .DS_Store
 .git*
 .idea
+python
+ruby
+-p

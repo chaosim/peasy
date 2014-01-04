@@ -8,24 +8,17 @@
     "coffeescript"
   ],
   "author": "Caoxingming",
-  "version": "0.2.8",
+  "version": "0.2.9",
   "licenses": [
     {
       "type": "MIT",
       "url": "https://raw.github.com/chaosim/peasy/master/LICENSE"
     }
   ],
-  "directories": {
-    "lib": "./lib",
-    "test": "./test"
-  },
   "engines": {
-    "node": "*"
+    "node": ">=0.8.0"
   },
-  "scripts": {
-    "test": "grunt nodeunit"
-  },
-  "main": "lib/index.js",
+  "main": "js/peasy.js",
   "homepage": "https://github.com/chaosim/peasy",
   "bugs": "https://github.com/chaosim/peasy/issues",
   "repository": {
@@ -34,9 +27,14 @@
   },
   "dependencies": {},
   "devDependencies": {
-    "nodeunit": "*",
     "grunt": "~0.4.1",
-    "grunt-contrib-nodeunit": "~0.2.0",
-    "grunt-gh-pages": "~0.7.1"
+    "grunt-contrib-coffee": "~0.7.0",
+    "grunt-contrib-clean": "~0.5.0",
+    "grunt-contrib-watch": "~0.5.2",
+    "grunt-karma": "~0.6.2",
+    "karma-html-reporter": "~0.1.1"
+  },
+  "scripts": {
+    "test": "grunt test"
   }
 }

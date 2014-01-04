@@ -8,26 +8,23 @@ You just play [one ball like so](https://raw.github.com/chaosim/peasy/master/doc
 To use Peasy, just require or copy the module to your project, read it, modify it, write the grammar rules,, and
 remove any unnecessary stuffs in Peasy, and parse with the grammar.<br/>
 
+### what's new in 0.2.8
+  * add logic features
+
 ### Documentation
 The [annotated peasy.coffee](http://chaosim.github.io/peasy/doc/peasy.html) is the best document for Peasy at the moment.<br/>
 If you're a pythoner, maybe you'd like to see the [annotated peasy.py](http://chaosim.github.io/peasy/doc/pypeasy.html).<br/>
 See the tests in /test for samples of left recursive grammars and how to parse them.<br/>
-See [here](http://chaosim.github.io/peasy/doc/peasy.html#peasysample) for a sample grammar in Peasy.<br/>
-For arithemetic expression, [here is a sample:](https://github.com/chaosim/peasy/blob/master/samples/arithmatic.coffee)<br/>
-The sample parser for a real language, here is [my translation from coffeescript's jison grammar:] <br/>
-(https://github.com/chaosim/coffee-script/blob/master/src/parser.coffee) <br/>
-and it's transcompiled from [this coffeescript source:] <br/>
-(https://github.com/chaosim/coffee-script/blob/master/src/parser.coffee)<br/>
-The original grammar.coffee, [from which lib/coffeescript/parser.js is generated:]<br/>
-(https://github.com/jashkenas/coffee-script/blob/master/src/grammar.coffee)
-
-### what's new in 0.2.8
-  * add logic features
+See here for a[ sample grammar in Peasy.](http://chaosim.github.io/peasy/doc/peasy.html#peasysample)<br/>
+For arithemetic expression, here is [a sample.](https://github.com/chaosim/peasy/blob/master/samples/arithmatic.coffee)<br/>
+The sample parser for a real language, here is [my translation from coffeescript's jison grammar.](https://github.com/chaosim/coffee-script/blob/master/src/parser.coffee)<br/>
+and it was transcompiled from [this coffeescript source.](https://github.com/chaosim/coffee-script/blob/master/src/parser.coffee)<br/>
+and here is [the original grammar.coffee](https://github.com/jashkenas/coffee-script/blob/master/src/grammar.coffee) by jashkenas, from which lib/coffeescript/parser.js is generated. <br/>
 
 ### information on Peasy
-**Web sites**: the project's repository is on github <https://github.com/chaosim/peasy>.
-**Testing**: Peasy uses the nodeunit test framework, see the folder "test"
-**Bug reports**: To report or search for bugs, please goto <https://github.com/chaosim/peasy/issues>, or email to simeon.chaos@gmail.com
-**Platform notes**: peasy is developed and tested on Windows 7, node.js 0.10.0, coffeescript 1.6.2.
+**Web sites**: the project's repository is on github <https://github.com/chaosim/peasy>.<br/>
+**Testing**: Peasy uses the nodeunit test framework, see the folder "test" <br/>
+**Bug reports**: To report or search for bugs, please goto <https://github.com/chaosim/peasy/issues>, or email to simeon.chaos@gmail.com <br/>
+**Platform notes**: peasy is developed and tested on Windows 7, node.js 0.10.0, coffeescript 1.6.2.<br/>
 **License**: MIT, see LICENSE
 
