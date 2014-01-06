@@ -7,76 +7,83 @@ do (require=require, exports=exports, module=module) ->
   {isMatcher} = peasy = require "./peasy"
 
   exports.Parser = class Parser extends peasy.Parser
-    constructor: -> super
+    constructor: ->
+      super
+      self = @
 
-    parse: (@data, root=@root, @cur=0) ->
-      @trail = new Trail; @ruleStack = {}; @cache = {}; root()
+      @parse = (data, root=self.root, cur=0) ->
+        self.data = data
+        self.cur = cur
+        self.trail = new Trail
+        self.ruleStack = {}
+        self.cache = {}
+        root()
 
-    bind: (vari, term) ->
-      vari.bind(@trail.deref(term))
-      true
+      @bind = (vari, term) ->
+        vari.bind(self.trail.deref(term))
+        true
 
-    unify: (x, y, compare=((x, y) -> x==y)) ->
-      @trail.unify(x, y, compare)
+      @unify = (x, y, compare=((x, y) -> x==y)) ->
+        self.trail.unify(x, y, compare)
 
-    unifyList: (xs, ys, compare=((x, y) -> x==y)) ->
-      xlen = xs.length
-      if ys.length isnt xlen then return false
-      else
-        _unify =  @trail.unify
-        for i in [0...xlen]
-          if not _unify(xs[i], ys[i], compare) then return false
-      true
+      @unifyList = (xs, ys, compare=((x, y) -> x==y)) ->
+        xlen = xs.length
+        if ys.length isnt xlen then return false
+        else
+          _unify =  self.trail.unify
+          for i in [0...xlen]
+            if not _unify(xs[i], ys[i], compare) then return false
+        true
 
-    # combinator *orp* <br/>
-    orp: (items...) ->
-      items = for item in items then (if not isMatcher(item) then @literal(item) else item)
-      =>
-        start = @cur
-        length = items.length
-        for i in [0...length]
-          @cur = start
-          @trail = new Trail
-          if result = items[i]() then return result
-          if i!= length-1 then @trail.undo()
-        result
+      # combinator *orp* <br/>
+      @orp = (items...) ->
+        items = for item in items then (if not isMatcher(item) then self.literal(item) else item)
+        ->
+          start = self.cur
+          length = items.length
+          for i in [0...length]
+            self.cur = start
+            self.trail = new Trail
+            if result = items[i]() then return result
+            if i!= length-1 then self.trail.undo()
+          result
 
-    # matcher *char*: match one character<br/>
-    unifyChar: (x) -> =>
-      x = @trail.deref(x)
-      if x instanceof Var then c = @data[@cur++]; x.bind(c); c
-      else if @data[@cur]==x then @cur++; x
+      # matcher *char*: match one character<br/>
+      @unifyChar = (x) -> ->
+        x = self.trail.deref(x)
+        if x instanceof Var then c = self.data[self.cur++]; x.bind(c); c
+        else if self.data[self.cur]==x then self.cur++; x
 
-    unifyDigit: (x) -> =>
-      c = @data[@cur]
-      if '0'<=c<='9'
-        x = @trail.deref(x)
-        if x instanceof Var then @cur++; x.bind(c); c
-        else if x==c then @cur++; c
+      @unifyDigit = (x) -> ->
+        c = self.data[self.cur]
+        if '0'<=c<='9'
+          x = self.trail.deref(x)
+          if x instanceof Var then self.cur++; x.bind(c); c
+          else if x==c then self.cur++; c
 
-    unifyLetter: (x) -> ->
-      c = @data[@cur]
-      if 'a'<=x<='z' or 'A'<=x<='Z'
-        x = @trail.deref(x)
-        if x instanceof Va then x.bind(c); @cur++; c
-        else if x==c then @cur++; c
+      @unifyLetter = (x) -> ->
+        c = self.data[self.cur]
+        if 'a'<=x<='z' or 'A'<=x<='Z'
+          x = self.trail.deref(x)
+          if x instanceof Va then x.bind(c); self.cur++; c
+          else if x==c then self.cur++; c
 
-    unifyLower: (x) -> =>
-      c = @data[@cur];
-      if 'a'<=x<='z'
-        x = @trail.deref(x)
-        if x instanceof Var then x.bind(c); @cur++; c
-        else if x==c then @cur++; c
+      @unifyLower = (x) -> ->
+        c = self.data[self.cur];
+        if 'a'<=x<='z'
+          x = self.trail.deref(x)
+          if x instanceof Var then x.bind(c); self.cur++; c
+          else if x==c then self.cur++; c
 
-    unifyUpper: (x) -> =>
-      c = @data[@cur]
-      if  'A'<=x<='Z'
-        x = @trail.deref(x)
-        if x instanceof Var then x.bind(c); @cur++; c
-        else if x==c then @cur++; c
+      @unifyUpper = (x) -> ->
+        c = self.data[self.cur]
+        if  'A'<=x<='Z'
+          x = self.trail.deref(x)
+          if x instanceof Var then x.bind(c); self.cur++; c
+          else if x==c then self.cur++; c
 
-    unifyIdentifier: (x) -> =>
-        if n = @identifier() and @unify(x, n) then n
+      @unifyIdentifier = (x) -> ->
+          if n = self.identifier() and self.unify(x, n) then n
 
   exports.Error = class Error
     constructor: (@exp, @message='', @stack = @) ->  # @stack: to make webstorm nodeunit happy.

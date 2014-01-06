@@ -16,187 +16,175 @@ if (typeof window === 'object') {
     __extends(Parser, _super);
 
     function Parser() {
+      var self;
       Parser.__super__.constructor.apply(this, arguments);
+      self = this;
+      this.parse = function(data, root, cur) {
+        if (root == null) {
+          root = self.root;
+        }
+        if (cur == null) {
+          cur = 0;
+        }
+        self.data = data;
+        self.cur = cur;
+        self.trail = new Trail;
+        self.ruleStack = {};
+        self.cache = {};
+        return root();
+      };
+      this.bind = function(vari, term) {
+        vari.bind(self.trail.deref(term));
+        return true;
+      };
+      this.unify = function(x, y, compare) {
+        if (compare == null) {
+          compare = (function(x, y) {
+            return x === y;
+          });
+        }
+        return self.trail.unify(x, y, compare);
+      };
+      this.unifyList = function(xs, ys, compare) {
+        var i, xlen, _i, _unify;
+        if (compare == null) {
+          compare = (function(x, y) {
+            return x === y;
+          });
+        }
+        xlen = xs.length;
+        if (ys.length !== xlen) {
+          return false;
+        } else {
+          _unify = self.trail.unify;
+          for (i = _i = 0; 0 <= xlen ? _i < xlen : _i > xlen; i = 0 <= xlen ? ++_i : --_i) {
+            if (!_unify(xs[i], ys[i], compare)) {
+              return false;
+            }
+          }
+        }
+        return true;
+      };
+      this.orp = function() {
+        var item, items;
+        items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        items = (function() {
+          var _i, _len, _results;
+          _results = [];
+          for (_i = 0, _len = items.length; _i < _len; _i++) {
+            item = items[_i];
+            _results.push(!isMatcher(item) ? self.literal(item) : item);
+          }
+          return _results;
+        })();
+        return function() {
+          var i, length, result, start, _i;
+          start = self.cur;
+          length = items.length;
+          for (i = _i = 0; 0 <= length ? _i < length : _i > length; i = 0 <= length ? ++_i : --_i) {
+            self.cur = start;
+            self.trail = new Trail;
+            if (result = items[i]()) {
+              return result;
+            }
+            if (i !== length - 1) {
+              self.trail.undo();
+            }
+          }
+          return result;
+        };
+      };
+      this.unifyChar = function(x) {
+        return function() {
+          var c;
+          x = self.trail.deref(x);
+          if (x instanceof Var) {
+            c = self.data[self.cur++];
+            x.bind(c);
+            return c;
+          } else if (self.data[self.cur] === x) {
+            self.cur++;
+            return x;
+          }
+        };
+      };
+      this.unifyDigit = function(x) {
+        return function() {
+          var c;
+          c = self.data[self.cur];
+          if (('0' <= c && c <= '9')) {
+            x = self.trail.deref(x);
+            if (x instanceof Var) {
+              self.cur++;
+              x.bind(c);
+              return c;
+            } else if (x === c) {
+              self.cur++;
+              return c;
+            }
+          }
+        };
+      };
+      this.unifyLetter = function(x) {
+        return function() {
+          var c;
+          c = self.data[self.cur];
+          if (('a' <= x && x <= 'z') || ('A' <= x && x <= 'Z')) {
+            x = self.trail.deref(x);
+            if (x instanceof Va) {
+              x.bind(c);
+              self.cur++;
+              return c;
+            } else if (x === c) {
+              self.cur++;
+              return c;
+            }
+          }
+        };
+      };
+      this.unifyLower = function(x) {
+        return function() {
+          var c;
+          c = self.data[self.cur];
+          if (('a' <= x && x <= 'z')) {
+            x = self.trail.deref(x);
+            if (x instanceof Var) {
+              x.bind(c);
+              self.cur++;
+              return c;
+            } else if (x === c) {
+              self.cur++;
+              return c;
+            }
+          }
+        };
+      };
+      this.unifyUpper = function(x) {
+        return function() {
+          var c;
+          c = self.data[self.cur];
+          if (('A' <= x && x <= 'Z')) {
+            x = self.trail.deref(x);
+            if (x instanceof Var) {
+              x.bind(c);
+              self.cur++;
+              return c;
+            } else if (x === c) {
+              self.cur++;
+              return c;
+            }
+          }
+        };
+      };
+      this.unifyIdentifier = function(x) {
+        return function() {
+          var n;
+          if (n = self.identifier() && self.unify(x, n)) {
+            return n;
+          }
+        };
+      };
     }
-
-    Parser.prototype.parse = function(data, root, cur) {
-      this.data = data;
-      if (root == null) {
-        root = this.root;
-      }
-      this.cur = cur != null ? cur : 0;
-      this.trail = new Trail;
-      this.ruleStack = {};
-      this.cache = {};
-      return root();
-    };
-
-    Parser.prototype.bind = function(vari, term) {
-      vari.bind(this.trail.deref(term));
-      return true;
-    };
-
-    Parser.prototype.unify = function(x, y, compare) {
-      if (compare == null) {
-        compare = (function(x, y) {
-          return x === y;
-        });
-      }
-      return this.trail.unify(x, y, compare);
-    };
-
-    Parser.prototype.unifyList = function(xs, ys, compare) {
-      var i, xlen, _i, _unify;
-      if (compare == null) {
-        compare = (function(x, y) {
-          return x === y;
-        });
-      }
-      xlen = xs.length;
-      if (ys.length !== xlen) {
-        return false;
-      } else {
-        _unify = this.trail.unify;
-        for (i = _i = 0; 0 <= xlen ? _i < xlen : _i > xlen; i = 0 <= xlen ? ++_i : --_i) {
-          if (!_unify(xs[i], ys[i], compare)) {
-            return false;
-          }
-        }
-      }
-      return true;
-    };
-
-    Parser.prototype.orp = function() {
-      var item, items,
-        _this = this;
-      items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-      items = (function() {
-        var _i, _len, _results;
-        _results = [];
-        for (_i = 0, _len = items.length; _i < _len; _i++) {
-          item = items[_i];
-          _results.push(!isMatcher(item) ? this.literal(item) : item);
-        }
-        return _results;
-      }).call(this);
-      return function() {
-        var i, length, result, start, _i;
-        start = _this.cur;
-        length = items.length;
-        for (i = _i = 0; 0 <= length ? _i < length : _i > length; i = 0 <= length ? ++_i : --_i) {
-          _this.cur = start;
-          _this.trail = new Trail;
-          if (result = items[i]()) {
-            return result;
-          }
-          if (i !== length - 1) {
-            _this.trail.undo();
-          }
-        }
-        return result;
-      };
-    };
-
-    Parser.prototype.unifyChar = function(x) {
-      var _this = this;
-      return function() {
-        var c;
-        x = _this.trail.deref(x);
-        if (x instanceof Var) {
-          c = _this.data[_this.cur++];
-          x.bind(c);
-          return c;
-        } else if (_this.data[_this.cur] === x) {
-          _this.cur++;
-          return x;
-        }
-      };
-    };
-
-    Parser.prototype.unifyDigit = function(x) {
-      var _this = this;
-      return function() {
-        var c;
-        c = _this.data[_this.cur];
-        if (('0' <= c && c <= '9')) {
-          x = _this.trail.deref(x);
-          if (x instanceof Var) {
-            _this.cur++;
-            x.bind(c);
-            return c;
-          } else if (x === c) {
-            _this.cur++;
-            return c;
-          }
-        }
-      };
-    };
-
-    Parser.prototype.unifyLetter = function(x) {
-      return function() {
-        var c;
-        c = this.data[this.cur];
-        if (('a' <= x && x <= 'z') || ('A' <= x && x <= 'Z')) {
-          x = this.trail.deref(x);
-          if (x instanceof Va) {
-            x.bind(c);
-            this.cur++;
-            return c;
-          } else if (x === c) {
-            this.cur++;
-            return c;
-          }
-        }
-      };
-    };
-
-    Parser.prototype.unifyLower = function(x) {
-      var _this = this;
-      return function() {
-        var c;
-        c = _this.data[_this.cur];
-        if (('a' <= x && x <= 'z')) {
-          x = _this.trail.deref(x);
-          if (x instanceof Var) {
-            x.bind(c);
-            _this.cur++;
-            return c;
-          } else if (x === c) {
-            _this.cur++;
-            return c;
-          }
-        }
-      };
-    };
-
-    Parser.prototype.unifyUpper = function(x) {
-      var _this = this;
-      return function() {
-        var c;
-        c = _this.data[_this.cur];
-        if (('A' <= x && x <= 'Z')) {
-          x = _this.trail.deref(x);
-          if (x instanceof Var) {
-            x.bind(c);
-            _this.cur++;
-            return c;
-          } else if (x === c) {
-            _this.cur++;
-            return c;
-          }
-        }
-      };
-    };
-
-    Parser.prototype.unifyIdentifier = function(x) {
-      var _this = this;
-      return function() {
-        var n;
-        if (n = _this.identifier() && _this.unify(x, n)) {
-          return n;
-        }
-      };
-    };
 
     return Parser;
 

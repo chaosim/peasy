@@ -9,7 +9,7 @@ do (require=require, exports=exports, module=module) ->
     for x in string then dict[x] = true
     dict
 
-  exports.inCharset = (c, set) -> set.hasOwnProperty(c)
+  exports.inCharset = exports.in_ = (c, set) -> set.hasOwnProperty(c)
 
   exports.isdigit = (c) -> '0'<=c<='9'
   exports.isletter = (c) -> 'a'<=c<='z' or 'A'<=c<='Z'
@@ -24,233 +24,234 @@ do (require=require, exports=exports, module=module) ->
   exports.letterDigits = letterDigits = letterDigits
 
   exports.Parser = class Parser
-    constructor:  -> @ruleIndex = 0
 
-    parse: (@data, root=@root, @cur=0) -> @ruleStack = {}; @cache = {}; root()
+    constructor:  ->
+      self = @
+      @ruleIndex = 0
 
-    # make rule left recursive
-    rec: (rule) ->
-      tag = @ruleIndex++
-      =>
-        ruleStack = @ruleStack
-        cache = @cache[tag] ?= {}
-        start = @cur
-        callStack = ruleStack[start] ?= []
-        if tag not in callStack
-          callStack.push(tag)
-          m = cache[start] ?= [undefined, start]
-          while 1
-            @cur = start
-            result = rule()
-            if not result then result = m[0]; @cur = m[1]; break
-            if m[1]==@cur then m[0] = result; break
-            m[0] = result; m[1] = @cur
-          callStack.pop()
-          result
-        else
+      @parse = (data, root=self.root, cur=0) ->
+        self.data = data
+        self.cur = cur
+        self.ruleStack = {};
+        self.cache = {};
+        root()
+
+      # make rule left recursive
+      @rec = (rule) ->
+        tag = self.ruleIndex++
+        ->
+          ruleStack = self.ruleStack
+          cache = self.cache[tag] ?= {}
+          start = self.cur
+          callStack = ruleStack[start] ?= []
+          if tag not in callStack
+            callStack.push(tag)
+            m = cache[start] ?= [undefined, start]
+            while 1
+              self.cur = start
+              result = rule()
+              if not result then result = m[0]; self.cur = m[1]; break
+              if m[1]==self.cur then m[0] = result; break
+              m[0] = result; m[1] = self.cur
+            callStack.pop()
+            result
+          else
+            m = cache[start]
+            self.cur = m[1]
+            m[0]
+
+      @memo = (rule) ->
+        tag = self.ruleIndex++
+        =>
+          cache = self.cache[tag] ?= {}
+          start = self.cur
           m = cache[start]
-          @cur = m[1]
-          m[0]
+          if m then self.cur = m[1]; m[0]
+          else
+            result = rule()
+            self.cache[tag][start] = [result, self.cur]
+            result
 
-    memo: (rule) ->
-      tag = @ruleIndex++
-      =>
-        cache = @cache[tag] ?= {}
-        start = @cur
-        m = cache[start]
-        if m then @cur = m[1]; m[0]
-        else
-          result = rule()
-          @cache[tag][start] = [result, @cur]
+      # #### matchers and combinators<br/>
+      @andp = (items...) ->
+        items = for item in items
+          if not isMatcher(item) then self.literal(item) else item
+        ->
+          for item in items
+            if not (result = item()) then return
           result
 
-    # #### matchers and combinators<br/>
-    andp: (items...) ->
-      items = for item in items
-        if not isMatcher(item) then @literal(item) else item
-      ->
-        for item in items
-          if not (result = item()) then return
-        result
+      # combinator *orp* <br/>
+      @orp = (items...) ->
+        items = for item in items
+          if not isMatcher(item) then self.literal(item) else item
+        =>
+          start = self.cur
+          length = items.length
+          for item in items
+            self.cur = start
+            if result = item() then return result
 
-    # combinator *orp* <br/>
-    orp: (items...) ->
-      items = for item in items
-        if not isMatcher(item) then @literal(item) else item
-      =>
-        start = @cur
-        length = items.length
-        for item in items
-          @cur = start
-          if result = item() then return result
+      @notp = (item) ->
+        if not isMatcher(item) then item = self.literal(item)
+        -> not item()
 
-    notp: (item) ->
-      if not isMatcher(item) then item = @literal(item)
-      -> not item()
+      @may = (item) ->
+        if not isMatcher(item) then item = self.literal(item)
+        =>
+          start = self.cur
+          if x = item() then x
+          else self.cur = start; true
 
-    may: (item) ->
-      if not isMatcher(item) then item = @literal(item)
-      =>
-        start = @cur
-        if x = item() then x
-        else @cur = start; true
+      # combinator *any*: zero or more times of `item()`
+      @any = (item) ->
+        if not isMatcher(item) then item = self.literal(item)
+        =>
+          result = []
+          while (x = item()) then result.push(x)
+          result
 
-    # combinator *any*: zero or more times of `item()`
-    any: (item) ->
-      if not isMatcher(item) then item = @literal(item)
-      =>
-        result = []
-        while (x = item()) then result.push(x)
-        result
+      # combinator *some*: one or more times of `item()`
+      some = (item) ->
+        if not isMatcher(item) then item = self.literal(item)
+        ->
+          if not (x = item()) then return
+          result = [x]
+          while (x = item()) then result.push(x)
+          result
 
-    # combinator *some*: one or more times of `item()`
-    some: (item) ->
-      if not isMatcher(item) then item = @literal(item)
-      ->
-        if not (x = item()) then return
-        result = [x]
-        while (x = item()) then result.push(x)
-        result
+      # combinator *times*: match *self.n* times item(), n>=1
+      @times = (item, n) ->
+        if not isMatcher(item) then item = self.literal(item)
+        ->
+          i = 0
+          while i++<n
+            if x = item() then result.push(x)
+            else return
+          result
 
-    # combinator *times*: match *@n* times item(), n>=1
-    times: (item, n) ->
-      if not isMatcher(item) then item = @literal(item)
-      ->
-        i = 0
-        while i++<n
-          if x = item() then result.push(x)
-          else return
-        result
+      # combinator *list*: some times item(), separated by self.separator
+      @list = (item, separator=self.spaces) ->
+        if not isMatcher(item) then item = self.literal(item)
+        if not isMatcher(separator) then separator = self.literal(separator)
+        ->
+          if not (x = item()) then return
+          result = [x]
+          while separator() and (x=item()) then result.push(x)
+          result
 
-    # combinator *list*: some times item(), separated by @separator
-    list: (item, separator=@spaces) ->
-      if not isMatcher(item) then item = @literal(item)
-      if not isMatcher(separator) then separator = @literal(separator)
-      ->
-        if not (x = item()) then return
-        result = [x]
-        while separator() and (x=item()) then result.push(x)
-        result
+      # combinator *listn*: given self.n times self.item separated by self.separator, n>=1
+      @listn = (item, n, separator=self.spaces) ->
+        if not isMatcher(item) then item = self.literal(item)
+        if not isMatcher(separator) then separator = self.literal(separator)
+        ->
+          if not (x = item()) then return
+          result = [x]
+          i = 1
+          while i++<n
+            if separator() and (x=item()) then result.push(x)
+            else return
+          result
 
-    # combinator *listn*: given @n times @item separated by @separator, n>=1
-    listn: (item, n, separator=@spaces) ->
-      if not isMatcher(item) then item = @literal(item)
-      if not isMatcher(separator) then separator = @literal(separator)
-      ->
-        if not (x = item()) then return
-        result = [x]
-        i = 1
-        while i++<n
-          if separator() and (x=item()) then result.push(x)
-          else return
-        result
+      # combinator *follow* <br/>
+      @follow = (item) ->
+        if not isMatcher(item) then item = self.literal(item)
+        =>
+          start = self.cur
+          x = item(); self.cur = start; x
 
-    # combinator *follow* <br/>
-    follow: (item) ->
-      if not isMatcher(item) then item = @literal(item)
-      =>
-        start = @cur
-        x = item(); @cur = start; x
+      # matcher *literal*<br/>
+      # match a text string.<br/>
+      # `notice = some combinators like andp, orp, notp, any, some, etc. use literal to wrap a object which is not a matcher.
+      @literal = (string) -> ->
+        len = string.length
+        start = self.cur
+        if self.data.slice(start, stop = start+len)==string then self.cur = stop; true
 
-    # matcher *literal*<br/>
-    # match a text string.<br/>
-    # `notice = some combinators like andp, orp, notp, any, some, etc. use literal to wrap a object which is not a matcher.
-    literal: (string) -> =>
-      len = string.length
-      start = @cur
-      if @data.slice(start, stop = start+len)==string then @cur = stop; true
+      # matcher *char*: match one character<br/>
+      @char = (c) -> -> if self.data[self.cur]==c then self.cur++; c
 
-    # matcher *char*: match one character<br/>
-    char: (c) ->  => if @data[@cur]==c then @cur++; c
+      # matcher *spaces*: zero or more whitespaces, ie. space or tab.<br/>
+      @spaces = ->
+        data = self.data
+        len = 0
+        cur = self.cur
+        while 1
+          if ((c=data[cur++]) and (c==' ' or c=='\t')) then lent++ else break
+        self.cur += len
+        len+1
 
-    # matcher *spaces*: zero or more whitespaces, ie. space or tab.<br/>
-    spaces: ->
-      data = @data
-      len = 0
-      cur = @cur
-      while 1
-        switch data[cur++]
-          when ' ' then len++
-          when '\t' then len++
-          else break
-      @cur += len
-      len+1
+      # matcher *spaces1*<br/>
+      # one or more whitespaces, ie. space or tab.<br/>
+      @spaces1 = ->
+        data = self.data
+        cur = self.cur
+        len = 0
+        while 1
+          if ((c=data[cur++]) and (c==' ' or c=='\t')) then lent++ else break
+        self.cur += len
+        len
 
-    # matcher *spaces1*<br/>
-    # one or more whitespaces, ie. space or tab.<br/>
-    spaces1: ->
-      data = @data
-      cur = @cur
-      len = 0
-      while 1
-        switch data[cur++]
-          when ' ' then len++
-          when '\t' then len++
-          else break
-      @cur += len
-      len
+      @eoi = -> self.cur==self.data.length
 
-    eoi: => @cur==@data.length
+      # matcher *wrap*<br/>
+      # match left, then match item, match right at last
+      @wrap = (item, left=self.spaces, right=self.spaces) ->
+        if not isMatcher(item) then item = self.literal(item)
+        -> if left() and result = item() and right() then result
 
-    # matcher *wrap*<br/>
-    # match left, then match item, match right at last
-    wrap: (item, left=@spaces, right=@spaces) ->
-      if not isMatcher(item) then item = @literal(item)
-      ->
-         if left() and result = item() and right() then result
+      # matcher *identifierLetter* = normal version<br/>
+      @identifierLetter = ->
+        c = self.data[self.cur]
+        if c is '$' or c is '_' or 'a'<=c<'z' or 'A'<=c<='Z' or '0'<=c<='9'
+          self.cur++; true
 
-    # matcher *identifierLetter* = normal version<br/>
-    identifierLetter: ->
-      c = @data[@cur]
-      if c is '$' or c is '_' or 'a'<=c<'z' or 'A'<=c<='Z' or '0'<=c<='9'
-        @cur++; true
+      @followIdentifierLetter_ = ->
+        c = self.data[self.cur]
+        (c is '$' or c is '_' or 'a'<=c<'z' or 'A'<=c<='Z' or '0'<=c<='9') and c
 
-    followIdentifierLetter_: ->
-      c = @data[@cur]
-      (c is '$' or c is '_' or 'a'<=c<'z' or 'A'<=c<='Z' or '0'<=c<='9') and c
+      @digit = -> c = self.data[self.cur];  if '0'<=c<='9' then self.cur++; c
+      @letter = -> c = self.data[self.cur]; if 'a'<=c<='z' or 'A'<=c<='Z' then self.cur++; c
+      @lower = -> c = self.data[self.cur]; if 'a'<=c<='z' then self.cur++; c
+      @upper = -> c = self.data[self.cur]; if 'A'<=c<='Z' then self.cur++; c
 
-    digit: -> c = @data[@cur];  if '0'<=c<='9' then @cur++; c
-    letter: -> c = @data[@cur]; if 'a'<=c<='z' or 'A'<=c<='Z' then @cur++; c
-    lower: -> c = @data[@cur]; if 'a'<=c<='z' then @cur++; c
-    upper: -> c = @data[@cur]; if 'A'<=c<='Z' then @cur++; c
-
-    identifier: ->
-      data = @data
-      start = cur = @cur
-      c = data[cur]
-      if 'a'<=c<='z' or 'A'<=c<='Z' or c=='$' or c=='_' then cur++
-      else return
-      while 1
+      @identifier = ->
+        data = self.data
+        start = cur = self.cur
         c = data[cur]
-        if 'a'<=c<='z' or 'A'<=c<='Z' or '0'<=c<='9' or c=='$' or c=='_' then cur++
-        else break
-      @cur = cur
-      data[start...cur]
+        if 'a'<=c<='z' or 'A'<=c<='Z' or c=='$' or c=='_' then cur++
+        else return
+        while 1
+          c = data[cur]
+          if 'a'<=c<='z' or 'A'<=c<='Z' or '0'<=c<='9' or c=='$' or c=='_' then cur++
+          else break
+        self.cur = cur
+        data[start...cur]
 
-    number: ->
-      data = @data
-      cur = @cur
-      c = data[cur]
-      if  '0'<=c<='9' then cur++
-      else return
-      while 1
+      @number = ->
+        data = self.data
+        cur = self.cur
         c = data[cur]
         if  '0'<=c<='9' then cur++
-        else break
-      @cur = cur
-      data[start...cur]
+        else return
+        while 1
+          c = data[cur]
+          if  '0'<=c<='9' then cur++
+          else break
+        self.cur = cur
+        data[start...cur]
 
-    string: ->
-      text = @data
-      start = cur = @cur
-      c = text[cur]
-      if c=='"' or c=="'" then quote = c
-      else return
-      cur++
-      while 1
+      @string = ->
+        text = self.data
+        start = cur = self.cur
         c = text[cur]
-        if c=='\\' then cur += 2
-        else if c==quote
-          @cur = cur+1
-          return text[start..cur]
-        else if not c then return
+        if c=='"' or c=="'" then quote = c
+        else return
+        cur++
+        while 1
+          c = text[cur]
+          if c=='\\' then cur += 2
+          else if c==quote
+            self.cur = cur+1
+            return text[start..cur]
+          else if not c then return

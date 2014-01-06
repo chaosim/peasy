@@ -31,7 +31,7 @@ module.exports = (grunt) ->
         if grunt.file.isMatch coffeePatterns, [filepath]
           grunt.config.set 'coffee',
             options: {sourceRoot: '', bare: true} # , sourceMap: true
-            dev: {expand: true, cwd: 'src', dest: 'dev', src: filepath.slice(4), ext: '.js'}
+            dev: {expand: true, cwd: 'coffee', dest: 'js', src: filepath.slice(7), ext: '.js'}
 
   grunt.registerTask('build', ['clean:js', 'coffee'])
   grunt.registerTask('karm1', ['karma:once'])

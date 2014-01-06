@@ -3,70 +3,122 @@ do (require=require, exports=exports, module=module) ->
 
   peasy  = require "../peasy"
 
+  {in_, charset, letterDigits} = peasy
+  _in_ = in_
+  identifierChars = '$_'+letterDigits
+  identifierCharSet = charset(identifierChars)
+
   exports.Parser = class Parser extends peasy.Parser
     constructor: ->
       super
+      self = @
 
-      {inCharset, charset, letterDigits} = peasy
-      identifierChars = '$_'+letterDigits
-      identifierCharSet = charset(identifierChars)
+      number = ->
+        text = self.data
+        start = cur = self.cur
+        base = 10
+        c =  text[cur]
+        if c=='+' or c=='-' then cur++
+        if text[cur]=='0'
+          c = text[++cur]
+          if c=='x' and c=='X' then base = 16; cur++
+        if base==16
+          while c = text[cur]
+            if not ('0'<=c<='9' or 'a'<=c<='f' or 'A'<=c<='F')
+              self.cur = cur
+              return text[start...cur]
+            cur++
+        while c = text[cur]
+          if not ('0'<=c<='9') then break
+          cur++
+        if text[cur]=='.'
+          cur++
+          while c = text[cur]
+            if not ('0'<=c<='9') then break
+            cur++
+          if text[cur-1]=='.' and (c = text[cur-2]) and not ('0'<=c<='9') then return
+        c = text[cur]
+        if c=='E' or c=='e'
+          cur++
+          while c = text[cur]
+            if not ('0'<=c<='9') then break
+            cur++
+          if (c =text[cur-1]) and (c=='E' or c=='e') then return
+        self.cur = cur
+        text[start...cur]
 
-      {char, literal, orp, andp, wrap, spaces, spaces1, rec, memo} = @
-      space = orp(char(' '), char('t'))
+      string = ->
+        text = self.data
+        start = cur = self.cur
+        c = text[cur]
+        if c=='"' or c=="'" then quote = c
+        else return
+        cur++
+        while 1
+          c = text[cur]
+          if c=='\\' then cur += 2
+          else if c==quote
+            self.cur = cur+1
+            return text[start..cur]
+          else if not c then error('expect '+quote)
+
+      {orp, rec, memo, wrap, char, literal, spaces, eoi, identifier} = self = @
+
+      question = char('?'); colon = char(':'); comma = char(','); dot = char('.')
       lpar = char('('); rpar = char(')')
       lbracket = char('['); rbracket = char(']')
 
-      myop = (op) =>
+      myop = (op) ->
         if op.length==1 then opFn = char(op) else opFn = literal(op)
-        if inCharset(op[0], identifierCharSet)
-          => spaces() and opFn() and spaces() and not inCharset(@data[@cur], identifierCharSet)
-        else => spaces() and opFn() and spaces()
+        if _in_(op[0], identifierCharSet)
+          -> spaces() and (op=opFn()) and spaces() and not _in_(data[self.cur], identifierCharSet) and ' '+op+' '
+        else -> spaces() and (op=opFn()) and spaces() and op
 
       new_ = myop('new')
       inc = myop('++'); dec = myop('--')
       not_ = orp(myop('!'), myop('not')); bitnot = myop('~')
       typeof_ = myop('typeof');  void_ = myop('void'); delete_ = myop('delete')
       plus = myop('+'); minus = myop('-')
-      mul = myop('*'); div = myop('/'); idiv = myop('//')
-      lshift = myop('<<'); rshift = myop('>>'); zrshift('>>>')
+      unaryOp = orp(not_, bitnot, plus, minus, typeof_, void_)
+      mul = myop('*'); div = myop('/'); idiv = myop('//'); mod = myop('%')
+      lshift = myop('<<'); rshift = myop('>>'); zrshift = myop('>>>')
       lt = myop('<'); le = myop('<='); gt = myop('>'); ge = myop('>=')
       in_ = myop('in'); instanceof_ = myop('instanceof')
       eq = myop('=='); ne = myop('!='); eq2 = myop('==='); ne2 = myop('!==')
       bitand = myop('&'); bitxor = myop('^'); bitor = myop('|')
       and_ = orp(myop('&&'), myop('and')); or_ = orp(myop('||'), myop('or'))
       comma = myop(',')
+      assign = myop('=');
+      addassign = myop('+='); subassign = myop('-=')
+      mulassign = myop('*='); divassign = myop('/='); modassign = myop('%='); idivassign = myop('//=')
+      rshiftassign = myop('>>='); lshiftassign = myop('<<='); zrshiftassign = myop('>>>=')
+      bitandassign = myop('&='); bitxorassign = myop('^='); bitorassign = myop('|=')
 
-      error = (msg) => throw @data[@cur-20..@cur+20]+' '+@cur+': '+msg
+      error = (msg) -> throw self.data[self.cur-20..self.cur+20]+' '+self.cur+': '+msg
+      expect = (fn, msg) -> fn() or error(msg)
 
-      getExpr = (n) =>
-        operation = operations[n]
-        lower = getExpr(n-1)
-        if typeof operation == 'function'
-          -> operation() or lower()
-        else
-          operator = if operation.length==1 then operation[0] else orp(operation...)
-          left = @rec =>  ((x = left()) and (op = operator()) and (y=lower()) and x+op+y) or lower()
+      incDec = orp(inc, dec)
+      prefixOperation = -> (op=incDec()) and (x=headExpr()) and op+x
+      suffixOperation = -> (x=headExpr()) and (op=incDec()) and x+op
+      parenExpr = memo -> lpar() and spaces() and (x=expr()) and spaces() and expect(rpar,'expect )') and '('+x+')'
+      literalExpr = orp((-> number()), (-> string()), (->identifier()))
+      atom = memo orp(parenExpr, literalExpr)
+      unary_ = -> (op=unaryOp()) and (x=prefixSuffixExpr()) and op+x
+      headAtom = memo orp(parenExpr, identifier)
+      funcall = rec -> (h=headExpr()) and ((e=parenExpr() and h+e) or h)
+      wrapLbracket = wrap(lbracket); wrapRbracket = wrap(rbracket); wrapDot = wrap(dot)
+      lbracketExpr = -> (wrapLbracket() and commaExpr() and wrapRbracket())
+      dotIdentifier = -> wrapDot() and identifier()
+      attr = orp(lbracketExpr, dotIdentifier)
+      property = rec -> (h=headExpr()) and ((e=attr() and h+e) or h)
+      headExpr = rec orp(funcall, property, headAtom)
 
-      atom = memo ->
-        (lpar() and spaces() and (x = expr()) and spaces() and ((rpar() and x) or error('expect )')))\
-        or number()\
-        or string()\
-        or identifier()
-
-      parenExpr = memo -> lpar() and expr() and rpar()
-      headAtom = memo -> parenExpr() or identifier()
-      funcall = rec -> (head = headExpr()) and ((e = parenExpr() and head+e) or head)
-      property = rec -> (head = headExpr()) and ((e = parenExpr() and head+e) or head) or oneProperty()
-      headExpr = orp(headAtom, funcall, property)
-
-
-      logicOrExpr = getExpr(14)
-      conditional_ = -> logicOrExpr() and spaces() and question() and spaces() and assign() and comma() and assign()
-      conditional = getExpr(15)
-      assign_ = -> assignLeft() and assignOperator() and conditional()
-      assign = getExpr(16)
-      expr = getExpr(17)
-      @root = => x = expr() and @eof() and x
+      wrapQuestion = wrap(question)
+      conditional_ = -> (x=logicOrExpr()) and wrapQuestion() and (y=assignExpr()) and expect(colon, 'expect :') and (z=assignExpr()) and x+'? '+y+'z'
+      assignLeft = orp(property, identifier)
+      assignOperator = orp(assign, addassign, subassign,  mulassign, divassign, modassign, idivassign,\
+        rshiftassign, lshiftassign, zrshiftassign, bitandassign,  bitxorassign, bitorassign)
+      assignExpr_ = -> (v=assignLeft()) and (op=assignOperator()) and (e=assignExpr()) and v+op+e
 
       #https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
       '''
@@ -89,13 +141,13 @@ do (require=require, exports=exports, module=module) ->
       14	logical-or	left-to-right	||
       15	conditional	right-to-left	?:
       16	yield	right-to-left	yield
-      17	assignment right-to-left	=  +  -=  *=  /=  %=  <<=  >>=  >>>=  &=  ^=  |=
+      17	assignment right-to-left	=  +=  -=  *=  /=  %=  <<=  >>=  >>>=  &=  ^=  |=
       18	comma	left-to-right	,
       '''
       operations =
         0: atom
         1: -> new_() and expr()
-        2: orp(funcall, property)
+        2: -> funcall() or property()
         3: orp(prefixOperation, suffixOperation)
         4: unary_
         5: [mul, div, idiv]
@@ -109,71 +161,46 @@ do (require=require, exports=exports, module=module) ->
         13: [and_]
         14: [or_]
         15: conditional_
-        16: assign_
+        16: assignExpr_
         17: [comma]
 
-    number: ->
-      text = @data
-      start = cur = @cur
-      symbol = ''
-      c =  text[cur++]
-      if c=='+' or c=='-' then symbol = c
-      if text[cur++]=='0'
-        c = text[cur++]
-        if 'a'<=c<='z' or 'A'<=c<='Z' then base = c; cur++
-      intStart = cur
-      if base=='x'
-        while c = text[cur++]
-          if not ('0'<=c<='9' or 'a'<=c<='z' or 'A'<=c<='Z') then break
-      else
-        while c = text[cur++]
-          if not '0'<=c<='9' then break
-      intStop = cur
-      dotStart = cur
-      if text[cur++]=='.'
-        while c = text[cur++]
-          if not '0'<=c<='9' then break
-      dotStop = cur
-      powStart = cur
-      c = text[cur++]
-      if c=='E' or c=='e'
-        while c = text[cur++]
-          if not '0'<=c<='9' then break
-      powStop = cur
-      if base
-        if base!='b' and base!='o' and base!='x'
-    #      base!='B' and  base!='O' and base!='X'
-          error(start, "wrong radix letter:#{base}, \"BbOoXx\" is permitted.")
-        if powStop>=powStart+1 or dotStop>dotStart+1
-          error(start, "binary, octal or hexidecimal is not permitted to have decimal fraction or exponent.")
-        if base=='b'# or base=='B'
-    #      base = 'b'
-          for c in intPart
-            if c>'1' then error(start, "binary number should have only digit 0 or 1.")
-        if base=='o'# or base=='B'
-    #      base = 'b'
-          for c in intPart
-            if c>'7' then error(start, "octal number should have only digit 0, 1, 2, 3, 4, 5, 6, 7.")
-        if base=='x'# or base=='B'
-    #      base = 'b'
-          for c in intPart
-            if 'g'<=c<='z' or 'G'<=c<='Z'  then error(start, "hexidecimal number have illgegal letter.")
+      operationFnList = [atom]
 
-      string: ->
-        text = @data
-        start = cur = @cur
-        c = text[cur]
-        if c=='"' or c=="'" then quote = c
-        else return
-        cur++
-        while 1
-          c = text[cur]
-          if c=='\\' then cur += 2
-          else if c==quote
-            @cur = cur+1
-            return text[start..cur]
-          else if not c then error('expect '+quote)
+      getExpr = (n) ->
+        operation = operations[n]
+        lower = operationFnList[n-1]
+        if typeof operation == 'function' then orp(operation, lower)
+        else
+          operator = if operation.length==1 then operation[0] else orp(operation...)
+          binary = rec ->
+            n
+            start = self.cur;
+            if (x = binary())
+               if (op=operator()) and (y=lower()) then  x+op+y
+               else x
+            else self.cur=start; lower()
+
+      for i in [1..17]  then operationFnList[i] = getExpr(i)
+
+      prefixSuffixExpr = operationFnList[3]
+      logicOrExpr = operationFnList[14]
+      conditional = operationFnList[15]
+      assignExpr = operationFnList[16]
+      expr = operationFnList[16]
+
+      @root = -> (x=expr()) and expect(eoi, 'expect end of input') and x
 
   exports.parser = parser = new Parser
 
   exports.parse = (text) -> parser.parse(text)
+
+  class Parser1 extends peasy.Parser
+    constructor: ->
+      super
+      self = @
+      {orp, char, spaces, spaces1} = @
+      one = char('1')
+      three = char('3')
+      @root = orp(one, three, spaces1)
+
+  exports.parse1 = (text) -> (new Parser1).parse(text)
