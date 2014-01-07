@@ -72,15 +72,6 @@ do (require=require, exports=exports, module=module) ->
             self.cache[tag][start] = [result, self.cur]
             result
 
-      # #### matchers and combinators<br/>
-      @andp = (items...) ->
-        items = for item in items
-          if not isMatcher(item) then self.literal(item) else item
-        ->
-          for item in items
-            if not (result = item()) then return
-          result
-
       # combinator *orp* <br/>
       @orp = (items...) ->
         items = for item in items
@@ -91,6 +82,15 @@ do (require=require, exports=exports, module=module) ->
           for item in items
             self.cur = start
             if result = item() then return result
+
+      # #### matchers and combinators<br/>
+      @andp = (items...) ->
+        items = for item in items
+          if not isMatcher(item) then self.literal(item) else item
+        ->
+          for item in items
+            if not (result = item()) then return
+          result
 
       @notp = (item) ->
         if not isMatcher(item) then item = self.literal(item)
@@ -177,7 +177,7 @@ do (require=require, exports=exports, module=module) ->
         len = 0
         cur = self.cur
         while 1
-          if ((c=data[cur++]) and (c==' ' or c=='\t')) then lent++ else break
+          if ((c=data[cur++]) and (c==' ' or c=='\t')) then len++ else break
         self.cur += len
         len+1
 

@@ -116,33 +116,6 @@ if (typeof window === 'object') {
           }
         };
       };
-      this.andp = function() {
-        var item, items;
-        items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
-        items = (function() {
-          var _i, _len, _results;
-          _results = [];
-          for (_i = 0, _len = items.length; _i < _len; _i++) {
-            item = items[_i];
-            if (!isMatcher(item)) {
-              _results.push(self.literal(item));
-            } else {
-              _results.push(item);
-            }
-          }
-          return _results;
-        })();
-        return function() {
-          var result, _i, _len;
-          for (_i = 0, _len = items.length; _i < _len; _i++) {
-            item = items[_i];
-            if (!(result = item())) {
-              return;
-            }
-          }
-          return result;
-        };
-      };
       this.orp = function() {
         var item, items,
           _this = this;
@@ -171,6 +144,33 @@ if (typeof window === 'object') {
               return result;
             }
           }
+        };
+      };
+      this.andp = function() {
+        var item, items;
+        items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
+        items = (function() {
+          var _i, _len, _results;
+          _results = [];
+          for (_i = 0, _len = items.length; _i < _len; _i++) {
+            item = items[_i];
+            if (!isMatcher(item)) {
+              _results.push(self.literal(item));
+            } else {
+              _results.push(item);
+            }
+          }
+          return _results;
+        })();
+        return function() {
+          var result, _i, _len;
+          for (_i = 0, _len = items.length; _i < _len; _i++) {
+            item = items[_i];
+            if (!(result = item())) {
+              return;
+            }
+          }
+          return result;
         };
       };
       this.notp = function(item) {

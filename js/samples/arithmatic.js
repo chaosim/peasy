@@ -17,7 +17,7 @@ if (typeof window === 'object') {
     __extends(Parser, _super);
 
     function Parser() {
-      var addassign, and_, assign, assignExpr, assignExpr_, assignLeft, assignOperator, atom, attr, bitand, bitandassign, bitnot, bitor, bitorassign, bitxor, bitxorassign, char, colon, comma, conditional, conditional_, dec, delete_, div, divassign, dot, dotIdentifier, eoi, eq, eq2, error, expect, expr, funcall, ge, getExpr, gt, headAtom, headExpr, i, identifier, idiv, idivassign, inc, incDec, instanceof_, lbracket, lbracketExpr, le, literal, literalExpr, logicOrExpr, lpar, lshift, lshiftassign, lt, memo, minus, mod, modassign, mul, mulassign, myop, ne, ne2, new_, not_, number, operationFnList, operations, or_, orp, parenExpr, plus, prefixOperation, prefixSuffixExpr, property, question, rbracket, rec, rpar, rshift, rshiftassign, self, spaces, string, subassign, suffixOperation, typeof_, unaryOp, unary_, void_, wrap, wrapDot, wrapLbracket, wrapQuestion, wrapRbracket, zrshift, zrshiftassign, _i, _ref1;
+      var addassign, and1, and_, assign, assignExpr, assignExpr_, assignLeft, assignOperator, atom, attr, bitand, bitandassign, bitnot, bitor, bitorassign, bitxor, bitxorassign, bracketExpr, callProp, callPropTail, char, colon, comma, conditional_, dec, delete_, div, divassign, dot, dotIdentifier, eoi, eq, eq2, error, expect, expr, ge, getExpr, gt, headAtom, headExpr, i, identifier, idiv, idivassign, inc, incDec, instanceof_, lbracket, le, literal, literalExpr, logicOrExpr, lpar, lshift, lshiftassign, lt, memo, minus, mod, modassign, mul, mulassign, myop, ne, ne2, negative, new_, not1, not_, number, operationFnList, operations, or1, or_, orp, parenExpr, plus, posNeg, positive, prefixOperation, prefixSuffixExpr, property, question, rbracket, rec, rpar, rshift, rshiftassign, self, spaces, string, subassign, suffixOperation, typeof_, unaryOp, unaryTail, unary_, void_, wrap, wrapColon, wrapDot, wrapLbracket, wrapQuestion, wrapRbracket, zrshift, zrshiftassign, _i, _ref1;
       Parser.__super__.constructor.apply(this, arguments);
       self = this;
       number = function() {
@@ -31,7 +31,7 @@ if (typeof window === 'object') {
         }
         if (text[cur] === '0') {
           c = text[++cur];
-          if (c === 'x' && c === 'X') {
+          if (c === 'x' || c === 'X') {
             base = 16;
             cur++;
           }
@@ -80,25 +80,30 @@ if (typeof window === 'object') {
         return text.slice(start, cur);
       };
       string = function() {
-        var c, cur, quote, start, text;
+        var c, cur, quote, result, text;
         text = self.data;
-        start = cur = self.cur;
+        cur = self.cur;
         c = text[cur];
         if (c === '"' || c === "'") {
           quote = c;
         } else {
           return;
         }
+        result = '';
         cur++;
         while (1) {
           c = text[cur];
           if (c === '\\') {
+            result += text[cur + 1];
             cur += 2;
           } else if (c === quote) {
             self.cur = cur + 1;
-            return text.slice(start, +cur + 1 || 9e9);
+            return quote + result + quote;
           } else if (!c) {
             error('expect ' + quote);
+          } else {
+            result += c;
+            cur++;
           }
         }
       };
@@ -128,17 +133,30 @@ if (typeof window === 'object') {
           };
         }
       };
+      posNeg = function(op) {
+        var opFn;
+        opFn = char(op);
+        return function() {
+          var c;
+          return spaces() && (op = opFn()) && (c = self.data[self.cur]) && c !== '.' && !(('0' <= c && c <= '9')) && spaces() && op;
+        };
+      };
+      positive = posNeg('+');
+      negative = posNeg('-');
       new_ = myop('new');
       inc = myop('++');
       dec = myop('--');
-      not_ = orp(myop('!'), myop('not'));
+      not1 = orp(myop('!'), myop('not'));
+      not_ = function() {
+        return not1() && '!';
+      };
       bitnot = myop('~');
       typeof_ = myop('typeof');
       void_ = myop('void');
       delete_ = myop('delete');
+      unaryOp = orp(not_, bitnot, positive, negative, typeof_, void_);
       plus = myop('+');
       minus = myop('-');
-      unaryOp = orp(not_, bitnot, plus, minus, typeof_, void_);
       mul = myop('*');
       div = myop('/');
       idiv = myop('//');
@@ -159,8 +177,14 @@ if (typeof window === 'object') {
       bitand = myop('&');
       bitxor = myop('^');
       bitor = myop('|');
-      and_ = orp(myop('&&'), myop('and'));
-      or_ = orp(myop('||'), myop('or'));
+      and1 = orp(myop('&&'), myop('and'));
+      and_ = function() {
+        return and1() && '&&';
+      };
+      or1 = orp(myop('||'), myop('or'));
+      or_ = function() {
+        return or1() && '||';
+      };
       comma = myop(',');
       assign = myop('=');
       addassign = myop('+=');
@@ -194,44 +218,43 @@ if (typeof window === 'object') {
         var x;
         return lpar() && spaces() && (x = expr()) && spaces() && expect(rpar, 'expect )') && '(' + x + ')';
       });
-      literalExpr = orp((function() {
-        return number();
-      }), (function() {
-        return string();
-      }), (function() {
-        return identifier();
-      }));
+      literalExpr = orp(number, string, identifier);
       atom = memo(orp(parenExpr, literalExpr));
+      unaryTail = orp(prefixSuffixExpr, atom);
       unary_ = function() {
         var op, x;
-        return (op = unaryOp()) && (x = prefixSuffixExpr()) && op + x;
+        return (op = unaryOp()) && (x = unaryTail()) && op + x;
       };
-      headAtom = memo(orp(parenExpr, identifier));
-      funcall = rec(function() {
-        var e, h;
-        return (h = headExpr()) && ((e = parenExpr() && h + e) || h);
-      });
       wrapLbracket = wrap(lbracket);
       wrapRbracket = wrap(rbracket);
       wrapDot = wrap(dot);
-      lbracketExpr = function() {
-        return wrapLbracket() && commaExpr() && wrapRbracket();
+      bracketExpr = function() {
+        var x;
+        return (wrapLbracket() && (x = commaExpr()) && wrapRbracket()) && '[' + x + ']';
       };
       dotIdentifier = function() {
-        return wrapDot() && identifier();
+        var id;
+        return wrapDot() && (id = expect(identifier, 'expect identifier')) && '.' + id;
       };
-      attr = orp(lbracketExpr, dotIdentifier);
+      attr = orp(bracketExpr, dotIdentifier);
+      callPropTail = orp(parenExpr, attr);
+      callProp = rec(function() {
+        var e, h;
+        return (h = headExpr()) && (((e = callPropTail()) && h + e) || h);
+      });
       property = rec(function() {
         var e, h;
-        return (h = headExpr()) && ((e = attr() && h + e) || h);
+        return (h = headExpr()) && (((e = attr()) && h + e) || h);
       });
-      headExpr = rec(orp(funcall, property, headAtom));
+      headAtom = memo(orp(parenExpr, identifier));
+      headExpr = memo(orp(callProp, headAtom));
       wrapQuestion = wrap(question);
+      wrapColon = wrap(colon);
       conditional_ = function() {
         var x, y, z;
-        return (x = logicOrExpr()) && wrapQuestion() && (y = assignExpr()) && expect(colon, 'expect :') && (z = assignExpr()) && x + '? ' + y + 'z';
+        return (x = logicOrExpr()) && wrapQuestion() && (y = assignExpr()) && expect(wrapColon, 'expect :') && (z = assignExpr()) && x + '? ' + y + ': ' + z;
       };
-      assignLeft = orp(property, identifier);
+      assignLeft = property;
       assignOperator = orp(assign, addassign, subassign, mulassign, divassign, modassign, idivassign, rshiftassign, lshiftassign, zrshiftassign, bitandassign, bitxorassign, bitorassign);
       assignExpr_ = function() {
         var e, op, v;
@@ -241,11 +264,10 @@ if (typeof window === 'object') {
       operations = {
         0: atom,
         1: function() {
-          return new_() && expr();
+          var x;
+          return new_() && (x = expr()) && 'new ' + x;
         },
-        2: function() {
-          return funcall() || property();
-        },
+        2: callProp,
         3: orp(prefixOperation, suffixOperation),
         4: unary_,
         5: [mul, div, idiv],
@@ -293,7 +315,6 @@ if (typeof window === 'object') {
       }
       prefixSuffixExpr = operationFnList[3];
       logicOrExpr = operationFnList[14];
-      conditional = operationFnList[15];
       assignExpr = operationFnList[16];
       expr = operationFnList[16];
       this.root = function() {

@@ -21,7 +21,7 @@ do (require=require, exports=exports, module=module) ->
         if c=='+' or c=='-' then cur++
         if text[cur]=='0'
           c = text[++cur]
-          if c=='x' and c=='X' then base = 16; cur++
+          if c=='x' or c=='X' then base = 16; cur++
         if base==16
           while c = text[cur]
             if not ('0'<=c<='9' or 'a'<=c<='f' or 'A'<=c<='F')
@@ -49,18 +49,20 @@ do (require=require, exports=exports, module=module) ->
 
       string = ->
         text = self.data
-        start = cur = self.cur
+        cur = self.cur
         c = text[cur]
         if c=='"' or c=="'" then quote = c
         else return
+        result = ''
         cur++
         while 1
           c = text[cur]
-          if c=='\\' then cur += 2
+          if c=='\\' then result += text[cur+1]; cur += 2;
           else if c==quote
             self.cur = cur+1
-            return text[start..cur]
+            return quote+result+quote
           else if not c then error('expect '+quote)
+          else result += c; cur++
 
       {orp, rec, memo, wrap, char, literal, spaces, eoi, identifier} = self = @
 
@@ -74,19 +76,28 @@ do (require=require, exports=exports, module=module) ->
           -> spaces() and (op=opFn()) and spaces() and not _in_(data[self.cur], identifierCharSet) and ' '+op+' '
         else -> spaces() and (op=opFn()) and spaces() and op
 
+      posNeg = (op) ->
+        opFn = char(op)
+        -> spaces() and (op=opFn()) and (c = self.data[self.cur]) and c!='.' and not('0'<=c<='9') and spaces() and op
+      positive = posNeg('+'); negative = posNeg('-')
       new_ = myop('new')
       inc = myop('++'); dec = myop('--')
-      not_ = orp(myop('!'), myop('not')); bitnot = myop('~')
+      not1 = orp(myop('!'), myop('not'))
+      not_ = -> not1() and '!'
+      bitnot = myop('~')
       typeof_ = myop('typeof');  void_ = myop('void'); delete_ = myop('delete')
+      unaryOp = orp(not_, bitnot, positive, negative, typeof_, void_)
       plus = myop('+'); minus = myop('-')
-      unaryOp = orp(not_, bitnot, plus, minus, typeof_, void_)
       mul = myop('*'); div = myop('/'); idiv = myop('//'); mod = myop('%')
       lshift = myop('<<'); rshift = myop('>>'); zrshift = myop('>>>')
       lt = myop('<'); le = myop('<='); gt = myop('>'); ge = myop('>=')
       in_ = myop('in'); instanceof_ = myop('instanceof')
       eq = myop('=='); ne = myop('!='); eq2 = myop('==='); ne2 = myop('!==')
       bitand = myop('&'); bitxor = myop('^'); bitor = myop('|')
-      and_ = orp(myop('&&'), myop('and')); or_ = orp(myop('||'), myop('or'))
+      and1 = orp(myop('&&'), myop('and'))
+      and_ = -> and1() and '&&'
+      or1 = orp(myop('||'), myop('or'))
+      or_ = -> or1() and '||'
       comma = myop(',')
       assign = myop('=');
       addassign = myop('+='); subassign = myop('-=')
@@ -101,21 +112,25 @@ do (require=require, exports=exports, module=module) ->
       prefixOperation = -> (op=incDec()) and (x=headExpr()) and op+x
       suffixOperation = -> (x=headExpr()) and (op=incDec()) and x+op
       parenExpr = memo -> lpar() and spaces() and (x=expr()) and spaces() and expect(rpar,'expect )') and '('+x+')'
-      literalExpr = orp((-> number()), (-> string()), (->identifier()))
+      literalExpr = orp(number, string, identifier)
       atom = memo orp(parenExpr, literalExpr)
-      unary_ = -> (op=unaryOp()) and (x=prefixSuffixExpr()) and op+x
-      headAtom = memo orp(parenExpr, identifier)
-      funcall = rec -> (h=headExpr()) and ((e=parenExpr() and h+e) or h)
+      unaryTail = orp(prefixSuffixExpr, atom)
+      unary_ = -> (op=unaryOp()) and (x=unaryTail()) and op+x
+
       wrapLbracket = wrap(lbracket); wrapRbracket = wrap(rbracket); wrapDot = wrap(dot)
-      lbracketExpr = -> (wrapLbracket() and commaExpr() and wrapRbracket())
-      dotIdentifier = -> wrapDot() and identifier()
-      attr = orp(lbracketExpr, dotIdentifier)
-      property = rec -> (h=headExpr()) and ((e=attr() and h+e) or h)
-      headExpr = rec orp(funcall, property, headAtom)
+      bracketExpr = -> (wrapLbracket() and (x=commaExpr()) and wrapRbracket()) and '['+x+']'
+      dotIdentifier = -> wrapDot() and (id=expect(identifier, 'expect identifier')) and '.'+id
+      attr = orp(bracketExpr, dotIdentifier)
+      callPropTail = orp(parenExpr, attr)
+      callProp = rec -> (h=headExpr()) and (((e=callPropTail()) and h+e) or h)
+      property = rec -> (h=headExpr()) and (((e=attr()) and h+e) or h)
+      headAtom = memo orp(parenExpr, identifier)
+      headExpr = memo orp(callProp, headAtom)
 
       wrapQuestion = wrap(question)
-      conditional_ = -> (x=logicOrExpr()) and wrapQuestion() and (y=assignExpr()) and expect(colon, 'expect :') and (z=assignExpr()) and x+'? '+y+'z'
-      assignLeft = orp(property, identifier)
+      wrapColon = wrap(colon)
+      conditional_ = -> (x=logicOrExpr()) and wrapQuestion() and (y=assignExpr()) and expect(wrapColon, 'expect :') and (z=assignExpr()) and x+'? '+y+': '+z
+      assignLeft = property
       assignOperator = orp(assign, addassign, subassign,  mulassign, divassign, modassign, idivassign,\
         rshiftassign, lshiftassign, zrshiftassign, bitandassign,  bitxorassign, bitorassign)
       assignExpr_ = -> (v=assignLeft()) and (op=assignOperator()) and (e=assignExpr()) and v+op+e
@@ -146,8 +161,8 @@ do (require=require, exports=exports, module=module) ->
       '''
       operations =
         0: atom
-        1: -> new_() and expr()
-        2: -> funcall() or property()
+        1: -> new_() and (x=expr()) and 'new '+x
+        2: callProp
         3: orp(prefixOperation, suffixOperation)
         4: unary_
         5: [mul, div, idiv]
@@ -184,7 +199,6 @@ do (require=require, exports=exports, module=module) ->
 
       prefixSuffixExpr = operationFnList[3]
       logicOrExpr = operationFnList[14]
-      conditional = operationFnList[15]
       assignExpr = operationFnList[16]
       expr = operationFnList[16]
 
