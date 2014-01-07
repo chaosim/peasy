@@ -7,9 +7,9 @@ if (typeof window === 'object') {
 }
 
 (function(require, exports, module) {
-  var Parser, Parser1, charset, identifierCharSet, identifierChars, in_, letterDigits, parser, peasy, _in_;
+  var Parser, Parser1, charset, identifierCharSet, identifierChars, in_, isMatcher, letterDigits, parser, peasy, _in_;
   peasy = require("../peasy");
-  in_ = peasy.in_, charset = peasy.charset, letterDigits = peasy.letterDigits;
+  isMatcher = peasy.isMatcher, in_ = peasy.in_, charset = peasy.charset, letterDigits = peasy.letterDigits;
   _in_ = in_;
   identifierChars = '$_' + letterDigits;
   identifierCharSet = charset(identifierChars);
@@ -17,7 +17,7 @@ if (typeof window === 'object') {
     __extends(Parser, _super);
 
     function Parser() {
-      var addassign, and1, and_, assign, assignExpr, assignExpr_, assignLeft, assignOperator, atom, attr, bitand, bitandassign, bitnot, bitor, bitorassign, bitxor, bitxorassign, bracketExpr, callProp, callPropTail, char, colon, comma, conditional_, dec, delete_, div, divassign, dot, dotIdentifier, eoi, eq, eq2, error, expect, expr, ge, getExpr, gt, headAtom, headExpr, i, identifier, idiv, idivassign, inc, incDec, instanceof_, lbracket, le, literal, literalExpr, logicOrExpr, lpar, lshift, lshiftassign, lt, memo, minus, mod, modassign, mul, mulassign, myop, ne, ne2, negative, new_, not1, not_, number, operationFnList, operations, or1, or_, orp, parenExpr, plus, posNeg, positive, prefixOperation, prefixSuffixExpr, property, question, rbracket, rec, rpar, rshift, rshiftassign, self, spaces, string, subassign, suffixOperation, typeof_, unaryOp, unaryTail, unary_, void_, wrap, wrapColon, wrapDot, wrapLbracket, wrapQuestion, wrapRbracket, zrshift, zrshiftassign, _i, _ref1;
+      var addassign, and1, and_, assign, assignExpr, assignExpr_, assignLeft, assignOperator, atom, attr, bitand, bitandassign, bitnot, bitor, bitorassign, bitxor, bitxorassign, bracketExpr, bracketExpr1, callProp, callPropTail, char, colon, comma, condition_, dec, delete_, div, divassign, dot, dotIdentifier, eoi, eq, eq2, error, expect, expr, ge, getExpr, gt, headAtom, headExpr, i, identifier, idiv, idivassign, inc, incDec, instanceof_, lbracket, le, literal, literalExpr, logicOrExpr, lpar, lshift, lshiftassign, lt, memo, minus, mod, modassign, mul, mulassign, myop, ne, ne2, negative, new_, not1, not_, number, operationFnList, operations, or1, or_, orp, param, paramExpr, paren, paren1, parenExpr, plus, posNeg, positive, prefixOperation, prefixSuffixExpr, property, question, rbracket, rec, rpar, rshift, rshiftassign, self, spaces, string, subassign, suffixOperation, typeof_, unaryOp, unaryTail, unary_, void_, wrap, wrapColon, wrapDot, wrapQuestion, zrshift, zrshiftassign, _i, _ref1;
       Parser.__super__.constructor.apply(this, arguments);
       self = this;
       number = function() {
@@ -214,9 +214,38 @@ if (typeof window === 'object') {
         var op, x;
         return (x = headExpr()) && (op = incDec()) && x + op;
       };
+      paren = function(item, left, right, msg) {
+        if (left == null) {
+          left = lpar;
+        }
+        if (right == null) {
+          right = rpar;
+        }
+        if (msg == null) {
+          msg = 'expect ) to match (';
+        }
+        if (!isMatcher(item)) {
+          left = self.literal(item);
+        }
+        if (!isMatcher(left)) {
+          left = self.literal(left);
+        }
+        if (!isMatcher(right)) {
+          right = self.literal(right);
+        }
+        return function() {
+          var start, x;
+          start = self.cur;
+          return left() && (x = item()) && expect(right, msg + ' at: ' + start) && x;
+        };
+      };
+      paren1 = paren(function() {
+        var x;
+        return spaces() && (x = expr()) && spaces() && x;
+      });
       parenExpr = memo(function() {
         var x;
-        return lpar() && spaces() && (x = expr()) && spaces() && expect(rpar, 'expect )') && '(' + x + ')';
+        return (x = paren1()) && '(' + x + ')';
       });
       literalExpr = orp(number, string, identifier);
       atom = memo(orp(parenExpr, literalExpr));
@@ -225,19 +254,28 @@ if (typeof window === 'object') {
         var op, x;
         return (op = unaryOp()) && (x = unaryTail()) && op + x;
       };
-      wrapLbracket = wrap(lbracket);
-      wrapRbracket = wrap(rbracket);
-      wrapDot = wrap(dot);
+      bracketExpr1 = wrap(paren(wrap(function() {
+        return commaExpr();
+      }), lbracket, rbracket, 'expect ) to match ('));
       bracketExpr = function() {
         var x;
-        return (wrapLbracket() && (x = commaExpr()) && wrapRbracket()) && '[' + x + ']';
+        return (x = bracketExpr1()) && '[' + x + ']';
       };
+      wrapDot = wrap(dot);
       dotIdentifier = function() {
         var id;
         return wrapDot() && (id = expect(identifier, 'expect identifier')) && '.' + id;
       };
       attr = orp(bracketExpr, dotIdentifier);
-      callPropTail = orp(parenExpr, attr);
+      param = paren(function() {
+        var x;
+        return (spaces() && (x = expr()) && spaces() && expect(rpar, 'expect )')) || ' ';
+      });
+      paramExpr = memo(function() {
+        var x;
+        return (x = param()) && '(' + x + ')';
+      });
+      callPropTail = orp(paramExpr, attr);
       callProp = rec(function() {
         var e, h;
         return (h = headExpr()) && (((e = callPropTail()) && h + e) || h);
@@ -250,7 +288,7 @@ if (typeof window === 'object') {
       headExpr = memo(orp(callProp, headAtom));
       wrapQuestion = wrap(question);
       wrapColon = wrap(colon);
-      conditional_ = function() {
+      condition_ = function() {
         var x, y, z;
         return (x = logicOrExpr()) && wrapQuestion() && (y = assignExpr()) && expect(wrapColon, 'expect :') && (z = assignExpr()) && x + '? ' + y + ': ' + z;
       };
@@ -260,7 +298,7 @@ if (typeof window === 'object') {
         var e, op, v;
         return (v = assignLeft()) && (op = assignOperator()) && (e = assignExpr()) && v + op + e;
       };
-      'Precedence	Operator type	Associativity	Individual operators\n1	new	right-to-left	new\n2	function call	left-to-right	()\nproperty access	left-to-right	.\nleft-to-right	[]\n3	 	++  n/a	--\n4	right-to-left	! ~ +	- typeof void delete\n5	* / % //\n6	+ -\n7	<<  >> >>>\n8	<  <=  >  >=  in  instanceof\n9	==  !=  ===  !==\n10	bitwise-and	left-to-right	&\n11	bitwise-xor	left-to-right	^\n12	bitwise-or	left-to-right	|\n13	logical-and	left-to-right	&&\n14	logical-or	left-to-right	||\n15	conditional	right-to-left	?:\n16	yield	right-to-left	yield\n17	assignment right-to-left	=  +=  -=  *=  /=  %=  <<=  >>=  >>>=  &=  ^=  |=\n18	comma	left-to-right	,';
+      'Precedence	Operator type	Associativity	Individual operators\n1	new	right-to-left	new\n2	function call	left-to-right	()\nproperty access	left-to-right	.\nleft-to-right	[]\n3	 	++  n/a	--\n4	right-to-left	! ~ +	- typeof void delete\n5	* / % //\n6	+ -\n7	<<  >> >>>\n8	<  <=  >  >=  in  instanceof\n9	==  !=  ===  !==\n10	bitwise-and	left-to-right	&\n11	bitwise-xor	left-to-right	^\n12	bitwise-or	left-to-right	|\n13	logical-and	left-to-right	&&\n14	logical-or	left-to-right	||\n15	condition	right-to-left	?:\n16	yield	right-to-left	yield\n17	assignment right-to-left	=  +=  -=  *=  /=  %=  <<=  >>=  >>>=  &=  ^=  |=\n18	comma	left-to-right	,';
       operations = {
         0: atom,
         1: function() {
@@ -280,7 +318,7 @@ if (typeof window === 'object') {
         12: [bitor],
         13: [and_],
         14: [or_],
-        15: conditional_,
+        15: condition_,
         16: assignExpr_,
         17: [comma]
       };

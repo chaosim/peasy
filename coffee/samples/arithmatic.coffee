@@ -3,7 +3,7 @@ do (require=require, exports=exports, module=module) ->
 
   peasy  = require "../peasy"
 
-  {in_, charset, letterDigits} = peasy
+  {isMatcher, in_, charset, letterDigits} = peasy
   _in_ = in_
   identifierChars = '$_'+letterDigits
   identifierCharSet = charset(identifierChars)
@@ -111,17 +111,28 @@ do (require=require, exports=exports, module=module) ->
       incDec = orp(inc, dec)
       prefixOperation = -> (op=incDec()) and (x=headExpr()) and op+x
       suffixOperation = -> (x=headExpr()) and (op=incDec()) and x+op
-      parenExpr = memo -> lpar() and spaces() and (x=expr()) and spaces() and expect(rpar,'expect )') and '('+x+')'
+
+      paren = (item, left=lpar, right=rpar, msg='expect ) to match (') ->
+        if not isMatcher(item) then left = self.literal(item)
+        if not isMatcher(left) then left = self.literal(left)
+        if not isMatcher(right) then right = self.literal(right)
+        -> start=self.cur; left() and (x=item()) and expect(right, msg+' at: '+start) and x
+
+      paren1 = paren(-> (spaces() and (x=expr()) and spaces() and x))
+      parenExpr = memo -> (x=paren1()) and '('+x+')'
       literalExpr = orp(number, string, identifier)
       atom = memo orp(parenExpr, literalExpr)
       unaryTail = orp(prefixSuffixExpr, atom)
       unary_ = -> (op=unaryOp()) and (x=unaryTail()) and op+x
 
-      wrapLbracket = wrap(lbracket); wrapRbracket = wrap(rbracket); wrapDot = wrap(dot)
-      bracketExpr = -> (wrapLbracket() and (x=commaExpr()) and wrapRbracket()) and '['+x+']'
+      bracketExpr1 = wrap(paren(wrap(-> commaExpr()), lbracket, rbracket, 'expect ) to match ('))
+      bracketExpr = -> (x=bracketExpr1()) and '['+x+']'
+      wrapDot = wrap(dot)
       dotIdentifier = -> wrapDot() and (id=expect(identifier, 'expect identifier')) and '.'+id
       attr = orp(bracketExpr, dotIdentifier)
-      callPropTail = orp(parenExpr, attr)
+      param = paren -> (spaces() and (x=expr()) and spaces() and expect(rpar,'expect )')) or ' '
+      paramExpr = memo -> (x=param()) and '('+x+')'
+      callPropTail = orp(paramExpr, attr)
       callProp = rec -> (h=headExpr()) and (((e=callPropTail()) and h+e) or h)
       property = rec -> (h=headExpr()) and (((e=attr()) and h+e) or h)
       headAtom = memo orp(parenExpr, identifier)
@@ -129,7 +140,7 @@ do (require=require, exports=exports, module=module) ->
 
       wrapQuestion = wrap(question)
       wrapColon = wrap(colon)
-      conditional_ = -> (x=logicOrExpr()) and wrapQuestion() and (y=assignExpr()) and expect(wrapColon, 'expect :') and (z=assignExpr()) and x+'? '+y+': '+z
+      condition_ = -> (x=logicOrExpr()) and wrapQuestion() and (y=assignExpr()) and expect(wrapColon, 'expect :') and (z=assignExpr()) and x+'? '+y+': '+z
       assignLeft = property
       assignOperator = orp(assign, addassign, subassign,  mulassign, divassign, modassign, idivassign,\
         rshiftassign, lshiftassign, zrshiftassign, bitandassign,  bitxorassign, bitorassign)
@@ -154,7 +165,7 @@ do (require=require, exports=exports, module=module) ->
       12	bitwise-or	left-to-right	|
       13	logical-and	left-to-right	&&
       14	logical-or	left-to-right	||
-      15	conditional	right-to-left	?:
+      15	condition	right-to-left	?:
       16	yield	right-to-left	yield
       17	assignment right-to-left	=  +=  -=  *=  /=  %=  <<=  >>=  >>>=  &=  ^=  |=
       18	comma	left-to-right	,
@@ -175,7 +186,7 @@ do (require=require, exports=exports, module=module) ->
         12: [bitor]
         13: [and_]
         14: [or_]
-        15: conditional_
+        15: condition_
         16: assignExpr_
         17: [comma]
 
