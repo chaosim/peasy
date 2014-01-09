@@ -7,43 +7,8 @@ if (typeof window === 'object') {
 }
 
 (function(require, exports, module) {
-  var Parser, charset, digits, isMatcher, letterDigits, letters, lowers, uppers;
-  exports.isMatcher = isMatcher = function(item) {
-    return typeof item === "function";
-  };
-  exports.charset = charset = function(string) {
-    var dict, x, _i, _len;
-    dict = {};
-    for (_i = 0, _len = string.length; _i < _len; _i++) {
-      x = string[_i];
-      dict[x] = true;
-    }
-    return dict;
-  };
-  exports.inCharset = exports.in_ = function(c, set) {
-    return set.hasOwnProperty(c);
-  };
-  exports.isdigit = function(c) {
-    return ('0' <= c && c <= '9');
-  };
-  exports.isletter = function(c) {
-    return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
-  };
-  exports.islower = function(c) {
-    return ('a' <= c && c <= 'z');
-  };
-  exports.isupper = function(c) {
-    return ('A' <= c && c <= 'Z');
-  };
-  exports.isIdentifierLetter = function(c) {
-    return c === '$' || c === '_' || ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9');
-  };
-  exports.digits = digits = '0123456789';
-  exports.lowers = lowers = 'abcdefghijklmnopqrstuvwxyz';
-  exports.uppers = uppers = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
-  exports.letters = letters = lowers + uppers;
-  exports.letterDigits = letterDigits = letterDigits;
-  return exports.Parser = Parser = (function() {
+  var Parser, charset, digits, letterDigits, letters, lowers, uppers;
+  exports.Parser = Parser = (function() {
     function Parser() {
       var self, some;
       self = this;
@@ -125,7 +90,7 @@ if (typeof window === 'object') {
           _results = [];
           for (_i = 0, _len = items.length; _i < _len; _i++) {
             item = items[_i];
-            if (!isMatcher(item)) {
+            if ((typeof item) === 'string') {
               _results.push(self.literal(item));
             } else {
               _results.push(item);
@@ -154,7 +119,7 @@ if (typeof window === 'object') {
           _results = [];
           for (_i = 0, _len = items.length; _i < _len; _i++) {
             item = items[_i];
-            if (!isMatcher(item)) {
+            if ((typeof item) === 'string') {
               _results.push(self.literal(item));
             } else {
               _results.push(item);
@@ -174,7 +139,7 @@ if (typeof window === 'object') {
         };
       };
       this.notp = function(item) {
-        if (!isMatcher(item)) {
+        if ((typeof item) === 'string') {
           item = self.literal(item);
         }
         return function() {
@@ -183,7 +148,7 @@ if (typeof window === 'object') {
       };
       this.may = function(item) {
         var _this = this;
-        if (!isMatcher(item)) {
+        if ((typeof item) === 'string') {
           item = self.literal(item);
         }
         return function() {
@@ -199,7 +164,7 @@ if (typeof window === 'object') {
       };
       this.any = function(item) {
         var _this = this;
-        if (!isMatcher(item)) {
+        if ((typeof item) === 'string') {
           item = self.literal(item);
         }
         return function() {
@@ -212,7 +177,7 @@ if (typeof window === 'object') {
         };
       };
       some = function(item) {
-        if (!isMatcher(item)) {
+        if ((typeof item) === 'string') {
           item = self.literal(item);
         }
         return function() {
@@ -228,7 +193,7 @@ if (typeof window === 'object') {
         };
       };
       this.times = function(item, n) {
-        if (!isMatcher(item)) {
+        if ((typeof item) === 'string') {
           item = self.literal(item);
         }
         return function() {
@@ -248,10 +213,10 @@ if (typeof window === 'object') {
         if (separator == null) {
           separator = self.spaces;
         }
-        if (!isMatcher(item)) {
+        if ((typeof item) === 'string') {
           item = self.literal(item);
         }
-        if (!isMatcher(separator)) {
+        if ((typeof separator) === 'string') {
           separator = self.literal(separator);
         }
         return function() {
@@ -270,10 +235,10 @@ if (typeof window === 'object') {
         if (separator == null) {
           separator = self.spaces;
         }
-        if (!isMatcher(item)) {
+        if ((typeof item) === 'string') {
           item = self.literal(item);
         }
-        if (!isMatcher(separator)) {
+        if ((typeof separator) === 'string') {
           separator = self.literal(separator);
         }
         return function() {
@@ -295,7 +260,7 @@ if (typeof window === 'object') {
       };
       this.follow = function(item) {
         var _this = this;
-        if (!isMatcher(item)) {
+        if ((typeof item) === 'string') {
           item = self.literal(item);
         }
         return function() {
@@ -365,7 +330,7 @@ if (typeof window === 'object') {
         if (right == null) {
           right = self.spaces;
         }
-        if (!isMatcher(item)) {
+        if ((typeof item) === 'string') {
           item = self.literal(item);
         }
         return function() {
@@ -490,4 +455,38 @@ if (typeof window === 'object') {
     return Parser;
 
   })();
+  /* some utilities for parsing*/
+
+  exports.charset = charset = function(string) {
+    var dict, x, _i, _len;
+    dict = {};
+    for (_i = 0, _len = string.length; _i < _len; _i++) {
+      x = string[_i];
+      dict[x] = true;
+    }
+    return dict;
+  };
+  exports.inCharset = exports.in_ = function(c, set) {
+    return set.hasOwnProperty(c);
+  };
+  exports.isdigit = function(c) {
+    return ('0' <= c && c <= '9');
+  };
+  exports.isletter = function(c) {
+    return ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z');
+  };
+  exports.islower = function(c) {
+    return ('a' <= c && c <= 'z');
+  };
+  exports.isupper = function(c) {
+    return ('A' <= c && c <= 'Z');
+  };
+  exports.isIdentifierLetter = function(c) {
+    return c === '$' || c === '_' || ('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9');
+  };
+  exports.digits = digits = '0123456789';
+  exports.lowers = lowers = 'abcdefghijklmnopqrstuvwxyz';
+  exports.uppers = uppers = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  exports.letters = letters = lowers + uppers;
+  return exports.letterDigits = letterDigits = letterDigits;
 })(require, exports, module);

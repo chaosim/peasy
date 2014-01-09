@@ -3,7 +3,7 @@ do (require=require, exports=exports, module=module) ->
 
   peasy  = require "../peasy"
 
-  {isMatcher, in_, charset, letterDigits} = peasy
+  {in_, charset, letterDigits} = peasy
   _in_ = in_
   identifierChars = '$_'+letterDigits
   identifierCharSet = charset(identifierChars)
@@ -113,9 +113,9 @@ do (require=require, exports=exports, module=module) ->
       suffixOperation = -> (x=headExpr()) and (op=incDec()) and x+op
 
       paren = (item, left=lpar, right=rpar, msg='expect ) to match (') ->
-        if not isMatcher(item) then left = self.literal(item)
-        if not isMatcher(left) then left = self.literal(left)
-        if not isMatcher(right) then right = self.literal(right)
+        if (typeof item)=='string' then left = self.literal(item)
+        if (typeof left)=='string' then left = self.literal(left)
+        if (typeof right)=='string' then right = self.literal(right)
         -> start=self.cur; left() and (x=item()) and expect(right, msg+' at: '+start) and x
 
       paren1 = paren(-> (spaces() and (x=expr()) and spaces() and x))
@@ -218,14 +218,3 @@ do (require=require, exports=exports, module=module) ->
   exports.parser = parser = new Parser
 
   exports.parse = (text) -> parser.parse(text)
-
-  class Parser1 extends peasy.Parser
-    constructor: ->
-      super
-      self = @
-      {orp, char, spaces, spaces1} = @
-      one = char('1')
-      three = char('3')
-      @root = orp(one, three, spaces1)
-
-  exports.parse1 = (text) -> (new Parser1).parse(text)

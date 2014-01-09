@@ -1,19 +1,23 @@
 var exports, module, require, _ref;
 
 if (typeof window === 'object') {
-  _ref = twoside('/test/mocha/samples/testarithmatic'), require = _ref.require, exports = _ref.exports, module = _ref.module;
+  _ref = twoside('/test/mocha/samples/testarithmatic2'), require = _ref.require, exports = _ref.exports, module = _ref.module;
 }
 
 (function(require, exports, module) {
-  var arithmatic, chai, expect, parse;
+  var Parser, chai, expect, parse, parser;
   chai = require('chai');
   expect = chai.expect;
-  parse = (arithmatic = require('../../../samples/arithmatic')).parse;
-  describe("run samples/testarithmatic:", function() {
+  Parser = require('../../../samples/arithmatic2').Parser;
+  parser = new Parser;
+  parse = function(text) {
+    return parser.parse(text);
+  };
+  describe("run samples/testarithmatic2:", function() {
     return it('', function() {});
   });
-  return describe("arithmatic", function() {
-    it("parse number", function() {
+  return describe("testarithmatic2", function() {
+    it("testaritmatic2: parse number", function() {
       expect(parse('1')).to.equal('1');
       expect(parse('01')).to.equal('01');
       expect(parse('0x01')).to.equal('0x01');
@@ -28,58 +32,58 @@ if (typeof window === 'object') {
       expect(parse('-.')).to.equal(void 0);
       return expect(parse('-.1')).to.equal('-.1');
     });
-    it("parse identifier", function() {
+    it("testaritmatic2: parse identifier", function() {
       expect(parse('a')).to.equal('a');
       expect(parse('$a')).to.equal('$a');
       expect(parse('$a_')).to.equal('$a_');
       expect(parse('$a_1')).to.equal('$a_1');
       return expect(parse('_1')).to.equal('_1');
     });
-    it("parse string", function() {
+    it("testaritmatic2: parse string", function() {
       expect(parse('"a\\"b"')).to.equal('"a\"b"');
       expect(parse('"a"')).to.equal('"a"');
       return expect(parse("'a'")).to.equal("'a'");
     });
-    it("parse a.b", function() {
+    it("testaritmatic2: parse a.b", function() {
       return expect(parse('a.b')).to.equal('a.b');
     });
-    it("parse 1+1", function() {
+    it("testaritmatic2: parse 1+1", function() {
       return expect(parse('1+1')).to.equal('1+1');
     });
-    it("parse 1+1*1", function() {
+    it("testaritmatic2: parse 1+1*1", function() {
       return expect(parse('1+1*1')).to.equal('1+1*1');
     });
-    it("parse 1*1+1", function() {
+    it("testaritmatic2: parse 1*1+1", function() {
       return expect(parse('1*1+1')).to.equal('1*1+1');
     });
-    it("parse 1*1", function() {
+    it("testaritmatic2: parse 1*1", function() {
       return expect(parse('1*1')).to.equal('1*1');
     });
-    it("parse 1*1*1", function() {
+    it("testaritmatic2: parse 1*1*1  ", function() {
       return expect(parse('1*1*1')).to.equal('1*1*1');
     });
-    it("parse (1*1)", function() {
+    it("testaritmatic2: parse (1*1)  ", function() {
       return expect(parse('(1*1)')).to.equal('(1*1)');
     });
-    it("parse (1*1)", function() {
+    it("testaritmatic2: parse (1*1)", function() {
       return expect(parse('(1*1)')).to.equal('(1*1)');
     });
-    it("parse (1*1)+(2*3)", function() {
+    it("testaritmatic2: parse (1*1)+(2*3)", function() {
       return expect(parse('(1*1)+(2*3)')).to.equal('(1*1)+(2*3)');
     });
-    it("parse a=1", function() {
+    it("testaritmatic2: parse a=1", function() {
       return expect(parse('a=1')).to.equal('a=1');
     });
-    it("parse a  = 1", function() {
+    it("testaritmatic2: parse a  = 1", function() {
       return expect(parse('a  = 1')).to.equal('a=1');
     });
-    it("parse a  = b = 1", function() {
+    it("testaritmatic2: parse a  = b = 1", function() {
       return expect(parse('a  = b = 1')).to.equal('a=b=1');
     });
-    it("parse 1?  a = 3:  b = 4", function() {
+    it("testaritmatic2: parse 1?  a = 3:  b = 4", function() {
       return expect(parse('1?  a = 3:  b = 4')).to.equal('1? a=3: b=4');
     });
-    return it("parse 1?a=3:b=4", function() {
+    return it("testaritmatic2: parse 1?a=3:b=4", function() {
       return expect(parse('1?a=3:b=4')).to.equal('1? a=3: b=4');
     });
   });

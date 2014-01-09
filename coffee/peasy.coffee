@@ -2,27 +2,6 @@ if typeof window=='object' then {require, exports, module} = twoside('/peasy')
 do (require=require, exports=exports, module=module) ->
 # The two lines above make this module can be used both in browser(with twoside.js) and on node.js
 
-  exports.isMatcher = isMatcher = (item) ->  typeof(item)=="function"
-
-  exports.charset = charset = (string) ->
-    dict = {}
-    for x in string then dict[x] = true
-    dict
-
-  exports.inCharset = exports.in_ = (c, set) -> set.hasOwnProperty(c)
-
-  exports.isdigit = (c) -> '0'<=c<='9'
-  exports.isletter = (c) -> 'a'<=c<='z' or 'A'<=c<='Z'
-  exports.islower = (c) -> 'a'<=c<='z'
-  exports.isupper = (c) ->'A'<=c<='Z'
-  exports.isIdentifierLetter = (c) -> c=='$' or c=='_' or 'a'<=c<='z' or 'A'<=c<='Z' or '0'<=c<='9'
-
-  exports.digits = digits = '0123456789'
-  exports.lowers = lowers = 'abcdefghijklmnopqrstuvwxyz'
-  exports.uppers = uppers = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
-  exports.letters = letters = lowers+uppers
-  exports.letterDigits = letterDigits = letterDigits
-
   exports.Parser = class Parser
 
     constructor:  ->
@@ -75,7 +54,7 @@ do (require=require, exports=exports, module=module) ->
       # combinator *orp* <br/>
       @orp = (items...) ->
         items = for item in items
-          if not isMatcher(item) then self.literal(item) else item
+          if (typeof item)=='string' then self.literal(item) else item
         =>
           start = self.cur
           length = items.length
@@ -86,18 +65,18 @@ do (require=require, exports=exports, module=module) ->
       # #### matchers and combinators<br/>
       @andp = (items...) ->
         items = for item in items
-          if not isMatcher(item) then self.literal(item) else item
+          if (typeof item)=='string' then self.literal(item) else item
         ->
           for item in items
             if not (result = item()) then return
           result
 
       @notp = (item) ->
-        if not isMatcher(item) then item = self.literal(item)
+        if (typeof item)=='string' then item = self.literal(item)
         -> not item()
 
       @may = (item) ->
-        if not isMatcher(item) then item = self.literal(item)
+        if (typeof item)=='string' then item = self.literal(item)
         =>
           start = self.cur
           if x = item() then x
@@ -105,7 +84,7 @@ do (require=require, exports=exports, module=module) ->
 
       # combinator *any*: zero or more times of `item()`
       @any = (item) ->
-        if not isMatcher(item) then item = self.literal(item)
+        if (typeof item)=='string' then item = self.literal(item)
         =>
           result = []
           while (x = item()) then result.push(x)
@@ -113,7 +92,7 @@ do (require=require, exports=exports, module=module) ->
 
       # combinator *some*: one or more times of `item()`
       some = (item) ->
-        if not isMatcher(item) then item = self.literal(item)
+        if (typeof item)=='string' then item = self.literal(item)
         ->
           if not (x = item()) then return
           result = [x]
@@ -122,7 +101,7 @@ do (require=require, exports=exports, module=module) ->
 
       # combinator *times*: match *self.n* times item(), n>=1
       @times = (item, n) ->
-        if not isMatcher(item) then item = self.literal(item)
+        if (typeof item)=='string' then item = self.literal(item)
         ->
           i = 0
           while i++<n
@@ -132,8 +111,8 @@ do (require=require, exports=exports, module=module) ->
 
       # combinator *list*: some times item(), separated by self.separator
       @list = (item, separator=self.spaces) ->
-        if not isMatcher(item) then item = self.literal(item)
-        if not isMatcher(separator) then separator = self.literal(separator)
+        if (typeof item)=='string' then item = self.literal(item)
+        if (typeof separator)=='string' then separator = self.literal(separator)
         ->
           if not (x = item()) then return
           result = [x]
@@ -142,8 +121,8 @@ do (require=require, exports=exports, module=module) ->
 
       # combinator *listn*: given self.n times self.item separated by self.separator, n>=1
       @listn = (item, n, separator=self.spaces) ->
-        if not isMatcher(item) then item = self.literal(item)
-        if not isMatcher(separator) then separator = self.literal(separator)
+        if (typeof item)=='string' then item = self.literal(item)
+        if (typeof separator)=='string' then separator = self.literal(separator)
         ->
           if not (x = item()) then return
           result = [x]
@@ -155,7 +134,7 @@ do (require=require, exports=exports, module=module) ->
 
       # combinator *follow* <br/>
       @follow = (item) ->
-        if not isMatcher(item) then item = self.literal(item)
+        if (typeof item)=='string' then item = self.literal(item)
         =>
           start = self.cur
           x = item(); self.cur = start; x
@@ -197,7 +176,7 @@ do (require=require, exports=exports, module=module) ->
       # matcher *wrap*<br/>
       # match left, then match item, match right at last
       @wrap = (item, left=self.spaces, right=self.spaces) ->
-        if not isMatcher(item) then item = self.literal(item)
+        if (typeof item)=='string' then item = self.literal(item)
         -> if left() and result = item() and right() then result
 
       # matcher *identifierLetter* = normal version<br/>
@@ -255,3 +234,24 @@ do (require=require, exports=exports, module=module) ->
             self.cur = cur+1
             return text[start..cur]
           else if not c then return
+
+  ### some utilities for parsing ###
+  exports.charset = charset = (string) ->
+    dict = {}
+    for x in string then dict[x] = true
+    dict
+
+  exports.inCharset = exports.in_ = (c, set) -> set.hasOwnProperty(c)
+
+  exports.isdigit = (c) -> '0'<=c<='9'
+  exports.isletter = (c) -> 'a'<=c<='z' or 'A'<=c<='Z'
+  exports.islower = (c) -> 'a'<=c<='z'
+  exports.isupper = (c) ->'A'<=c<='Z'
+  exports.isIdentifierLetter = (c) -> c=='$' or c=='_' or 'a'<=c<='z' or 'A'<=c<='Z' or '0'<=c<='9'
+
+  exports.digits = digits = '0123456789'
+  exports.lowers = lowers = 'abcdefghijklmnopqrstuvwxyz'
+  exports.uppers = uppers = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ'
+  exports.letters = letters = lowers+uppers
+  exports.letterDigits = letterDigits = letterDigits
+

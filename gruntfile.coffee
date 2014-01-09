@@ -12,6 +12,13 @@ module.exports = (grunt) ->
     karma:
       auto: {configFile: 'js/test/karma-conf', autoWatch: true, singleRun: false}
       once: {configFile: 'js/test/karma-conf', autoWatch: false, singleRun: true}
+    mochaTest:
+      test:
+        options: {reporter: 'spec', clearRequireCache: true}
+        src: ['js/test/mocha/**/*.js']
+    concurrent:
+      options: logConcurrentOutput: true
+      dev: tasks: ['look:dev', 'karma:auto']
 
   watchConfig =
     dev:
@@ -19,14 +26,19 @@ module.exports = (grunt) ->
       coffee:{files: coffeePatterns, tasks: ['coffee:dev']}
 
   grunt.option 'force', true
-  for task in ['grunt-contrib-clean', 'grunt-contrib-coffee', 'grunt-karma', 'grunt-contrib-watch']
+  for task in ['grunt-contrib-clean', 'grunt-contrib-coffee', 'grunt-karma', 'grunt-contrib-watch', 'grunt-mocha-test', 'grunt-concurrent']
     grunt.loadNpmTasks(task)
+
+  defaultMochaSrc = grunt.config('mochaTest.test.src')
+
   grunt.registerTask 'look', 'dynamic watch', ->
     target = grunt.task.current.args[0] or 'dev'
     grunt.config.set('watch', watchConfig[target])
     grunt.task.run 'watch'
     if target=='dev'
       grunt.event.on 'watch', (action, filepath) ->
+        grunt.config('mochaTest.test.src', defaultMochaSrc)
+        if filepath.match('js/test/mocha/') then grunt.config('mochaTest.test.src', filepath); return
         if action=='deleted' then return
         if grunt.file.isMatch coffeePatterns, [filepath]
           grunt.config.set 'coffee',
@@ -37,4 +49,5 @@ module.exports = (grunt) ->
   grunt.registerTask('karm1', ['karma:once'])
   grunt.registerTask('karm', ['karma:auto'])
   grunt.registerTask('test', ['build', 'karm1'])
-  grunt.registerTask 'default', ['test']
+  grunt.registerTask('dev', ['build','mochaTest',  'concurrent'])
+  grunt.registerTask 'default', ['dev']
