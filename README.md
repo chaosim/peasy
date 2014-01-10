@@ -14,7 +14,7 @@ Copy twoside.js, peasy.js, logicpeasy.js(if logic feature is required) to the pr
 In addition to directly copy the files from github, you can also get peasy by `npm install peasy`
 
 **twoside**:
-twoside is a utility that I wrote, so that the module can be used both in the browser and in node.js. In broser,  if you do not want to use twoside, simply delete the first two lines in peasy.js and logicpeasy.js, exports variable and their references.
+twoside is a utility that I wrote, so that the module can be used both in the browser and in node.js. In broser,  if you do not want to use twoside, delete the first two lines in peasy.js and logicpeasy.js, exports variable and their references.
 For more information about twoside, See https://github/chaosim/twoside. In pure node environment without the browser, twoside can be ignored and peasy will not be effected. You can install twoside through npm: `npm install twoside`
 
 ### introduction
@@ -26,7 +26,7 @@ logicpeasy is an extension to peasy, it makes logical variable can be used as an
 
 Recommend the following method:
 
-Create a new module(you can use as template a file under samples), then require peasy or logicpeasy, create a new Parser class which uses peasy.Parser or logicpeasy.Parser as the base class.
+Create a new module(you can use a file under samples as template ), then require peasy or logicpeasy, create a new Parser class which uses peasy.Parser or logicpeasy.Parser as the base class.
 
 I advice you read the code in /test and /samples, which  are simple and self-interpreting,  before writing code for your own parser. after that you will figure out how to write parser.
 
@@ -55,7 +55,7 @@ In order to immediately have an intuitive feeling on how to write parser in peas
         posNeg =(op)->...
         positive = posNeg('+'); negative = posNeg('-')
         ...
-        assign = myop('=');..., bitorassign = myop('| =')
+        assign = myop('=');..., bitorassign = myop('|=')
 
         error =(msg)-> throw self.data [self.cur-20.. self.cur +20] + '' + self.cur + ':' + msg
         expect =(fn, msg)-> fn() or error(msg)
@@ -123,7 +123,7 @@ In order to immediately have an intuitive feeling on how to write parser in peas
 Samples/arithmatic2.coffee has only 180 lines of code in total, and which also contains lexical process. Able to handle expressions as complex as in javascript, and the code is so simple, I bet that only peasy can make it.
 
 The code has several unique points need to explain:
-* Coffeescript syntax makes the rules' readability very as good as any other compiler's rule definition, and will be slightly worse under the javascript.
+* Coffeescript syntax makes the rules' readability as good as any other compiler's rule definition, and will be slightly worse under the javascript.
 * All the rules are set as instance member of the parser in the constructor, rather than the prototype members, which can avoid many potential problems associated with binding of `this`. I have tried the prototype members solution before, after testing and debugging I found there were many hidden bugs. In addition, the speed of the parser can be improved by avoiding the lookup to prototype inheritance chain.
 * The process to binary expression(expr(n), and it generates binary = rec...) is also unique. This will be further explained hereinafter.
 

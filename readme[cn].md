@@ -8,7 +8,7 @@
 ###**用法**
 
 
-**客户端浏览器**:
+**浏览器**:
 复制twoside.js, peasy.js, logicpeasy.js（如果需要逻辑功能)到项目文件夹，按次序添加到yourpage.html的`<script>`标签。
 
 **node.js**:
