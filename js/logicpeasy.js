@@ -37,18 +37,18 @@ if (typeof window === 'object') {
         vari.bind(self.trail.deref(term));
         return true;
       };
-      this.unify = function(x, y, compare) {
-        if (compare == null) {
-          compare = (function(x, y) {
+      this.unify = function(x, y, equal) {
+        if (equal == null) {
+          equal = (function(x, y) {
             return x === y;
           });
         }
-        return self.trail.unify(x, y, compare);
+        return self.trail.unify(x, y, equal);
       };
-      this.unifyList = function(xs, ys, compare) {
+      this.unifyList = function(xs, ys, equal) {
         var i, xlen, _i, _unify;
-        if (compare == null) {
-          compare = (function(x, y) {
+        if (equal == null) {
+          equal = (function(x, y) {
             return x === y;
           });
         }
@@ -58,7 +58,7 @@ if (typeof window === 'object') {
         } else {
           _unify = self.trail.unify;
           for (i = _i = 0; 0 <= xlen ? _i < xlen : _i > xlen; i = 0 <= xlen ? ++_i : --_i) {
-            if (!_unify(xs[i], ys[i], compare)) {
+            if (!_unify(xs[i], ys[i], equal)) {
               return false;
             }
           }
@@ -259,7 +259,7 @@ if (typeof window === 'object') {
       }
     };
 
-    Trail.prototype.unify = function(x, y, compare) {
+    Trail.prototype.unify = function(x, y, equal) {
       x = this.deref(x);
       y = this.deref(y);
       if (x instanceof Var) {
@@ -271,7 +271,7 @@ if (typeof window === 'object') {
         y.binding = x;
         return true;
       } else {
-        return (x != null ? typeof x.unify === "function" ? x.unify(y, this) : void 0 : void 0) || (y != null ? typeof y.unify === "function" ? y.unify(x, this) : void 0 : void 0) || compare(x, y);
+        return (x != null ? typeof x.unify === "function" ? x.unify(y, this) : void 0 : void 0) || (y != null ? typeof y.unify === "function" ? y.unify(x, this) : void 0 : void 0) || equal(x, y);
       }
     };
 
@@ -445,10 +445,10 @@ if (typeof window === 'object') {
       }
     };
 
-    UObject.prototype.unify = function(y, trail, compare) {
+    UObject.prototype.unify = function(y, trail, equal) {
       var index, key, xdata, ydata, ykeys;
-      if (compare == null) {
-        compare = function(x, y) {
+      if (equal == null) {
+        equal = function(x, y) {
           return x === y;
         };
       }
@@ -460,7 +460,7 @@ if (typeof window === 'object') {
         if (index === -1) {
           return false;
         }
-        if (!trail.unify(xdata[key], ydata[key], compare)) {
+        if (!trail.unify(xdata[key], ydata[key], equal)) {
           return false;
         }
         ykeys.splice(index, 1);
@@ -505,10 +505,10 @@ if (typeof window === 'object') {
       }
     };
 
-    UArray.prototype.unify = function(y, trail, compare) {
+    UArray.prototype.unify = function(y, trail, equal) {
       var i, length, xdata, ydata, _i;
-      if (compare == null) {
-        compare = function(x, y) {
+      if (equal == null) {
+        equal = function(x, y) {
           return x === y;
         };
       }
@@ -519,7 +519,7 @@ if (typeof window === 'object') {
         return false;
       }
       for (i = _i = 0; 0 <= length ? _i < length : _i > length; i = 0 <= length ? ++_i : --_i) {
-        if (!trail.unify(xdata[i], ydata[i], compare)) {
+        if (!trail.unify(xdata[i], ydata[i], equal)) {
           return false;
         }
       }
@@ -558,18 +558,18 @@ if (typeof window === 'object') {
       }
     };
 
-    Cons.prototype.unify = function(y, trail, compare) {
-      if (compare == null) {
-        compare = function(x, y) {
+    Cons.prototype.unify = function(y, trail, equal) {
+      if (equal == null) {
+        equal = function(x, y) {
           return x === y;
         };
       }
       if (!(y instanceof Cons)) {
         return false;
-      } else if (!trail.unify(this.head, y.head, compare)) {
+      } else if (!trail.unify(this.head, y.head, equal)) {
         return false;
       } else {
-        return trail.unify(this.tail, y.tail, compare);
+        return trail.unify(this.tail, y.tail, equal);
       }
     };
 

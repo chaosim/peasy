@@ -31,92 +31,9 @@ if (typeof window === 'object') {
   18	comma	left-to-right	,
   */
 
-  var Parser, StateMachine, charset, hasOwnProperty, identifierCharSet, identifierChars, in_, letterDigits, peasy, _in_;
+  var Parser, StateMachine, charset, identifierCharSet, identifierChars, in_, letterDigits, peasy, _in_;
   peasy = require("../peasy");
-  hasOwnProperty = Object.hasOwnProperty;
-  StateMachine = (function() {
-    function StateMachine(items) {
-      var item, _i, _len;
-      if (items == null) {
-        items = [];
-      }
-      this.index = 1;
-      this.stateMap = {};
-      this.stateMap[0] = {};
-      this.tagMap = {};
-      for (_i = 0, _len = items.length; _i < _len; _i++) {
-        item = items[_i];
-        this.add(item[0], item[1] || item[0]);
-      }
-    }
-
-    StateMachine.prototype.add = function(word, tag) {
-      var c, i, length, newState, s, state, stateMap;
-      if (tag == null) {
-        tag = word;
-      }
-      length = word.length;
-      state = 0;
-      i = 0;
-      stateMap = this.stateMap;
-      while (i < length - 1) {
-        c = word[i++];
-        if (hasOwnProperty.call(stateMap[state], c)) {
-          state = stateMap[state][c];
-          if (state < 0) {
-            state = -state;
-          }
-        } else {
-          newState = this.index++;
-          stateMap[state][c] = newState;
-          stateMap[newState] = {};
-          state = newState;
-        }
-      }
-      c = word[i];
-      if (hasOwnProperty.call(stateMap[state], c)) {
-        s = stateMap[state][c];
-        if (s > 0) {
-          stateMap[state][c] = -s;
-          return this.tagMap[s] = tag;
-        }
-      } else {
-        newState = this.index++;
-        stateMap[state][c] = -newState;
-        stateMap[newState] = {};
-        return this.tagMap[newState] = tag;
-      }
-    };
-
-    StateMachine.prototype.match = function(text, i) {
-      var cursor, length, state, stateMap, succeedState;
-      if (i == null) {
-        i = 0;
-      }
-      state = 0;
-      length = text.length;
-      stateMap = this.stateMap;
-      while (i < length) {
-        state = stateMap[state][text[i++]];
-        if (state === void 0) {
-          i--;
-          break;
-        } else if (state < 0) {
-          state = -state;
-          succeedState = state;
-          cursor = i;
-        }
-      }
-      if (succeedState) {
-        return [this.tagMap[succeedState], cursor];
-      } else {
-        return [null, i];
-      }
-    };
-
-    return StateMachine;
-
-  })();
+  StateMachine = require("./statemachine").StateMachine;
   in_ = peasy.in_, charset = peasy.charset, letterDigits = peasy.letterDigits;
   _in_ = in_;
   identifierChars = '$_' + letterDigits;
@@ -125,7 +42,7 @@ if (typeof window === 'object') {
     __extends(Parser, _super);
 
     function Parser() {
-      var addassign, and1, and_, assign, assignExpr, assignExpr_, assignOperator, atom, attr, binaryOpItems, binaryOpPriorityMap, binaryOperator, binarysm, bitandassign, bitnot, bitorassign, bitxorassign, bracketExpr, bracketExpr1, callPropExpr, callPropTail, char, colon, comma, condition, dec, delete_, divassign, dot, dotIdentifier, eoi, error, expect, expr, expression, expression_, headAtom, headExpr, identifier, idivassign, inc, incDec, lbracket, list, literal, logicOrExpr, lpar, lshiftassign, memo, modassign, mulassign, myop, negative, newExpr, new_, not1, not_, number, or1, orBinary, or_, orp, param, paramExpr, paren, paren1, parenExpr, posNeg, positive, prefixExpr, property, question, rbracket, rec, rpar, rshiftassign, self, simpleExpr, spaces, string, subassign, suffixExpr, typeof_, unaryExpr, unaryOp, unaryTail, void_, wrap, wrapColon, wrapDot, wrapQuestion, zrshiftassign, _ref1;
+      var addassign, assign, assignExpr, assignExpr_, assignOperator, atom, attr, binaryOpItems, binaryOpPriorityMap, binaryOperator, binarysm, bitandassign, bitnot, bitorassign, bitxorassign, bracketExpr, bracketExpr1, callPropExpr, callPropTail, char, colon, comma, condition, dec, delete_, divassign, dot, dotIdentifier, eoi, error, expect, expr, expression, expression_, headAtom, headExpr, identifier, idivassign, inc, incDec, lbracket, list, literal, logicOrExpr, lpar, lshiftassign, memo, modassign, mulassign, myop, negative, newExpr, new_, not1, not_, number, orBinary, orp, param, paramExpr, paren, paren1, parenExpr, posNeg, positive, prefixExpr, property, question, rbracket, rec, rpar, rshiftassign, self, simpleExpr, spaces, string, subassign, suffixExpr, typeof_, unaryExpr, unaryOp, unaryTail, void_, wrap, wrapColon, wrapDot, wrapQuestion, zrshiftassign;
       Parser.__super__.constructor.apply(this, arguments);
       self = this;
       number = function() {
@@ -215,7 +132,7 @@ if (typeof window === 'object') {
           }
         }
       };
-      _ref1 = self = this, orp = _ref1.orp, list = _ref1.list, rec = _ref1.rec, memo = _ref1.memo, wrap = _ref1.wrap, char = _ref1.char, literal = _ref1.literal, spaces = _ref1.spaces, eoi = _ref1.eoi, identifier = _ref1.identifier;
+      orp = self.orp, list = self.list, rec = self.rec, memo = self.memo, wrap = self.wrap, char = self.char, literal = self.literal, spaces = self.spaces, eoi = self.eoi, identifier = self.identifier;
       question = char('?');
       colon = char(':');
       comma = char(',');
@@ -263,14 +180,6 @@ if (typeof window === 'object') {
       void_ = myop('void');
       delete_ = myop('delete');
       unaryOp = orp(not_, bitnot, positive, negative, typeof_, void_);
-      and1 = orp(myop('&&'), myop('and'));
-      and_ = function() {
-        return and1() && '&&';
-      };
-      or1 = orp(myop('||'), myop('or'));
-      or_ = function() {
-        return or1() && '||';
-      };
       comma = myop(',');
       assign = myop('=');
       addassign = myop('+=');
@@ -413,23 +322,21 @@ if (typeof window === 'object') {
         return _results;
       })();
       binarysm = new StateMachine(binaryOpItems);
-      binaryOperator = function() {
+      binaryOperator = memo(function() {
         var m;
         m = binarysm.match(self.data, self.cur);
         if (m[0]) {
           self.cur = m[1];
           return m[0];
         }
-      };
+      });
       expr = function(n) {
         var binary;
         return binary = rec(function() {
-          n;
-          var beforeOp, fn, op, start, x, y, _ref2;
-          start = self.cur;
+          var beforeOp, fn, op, x, y, _ref1;
           if (x = binary()) {
             beforeOp = self.cur;
-            if ((op = binaryOperator()) && ((n >= (_ref2 = op.pri) && _ref2 >= x.pri)) && (fn = expr(op.pri)) && (y = fn())) {
+            if ((op = binaryOperator()) && ((n >= (_ref1 = op.pri) && _ref1 >= x.pri)) && (fn = expr(op.pri)) && (y = fn())) {
               return {
                 text: x.text + op.text + y.text,
                 pri: op.pri
@@ -438,14 +345,11 @@ if (typeof window === 'object') {
               self.cur = beforeOp;
               return x;
             }
-          } else {
-            self.cur = start;
-            if (x = simpleExpr()) {
-              return {
-                text: x,
-                pri: 4
-              };
-            }
+          } else if (x = simpleExpr()) {
+            return {
+              text: x,
+              pri: 4
+            };
           }
         });
       };
@@ -458,12 +362,7 @@ if (typeof window === 'object') {
       wrapColon = wrap(colon);
       condition = function() {
         var x, y, z;
-        x = logicOrExpr();
-        if (wrapQuestion() && (y = assignExpr()) && expect(wrapColon, 'expect :') && (z = assignExpr())) {
-          return x + '? ' + y + ': ' + z;
-        } else {
-          return x;
-        }
+        return (x = logicOrExpr()) && ((wrapQuestion() && (y = assignExpr()) && expect(wrapColon, 'expect :') && (z = assignExpr()) && x + '? ' + y + ': ' + z) || x);
       };
       assignOperator = orp(assign, addassign, subassign, mulassign, divassign, modassign, idivassign, rshiftassign, lshiftassign, zrshiftassign, bitandassign, bitxorassign, bitorassign);
       assignExpr_ = function() {

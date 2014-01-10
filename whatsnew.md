@@ -1,5 +1,12 @@
 ## What's new in peasy
 
+### what's new in 0.3.0
+  * new class based api
+  * samples: arithmatic, arithmatic2, dsl
+  * rewrite readme.md
+  * grunt work flow
+  * rearranges folder, split coffee and js folder.
+
 ### what's new in 0.2.8
   * add logic features
 

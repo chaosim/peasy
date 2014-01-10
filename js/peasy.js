@@ -290,6 +290,23 @@ if (typeof window === 'object') {
           }
         };
       };
+      this.wrap = function(item, left, right) {
+        if (left == null) {
+          left = self.spaces;
+        }
+        if (right == null) {
+          right = self.spaces;
+        }
+        if ((typeof item) === 'string') {
+          item = self.literal(item);
+        }
+        return function() {
+          var result;
+          if (left() && (result = item() && right())) {
+            return result;
+          }
+        };
+      };
       this.spaces = function() {
         var c, cur, data, len;
         data = self.data;
@@ -323,23 +340,6 @@ if (typeof window === 'object') {
       this.eoi = function() {
         return self.cur === self.data.length;
       };
-      this.wrap = function(item, left, right) {
-        if (left == null) {
-          left = self.spaces;
-        }
-        if (right == null) {
-          right = self.spaces;
-        }
-        if ((typeof item) === 'string') {
-          item = self.literal(item);
-        }
-        return function() {
-          var result;
-          if (left() && (result = item() && right())) {
-            return result;
-          }
-        };
-      };
       this.identifierLetter = function() {
         var c;
         c = self.data[self.cur];
@@ -348,7 +348,7 @@ if (typeof window === 'object') {
           return true;
         }
       };
-      this.followIdentifierLetter_ = function() {
+      this.followIdentifierLetter = function() {
         var c;
         c = self.data[self.cur];
         return (c === '$' || c === '_' || ('a' <= c && c < 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9')) && c;

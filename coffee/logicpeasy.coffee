@@ -23,16 +23,16 @@ do (require=require, exports=exports, module=module) ->
         vari.bind(self.trail.deref(term))
         true
 
-      @unify = (x, y, compare=((x, y) -> x==y)) ->
-        self.trail.unify(x, y, compare)
+      @unify = (x, y, equal=((x, y) -> x==y)) ->
+        self.trail.unify(x, y, equal)
 
-      @unifyList = (xs, ys, compare=((x, y) -> x==y)) ->
+      @unifyList = (xs, ys, equal=((x, y) -> x==y)) ->
         xlen = xs.length
         if ys.length isnt xlen then return false
         else
           _unify =  self.trail.unify
           for i in [0...xlen]
-            if not _unify(xs[i], ys[i], compare) then return false
+            if not _unify(xs[i], ys[i], equal) then return false
         true
 
       # combinator *orp* <br/>
@@ -109,11 +109,11 @@ do (require=require, exports=exports, module=module) ->
       getvalue =  x?.getvalue
       if getvalue then getvalue.call(x, @, memo)
       else x
-    unify: (x, y, compare) ->
+    unify: (x, y, equal) ->
       x = @deref(x); y = @deref(y)
       if x instanceof Var then @set(x, x.binding); x.binding = y; true;
       else if y instanceof Var then @set(y, y.binding); y.binding = x; true;
-      else x?.unify?(y, @) or y?.unify?(x, @) or compare(x, y)
+      else x?.unify?(y, @) or y?.unify?(x, @) or equal(x, y)
 
   # ####class Var
   # Var for logic bindings, used in unify, lisp.assign, inc/dec, parser operation, etc.
@@ -209,14 +209,14 @@ do (require=require, exports=exports, module=module) ->
       if changed then new UObject(result)
       else @
 
-    unify: (y, trail, compare=(x, y) -> x==y) ->
+    unify: (y, trail, equal=(x, y) -> x==y) ->
       xdata = @data
       ydata = if y instanceof UObject then y.data else y
       ykeys = Object.keys(y)
       for key of xdata
         index = ykeys.indexOf(key)
         if index==-1 then return false
-        if not trail.unify(xdata[key], ydata[key], compare) then return false
+        if not trail.unify(xdata[key], ydata[key], equal) then return false
         ykeys.splice(index, 1);
       if ykeys.length isnt 0 then return false
       true
@@ -237,12 +237,12 @@ do (require=require, exports=exports, module=module) ->
       if changed then new UArray(result)
       else @
 
-    unify: (y, trail, compare=(x, y) -> x==y) ->
+    unify: (y, trail, equal=(x, y) -> x==y) ->
       xdata = @data; ydata = y.data or y
       length = @data.length
       if length!=y.length then return false
       for i in [0...length]
-        if not trail.unify(xdata[i], ydata[i], compare) then return false
+        if not trail.unify(xdata[i], ydata[i], equal) then return false
       true
 
     toString: () -> @data.toString()
@@ -260,10 +260,10 @@ do (require=require, exports=exports, module=module) ->
       if head1 is head and tail1 is tail then @
       else new Cons(head1, tail1)
 
-    unify: (y, trail, compare=(x, y) -> x==y) ->
+    unify: (y, trail, equal=(x, y) -> x==y) ->
      if y not instanceof Cons then false
-     else if not trail.unify(@head, y.head, compare) then false
-     else trail.unify(@tail, y.tail, compare)
+     else if not trail.unify(@head, y.head, equal) then false
+     else trail.unify(@tail, y.tail, equal)
 
     flatString: () ->
       result = "#{@head}"

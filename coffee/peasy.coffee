@@ -150,6 +150,12 @@ do (require=require, exports=exports, module=module) ->
       # matcher *char*: match one character<br/>
       @char = (c) -> -> if self.data[self.cur]==c then self.cur++; c
 
+      # matcher *wrap*<br/>
+      # match left, then match item, match right at last
+      @wrap = (item, left=self.spaces, right=self.spaces) ->
+        if (typeof item)=='string' then item = self.literal(item)
+        -> if left() and result = item() and right() then result
+
       # matcher *spaces*: zero or more whitespaces, ie. space or tab.<br/>
       @spaces = ->
         data = self.data
@@ -173,19 +179,13 @@ do (require=require, exports=exports, module=module) ->
 
       @eoi = -> self.cur==self.data.length
 
-      # matcher *wrap*<br/>
-      # match left, then match item, match right at last
-      @wrap = (item, left=self.spaces, right=self.spaces) ->
-        if (typeof item)=='string' then item = self.literal(item)
-        -> if left() and result = item() and right() then result
-
       # matcher *identifierLetter* = normal version<br/>
       @identifierLetter = ->
         c = self.data[self.cur]
         if c is '$' or c is '_' or 'a'<=c<'z' or 'A'<=c<='Z' or '0'<=c<='9'
           self.cur++; true
 
-      @followIdentifierLetter_ = ->
+      @followIdentifierLetter = ->
         c = self.data[self.cur]
         (c is '$' or c is '_' or 'a'<=c<'z' or 'A'<=c<='Z' or '0'<=c<='9') and c
 

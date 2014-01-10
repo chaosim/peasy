@@ -26,54 +26,7 @@ do (require=require, exports=exports, module=module) ->
   ###
 
   peasy  = require "../peasy"
-
-  hasOwnProperty = Object.hasOwnProperty
-
-  class StateMachine
-    constructor: (items=[]) ->
-      @index = 1
-      @stateMap = {}
-      @stateMap[0] = {}
-      @tagMap = {}
-      for item in items then @add(item[0], item[1] or item[0])
-
-    add: (word, tag=word) ->
-      length = word.length
-      state = 0
-      i = 0
-      stateMap = @stateMap
-      while i<length-1
-        c = word[i++]
-        if hasOwnProperty.call(stateMap[state], c)
-          state = stateMap[state][c]
-          if state < 0 then state = -state
-        else
-          newState = @index++
-          stateMap[state][c] = newState
-          stateMap[newState] = {}
-          state = newState
-      c = word[i]
-      if hasOwnProperty.call(stateMap[state], c)
-        s = stateMap[state][c]
-        if s>0
-          stateMap[state][c] = -s
-          @tagMap[s] = tag
-      else
-        newState = @index++
-        stateMap[state][c] = -newState
-        stateMap[newState] = {}
-        @tagMap[newState] = tag
-
-    match: (text, i=0) ->
-      state = 0
-      length = text.length
-      stateMap = @stateMap
-      while i<length
-        state = stateMap[state][text[i++]]
-        if state is undefined then i--; break
-        else if state<0 then state = -state; succeedState = state; cursor = i
-      if succeedState then return [@tagMap[succeedState], cursor]
-      else return [null, i]
+  {StateMachine} =   require "./statemachine"
 
   {in_, charset, letterDigits} = peasy
   _in_ = in_
@@ -136,7 +89,7 @@ do (require=require, exports=exports, module=module) ->
           else if not c then error('expect '+quote)
           else result += c; cur++
 
-      {orp, list, rec, memo, wrap, char, literal, spaces, eoi, identifier} = self = @
+      {orp, list, rec, memo, wrap, char, literal, spaces, eoi, identifier} = self
 
       question = char('?'); colon = char(':'); comma = char(','); dot = char('.')
       lpar = char('('); rpar = char(')')
@@ -159,10 +112,6 @@ do (require=require, exports=exports, module=module) ->
       bitnot = myop('~')
       typeof_ = myop('typeof');  void_ = myop('void'); delete_ = myop('delete')
       unaryOp = orp(not_, bitnot, positive, negative, typeof_, void_)
-      and1 = orp(myop('&&'), myop('and'))
-      and_ = -> and1() and '&&'
-      or1 = orp(myop('||'), myop('or'))
-      or_ = -> or1() and '||'
       comma = myop(',')
       assign = myop('=');
       addassign = myop('+='); subassign = myop('-=')
@@ -223,35 +172,26 @@ do (require=require, exports=exports, module=module) ->
 
       binarysm = new StateMachine(binaryOpItems)
 
-      binaryOperator = ->
+      binaryOperator = memo ->
         m = binarysm.match(self.data, self.cur)
         if m[0] then self.cur = m[1]; m[0]
 
       expr = (n) ->
         binary = rec ->
-          n
-          start = self.cur
           if x = binary()
             beforeOp = self.cur
             if (op=binaryOperator()) and (n>=op.pri>=x.pri) and (fn=expr(op.pri)) and y=fn()
               {text: x.text+op.text+y.text, pri:op.pri}
             else self.cur = beforeOp; x
-          else
-            self.cur = start
-            if x=simpleExpr() then {text:x, pri:4}
+          else if x=simpleExpr() then {text:x, pri:4}
 
       orBinary = expr(15)
       logicOrExpr = -> (x = orBinary()) and x.text
       wrapQuestion = wrap(question); wrapColon = wrap(colon)
-      condition = ->
-        x=logicOrExpr()
-        if wrapQuestion() and (y=assignExpr()) and expect(wrapColon, 'expect :') and (z=assignExpr())
-          x+'? '+y+': '+z
-        else x
+      condition = -> (x=logicOrExpr()) and ((wrapQuestion() and (y=assignExpr()) and expect(wrapColon, 'expect :') and (z=assignExpr()) and x+'? '+y+': '+z) or x)
       assignOperator = orp(assign, addassign, subassign,  mulassign, divassign, modassign, idivassign,
         rshiftassign, lshiftassign, zrshiftassign, bitandassign,  bitxorassign, bitorassign)
-      assignExpr_ = -> if (v=property()) and (op=assignOperator())
-          (e = expect(assignExpr, 'expect the right hand side of assign.')) and v+op+e
+      assignExpr_ = -> if (v=property()) and (op=assignOperator()) then (e = expect(assignExpr, 'expect the right hand side of assign.')) and v+op+e
       assignExpr = orp(assignExpr_, condition)
       expression_ = list(assignExpr, wrap(comma))
       expression = -> x = expression_(); if x then x.join(',')
