@@ -10,8 +10,8 @@ if (typeof window === 'object') {
 }
 
 (function(require, exports, module) {
-  var BindingError, Cons, DummyVar, Error, Parser, Trail, UArray, UObject, Var, dummy, isMatcher, nameToIndexMap, peasy, reElements, uarray, _ref1;
-  isMatcher = (peasy = require("./peasy")).isMatcher;
+  var BindingError, Cons, DummyVar, Error, Parser, Trail, UArray, UObject, Var, dummy, nameToIndexMap, peasy, reElements, uarray, _ref1;
+  peasy = require("./peasy");
   exports.Parser = Parser = (function(_super) {
     __extends(Parser, _super);
 
@@ -73,7 +73,7 @@ if (typeof window === 'object') {
           _results = [];
           for (_i = 0, _len = items.length; _i < _len; _i++) {
             item = items[_i];
-            _results.push(!isMatcher(item) ? self.literal(item) : item);
+            _results.push((typeof item) === 'string' ? self.literal(item) : item);
           }
           return _results;
         })();

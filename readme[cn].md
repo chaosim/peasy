@@ -7,6 +7,7 @@
 
 ###**用法**
 
+
 **客户端浏览器**:
 复制twoside.js, peasy.js, logicpeasy.js（如果需要逻辑功能)到项目文件夹，按次序添加到yourpage.html的`<script>`标签。
 
@@ -121,7 +122,7 @@ logicpeasy 是对peasy的扩展，它使得解析规则可以用逻辑变量作�
     
           @root = -> (x=expression()) and expect(eoi, 'expect end of input') and x
           
-在samples/arithmatic2.coffee中，全部代码只有180行，还包含了词法分析器的功能。能够完整地处理javascript这种复杂程度的表达式，而代码又如此简单，可以说只有peasy能够做到。
+在samples/arithmatic2.coffee中，全部代码只有180行，代码又如此简单，能够完整处理javascript这种复杂程度的表达式，还包含了词法分析器的功能，可以说只有peasy能够做到。
 
 上述代码有几点独特之处需要解释一下：
 * coffeescript的语法使得规则可读性非常好，不亚于其它任何编译器产生器的规则定义，javascript下则将稍逊一筹。
@@ -138,7 +139,7 @@ dsl.coffee 是我在另一项目中利用peasy解析小语言的实例。
 
 arimatic.coffee利用peasy对左递归的支持完成了javascript表达式的解析。它的特点是用一个函数生成所有优先级二元表达式的左递归规则。解析的时候从最低优先级的规则（逗号表达式）开始，调用栈经历所有优先级后得到最终结果。这种方法是线性时间的，但因为要经历很长的调用栈，对效率会有所影响。比如即使象1这样的表达式，也要变换成乘法式，加法式，...，逻辑或表达式，条件式，逗号式。
 
-arithmatic2.coffee是避免了上述问题，可以根据运算符跨越式提升表达式优先级。比如 1 || 1，可以直接将1提升成或表达式的优先级。
+arithmatic2.coffee避免了上述问题，可以根据运算符跨越式提升表达式优先级。比如 1 || 1，可以直接将1提升成或表达式的优先级。
 
 这两个模块演示的算术表达式的解析方法都是独特的，我尚没有发现其它类似的实现。如果您发现有相近或更好的方法，请告诉我。
 
@@ -229,13 +230,13 @@ UObject, uobject, UArray, uarray, Cons, cons, unifiable用来构造可以包含�
 * 重新组织文件夹，分离coffee和js文件夹。
 
 ###peasy项目的由来
-peasy项目是以本人的下一代编程语言项目dao(python语言实现)和daonode（coffeescript/javascript实现）的解析特性为基础移植而来的。dao项目实现了逻辑编程范式和函数编程范式的自然结合，是lisp和prolog语言的合体，并且内置包含了解析器功能。以逻辑变量作为参数编写文法规是dao项目的独创，这种逻辑参数文法具有强大的能力，具有超越传统编译原理所基于的乔姆斯基文法（包括上下文无关文法cfg、上下文相关文法csg以及0型文法）以及现在流行的解析表达式文法（peg)的表达能力（有兴趣的可以查阅编译原理中有关0-4型文法表达能力的一些论述，[比如这个链接](http://ccl.pku.edu.cn/doubtfire/Syntax/Introduction/Chomsky/Chomsky_Hierarchy/Chapter%2024%20The%20Chomsky%20Hierarchy.htm)），同时无损于解析算法的时间复杂度。
+peasy项目是以本人的下一代编程语言项目dao(python)和daonode（coffeescript/javascript）的解析特性为基础移植而来的。dao项目实现了逻辑编程范式和函数编程范式的自然结合，是lisp和prolog语言的合体，并且内置包含了解析器功能。以逻辑变量作为参数编写文法规是dao项目的独创，这种逻辑参数文法具有强大的能力，具有超越传统编译原理所基于的乔姆斯基文法（包括上下文无关文法cfg、上下文相关文法csg以及0型文法）以及现在流行的解析表达式文法（peg)的表达能力（有兴趣的可以查阅编译原理中有关0-4型文法表达能力的一些论述，[比如这个链接](http://ccl.pku.edu.cn/doubtfire/Syntax/Introduction/Chomsky/Chomsky_Hierarchy/Chapter%2024%20The%20Chomsky%20Hierarchy.htm)），同时无损于解析算法的时间复杂度。
 
 ### python实现
-本项目有peasy的老版本python实现，因为时间问题，api还是原来的，没有与coffee/js版本同步。
+本项目有peasy的老版本python实现，因为时间问题，没有与coffee/js版本同步更新。
 
 ### 关于Peasy的其它信息
-**更多文档**：http://chaosim.github.io/peasy/ 有更多关于peasy的文档。其中包含这个readme.md的中文版本。其它文档有的已经过时。
+**更多文档**：http://chaosim.github.io/peasy/ 有更多关于peasy的文档。
 
 **项目站点**：github <https://github.com/chaosim/peasy> 。
 

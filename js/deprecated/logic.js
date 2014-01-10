@@ -8,7 +8,7 @@ if (typeof window === 'object') {
 }
 
 (function(require, exports, module) {
-  var BindingError, Cons, DummyVar, Error, Trail, UArray, UObject, Var, char, dummy, identifier, isMatcher, makeInfo, nameToIndexMap, orp, reElements, uarray, unify, unifyList, _ref1, _ref2;
+  var BindingError, Cons, DummyVar, Error, Trail, UArray, UObject, Var, char, dummy, identifier, makeInfo, nameToIndexMap, orp, reElements, uarray, unify, unifyList, _ref1;
   exports.Error = Error = (function() {
     function Error(exp, message, stack) {
       this.exp = exp;
@@ -474,7 +474,7 @@ if (typeof window === 'object') {
       return true;
     };
   };
-  _ref2 = require("./../peasy"), isMatcher = _ref2.isMatcher, identifier = _ref2.identifier;
+  identifier = require("./../peasy").identifier;
   exports.orp = orp = function(info) {
     return function() {
       var item, items;
@@ -484,7 +484,7 @@ if (typeof window === 'object') {
         _results = [];
         for (_i = 0, _len = items.length; _i < _len; _i++) {
           item = items[_i];
-          if (!isMatcher(item)) {
+          if ((typeof item) === 'string') {
             _results.push(literal(info)(item));
           } else {
             _results.push(item);

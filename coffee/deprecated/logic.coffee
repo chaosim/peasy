@@ -229,12 +229,12 @@ do (require=require, exports=exports, module=module) ->
         if not _unify(xs[i], ys[i], compare) then return false
     true
 
-  {isMatcher, identifier} = require "./../peasy"
+  {identifier} = require "./../peasy"
 
   # combinator *orp* <br/>
   exports.orp = orp = (info) -> (items...) ->
     items = for item in items
-      if not isMatcher(item) then literal(info)(item) else item
+      if (typeof item)=='string' then literal(info)(item) else item
     ->
       start = info.cursor
       length = items.length

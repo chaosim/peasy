@@ -3,7 +3,7 @@ var exports, module, require, _ref,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 if (typeof window === 'object') {
-  _ref = twoside('/samples/arithmatic'), require = _ref.require, exports = _ref.exports, module = _ref.module;
+  _ref = twoside('/samples/arithmatic2'), require = _ref.require, exports = _ref.exports, module = _ref.module;
 }
 
 (function(require, exports, module) {
@@ -254,7 +254,7 @@ if (typeof window === 'object') {
       };
       bracketExpr1 = wrap(paren(wrap(function() {
         return commaExpr();
-      }), lbracket, rbracket, 'expect ) to match ('));
+      }), lbracket, rbracket, 'expect ] to match ['));
       bracketExpr = function() {
         var x;
         return (x = bracketExpr1()) && '[' + x + ']';

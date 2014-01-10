@@ -19,6 +19,8 @@ module.exports = (config) ->
       'deprecated/nonmodularpeasy.js'
       'samples/dsl.js'
       'samples/arithmatic.js'
+      'samples/statemachine.js'
+      'samples/arithmatic2.js'
       'test/karma/testpeasy.js'
       'test/karma/testlogicpeasy.js'
       'test/karma/deprecated/testlogic.js'
@@ -27,6 +29,7 @@ module.exports = (config) ->
       'test/karma/deprecated/testnonmodularpeasy.js'
       'test/karma/samples/testdsl.js'
       'test/karma/samples/testarithmatic.js'
+      'test/karma/samples/testarithmatic2.js'
      ],
     exclude: []
     #after switching from win7 64bit to win7 32bit, dsable many services, karma say chrome have not captured in 6000ms. use 9876 ok.

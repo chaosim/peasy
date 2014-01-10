@@ -4,7 +4,7 @@ if typeof window=='object' then {require, exports, module} = twoside('/logicpeas
 do (require=require, exports=exports, module=module) ->
 # The two lines above make this module can be used both in browser(with twoside.js) and on node.js
 
-  {isMatcher} = peasy = require "./peasy"
+  peasy = require "./peasy"
 
   exports.Parser = class Parser extends peasy.Parser
     constructor: ->
@@ -37,7 +37,7 @@ do (require=require, exports=exports, module=module) ->
 
       # combinator *orp* <br/>
       @orp = (items...) ->
-        items = for item in items then (if not isMatcher(item) then self.literal(item) else item)
+        items = for item in items then (if (typeof item)=='string' then self.literal(item) else item)
         ->
           start = self.cur
           length = items.length

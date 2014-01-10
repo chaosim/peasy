@@ -7,31 +7,30 @@ now only need [ like this ](https://raw.github.com/chaosim/peasy/master/doc/dolp
 
 ###**Usage**
 
-**Client browser**:
+**browser**:
 Copy twoside.js, peasy.js, logicpeasy.js(if logic feature is required) to the project folder, sequentially add `<script>` label in yourpage.html.
 
 **node.js**:
 In addition to directly copy the files from github, you can also get peasy by `npm install peasy`
 
 **twoside**:
-twoside is a utility that I wrote, so that the module can be used for both the browser and node.js. In broser,  if you do not want to use twoside, simply ignore and delete the first two lines in peasy.js and logicpeasy.js, and delete code exports variables and their references.
-For more information about twoside, See https://github/chaosim/twoside. In pure node environment without the client browser, twoside can be ignored and peasy will not be effected. You can install twoside through npm: `npm install twoside`
+twoside is a utility that I wrote, so that the module can be used both in the browser and in node.js. In broser,  if you do not want to use twoside, simply delete the first two lines in peasy.js and logicpeasy.js, exports variable and their references.
+For more information about twoside, See https://github/chaosim/twoside. In pure node environment without the browser, twoside can be ignored and peasy will not be effected. You can install twoside through npm: `npm install twoside`
 
 ### introduction
-From concept to implementation and use, Peasy is extremely simple. Peasy contains only one class “Parser”. In addition to 'parse' member function which starts parsing, Parser contains only two categories of member functions, one is called matching function, with no parameters, its role is to operate the parsed data and adjust the parsing pointer, including eoi, spaces, spaces1, digit, letter, upper, lower, number, string, identifier, identifierLetter, followIdentifierLetter, etc. Another is called combinational functions, which return matching function as its result, including rec, memo, orp, andp, notp, may, any, some, times, list, listn, follow, literal, char, wrap etc.  Specially, "rec" implements left recursive feature to make peasy have the strongest grammar expressiveness; "memo" implements caching feature, which make peasy can reach minimum time complexity.
+From concept to implementation and use, Peasy is extremely simple. Peasy contains only one class **Parser**. In addition to 'parse' member function which starts parsing, Parser contains only two categories of member functions, one is called **matching function**, with no parameters, its role is to operate the parsed data and adjust the parsing pointer, including eoi, spaces, spaces1, digit, letter, upper, lower, number, string, identifier, identifierLetter, followIdentifierLetter, etc. Another is called **combinational functions**, which return matching function as its result, including rec, memo, orp, andp, notp, may, any, some, times, list, listn, follow, literal, char, wrap etc.  Specially, "rec" implements left recursive feature to make peasy have the strongest grammar expressiveness; "memo" implements caching feature, which make peasy can reach minimum time complexity.
 
 logicpeasy is an extension to peasy, it makes logical variable can be used as an argument of the parsing rules.
 
 ### Start writing parsers
 
-Recommend the following methods:
+Recommend the following method:
 
-Create a new module(you can use a file under samples as template), then require peasy or logicpeasy, create a new Parser class which uses peasy.Parser or logicpeasy.Parser as the base class.
+Create a new module(you can use as template a file under samples), then require peasy or logicpeasy, create a new Parser class which uses peasy.Parser or logicpeasy.Parser as the base class.
 
+I advice you read the code in /test and /samples, which  are simple and self-interpreting,  before writing code for your own parser. after that you will figure out how to write parser.
 
-I advice you read the code  in peasy, test and samples, which  are simple and self-interpreting,  before writing code for your own parser. after that you will figure out how to write parser.
-
-In order to immediately have an intuitive feeling on how to write parser in peasy,  the main content of samples/arithmatic2.coffee is listed below. To save space and ease of reading, ... is used to omit the the paragraph which do not affect the overall structure.
+In order to immediately have an intuitive feeling on how to write parser in peasy,  the main content of `samples/arithmatic2.coffee` is listed below. To save space and ease of reading, ... is used to omit the the paragraph which do not affect the overall structure.
 
     exports.Parser = class Parser extends peasy.Parser
       constructor:->
@@ -65,7 +64,7 @@ In order to immediately have an intuitive feeling on how to write parser in peas
         prefixExpr =->(op = incDec()) and(x = headExpr()) and op + x
         suffixExpr =->(x = headExpr()) and(op = incDec()) and x + op
 
-        paren =(item, left = lpar, right = rpar, msg = 'expect) to match(')->
+        paren =(item, left = lpar, right = rpar, msg = 'expect) to match(')->s
           -> Start = self.cur; left() and(x = item()) and expect(right, msg + 'at:' + start) and x
 
         paren1 = paren(->(spaces() and(x = expression()) and spaces() and x))
@@ -75,7 +74,7 @@ In order to immediately have an intuitive feeling on how to write parser in peas
         unaryTail = orp(prefixExpr, suffixExpr, atom)
         unaryExpr =->(op = unaryOp()) and(x = unaryTail()) and op + x
 
-        bracketExpr1 = wrap(paren(wrap(-> commaExpr()), lbracket, rbracket, 'expect) to match('))
+        bracketExpr1 = wrap(paren(wrap(-> commaExpr()), lbracket, rbracket, 'expect ] to match ['))
         bracketExpr =->(x = bracketExpr1()) and '[' + x + ']'
         wrapDot = wrap(dot)
         dotIdentifier =-> wrapDot() and(id = expect(identifier, 'expect identifier')) and + id '.'
@@ -124,19 +123,18 @@ In order to immediately have an intuitive feeling on how to write parser in peas
 Samples/arithmatic2.coffee has only 180 lines of code in total, and which also contains lexical process. Able to handle expressions as complex as in javascript, and the code is so simple, I bet that only peasy can make it.
 
 The code has several unique points need to explain:
-* Coffeescript syntax makes the rules' readability is very good, as much as any other compiler's rule definition, and will be slightly worse under the javascript .
-* All the rules are set as instance member of the parser in the constructor, rather than the prototype members, which can avoid many potential problems associated with binding of `this`. I have tried the prototype members solution before, after testing and debugging I found there were many hidden bugs. In addition, to avoid the lookup to prototype inheritance chain, but also can improve the speed of the parser.
+* Coffeescript syntax makes the rules' readability very as good as any other compiler's rule definition, and will be slightly worse under the javascript.
+* All the rules are set as instance member of the parser in the constructor, rather than the prototype members, which can avoid many potential problems associated with binding of `this`. I have tried the prototype members solution before, after testing and debugging I found there were many hidden bugs. In addition, the speed of the parser can be improved by avoiding the lookup to prototype inheritance chain.
 * The process to binary expression(expr(n), and it generates binary = rec...) is also unique. This will be further explained hereinafter.
 
 You can also start from peasy.coffee(or js) or logicpeasy.coffee(or js), and directly modify until the completion of your own parser.
 
-
 ### Introduction to samples
 The project provides several samples, I'd like to explain them as below:
 
-dsl.coffee is what I parse little language in another project by using peasy.
+dsl.coffee is what I parse a little language in another project.
 
-arimatic.coffee uses the support for left-recursive in peasy to parse javascript expressions. It is characterized by generating left-recursive rules for all priority binary expression with a function. When parsing, It is necessary to go through the call stack with all priorities, from the lowest priority rule(comma expression) to the highest priority rule(atom expression such as number, string, etc). This method is linear time, but because a very long call stack need to be traversed, it will have an impact on the time to run. For example, even for an expression like '1', it must be transformed into a multiplication expressions, add expressions, ..., logical or expressions, conditional expression, and comma expression at last.
+arimatic.coffee uses the support for left-recursive to parse javascript expressions. It is characterized by generating left-recursive rules for all priority binary expression with a function. When parsing, It is necessary to go through the call stack with all priorities, from the lowest priority rule(comma expression) to the highest priority rule(atom expression such as number, string, etc). This method is linear time, but because a very long call stack need to be traversed, it will have an impact on the time to run. For example, even for an expression like '1', it must be transformed into a multiplication expressions, add expressions, ..., logical or expressions, conditional expression, and comma expression at last.
 
 arithmatic2.coffee is written to avoid the above problems, by setting expression priority according to the operator. Say, for 1 || 1, it can upgrade directly into an expression with priority of '||'(14 in the sample).
 
@@ -220,23 +218,24 @@ Class Members
 Var, vars, Dummy, dummy variables are used to construct logic variables.
 UObject, uobject, UArray, uarray, Cons, cons, unifiable can contain logical variables and unify correctly.
 
-### 0.3.0 new features
+### what's new in 0.3.0
 * new class-based API
 * samples: arithmatic, arithmatic2, dsl
 * rewrite readme.md
-* added readme[cn].md
+* added readme[cn].md  
 * grunt work flow
 * reorganize folders, separate coffee and js folder.
 
-### the origin of peasy items
-Peasy project is based on the next-generation programming language project I make in dao(python language) and daonode(coffeescript/javascript implementation).
-Dao project achieved a natural combination of logic programming paradigm and functional programming paradigm, and fit prolog and lisp language perfectly, and which also includes a built-in parser. Logical variable can be the parameter in the rule of dao or daonode. When the rule of parser can have logic variable parameters, the parser will has a more powerful capability of expressiveness than Chomsky grammars and peg grammar used in traditional compiler and parser. (anyone who is interested in this can read some discussion of compiler theory about 0-4 type of grammar, [such as this link ](http://ccl. pku.edu.cn/doubtfire/Syntax/Introduction/Chomsky/Chomsky_Hierarchy/Chapter% 2024% 20The% 20Chomsky% 20Hierarchy.htm)), and at the meanwhile the minimal time complexity could be keeped.
+### the origin of peasy project
+Peasy project is based on the next-generation programming language project I make in dao(python) and daonode(coffeescript/javascript).
+Dao project achieved a natural combination of logic programming paradigm and functional programming paradigm, and fit prolog and lisp language perfectly, and which also includes a built-in parser. Logical variable can be the parameter in the rule of dao or daonode. When the rule of parser can have logic variable parameters, the parser will has a more powerful capability of expressiveness than Chomsky grammars and peg grammar used in traditional compiler and parser. (anyone who is interested in this can read some discussion of compiler theory about 0-4 type of grammar, [like this link](http://ccl.pku.edu.cn/doubtfire/Syntax/Introduction/Chomsky/Chomsky_Hierarchy/Chapter%2024%20The%20Chomsky%20Hierarchy.htm)), and at the meanwhile the minimal time complexity could be keeped.
 
 ### Python implementation
-The project has an older version of python implementaion. Because I have no more spare time, api in python implementation is the original one, not updated as the same as with coffee/js version.
+The project has an old python implementaion. Because I have no more spare time, api in python implementation is the original one, not updated as the same as with coffee/js version.
 
 ### For additional information about Peasy
-**Further documentation**: http://chaosim.github.io/peasy/ have more documentation about peasy. A Chinese version(中文版）of  this readme.md is provided. Some other documentation maybe outdated.
+
+**Further documentation**: http://chaosim.github.io/peasy/ have more documentation about peasy. A [Chinese version(中文文档)](http://chaosim.github.io/peasy/doc/readme[cn].htm) of  this readme.md is provided. 
 
 **Project site**: github <https://github.com/chaosim/peasy>.
 

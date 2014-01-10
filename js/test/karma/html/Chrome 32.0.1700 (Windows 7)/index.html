@@ -57,17 +57,16 @@ body { background-color: #eeeeee; padding: 0; margin: 5px; overflow-y: scroll; }
  </script>
 </head>
 
-<body id="HTMLReporter" class="html-reporter showDetails">
+<body id="HTMLReporter" class="html-reporter">
 <h1>Chrome 32.0.1700 (Windows 7)</h1>
 
 <div class="alert">
 
 
-<span class="failingAlert bar">Failed 9 specs</span>
-<span class="resultsMenu bar">
-<a class="summaryMenuItem" href="#">72 specs<a>|<a class="detailsMenuItem" href="#">9 failing</a>
-</span>
 
+	
+	<span class="passingAlert bar">Passing 106 specs</span>
+	
 
 
 </div>
@@ -110,7 +109,7 @@ body { background-color: #eeeeee; padding: 0; margin: 5px; overflow-y: scroll; }
 		
 		</div>
 	
-		<div class="suite failed">
+		<div class="suite passed">
 			<span class="description">logicpeasy</span>
 		
 			<div class="specSummary passed">
@@ -129,7 +128,7 @@ body { background-color: #eeeeee; padding: 0; margin: 5px; overflow-y: scroll; }
 			<span class="description">should sequential unify logicvar</span>
 			</div>
 		
-			<div class="specSummary failed">
+			<div class="specSummary passed">
 			<span class="description">should unify logicvar with backtracking</span>
 			</div>
 		
@@ -145,7 +144,7 @@ body { background-color: #eeeeee; padding: 0; margin: 5px; overflow-y: scroll; }
 			<span class="description">should unify cons 3</span>
 			</div>
 		
-			<div class="specSummary failed">
+			<div class="specSummary passed">
 			<span class="description">should unify cons 4</span>
 			</div>
 		
@@ -165,7 +164,7 @@ body { background-color: #eeeeee; padding: 0; margin: 5px; overflow-y: scroll; }
 			<span class="description">should unify uobject 4</span>
 			</div>
 		
-			<div class="specSummary failed">
+			<div class="specSummary passed">
 			<span class="description">should unify uobject 5</span>
 			</div>
 		
@@ -189,32 +188,32 @@ body { background-color: #eeeeee; padding: 0; margin: 5px; overflow-y: scroll; }
 			<span class="description">should unify array, uarray 5</span>
 			</div>
 		
-			<div class="specSummary failed">
+			<div class="specSummary passed">
 			<span class="description">should unify array, uarray 6</span>
 			</div>
 		
 		</div>
 	
-		<div class="suite failed">
+		<div class="suite passed">
 			<span class="description">logic</span>
 		
 			<div class="specSummary passed">
 			<span class="description">test unify 1 1, 1 2</span>
 			</div>
 		
-			<div class="specSummary failed">
+			<div class="specSummary passed">
 			<span class="description">test unify logicvar</span>
 			</div>
 		
-			<div class="specSummary failed">
+			<div class="specSummary passed">
 			<span class="description">test unify cons</span>
 			</div>
 		
-			<div class="specSummary failed">
+			<div class="specSummary passed">
 			<span class="description">test unify uobject</span>
 			</div>
 		
-			<div class="specSummary failed">
+			<div class="specSummary passed">
 			<span class="description">test unify array, uarray</span>
 			</div>
 		
@@ -421,11 +420,157 @@ body)</span>
 		
 		</div>
 	
-		<div class="suite failed">
-			<span class="description">parse</span>
+		<div class="suite passed">
+			<span class="description">arithmatic</span>
 		
-			<div class="specSummary failed">
-			<span class="description">parse @) shold throw error</span>
+			<div class="specSummary passed">
+			<span class="description">parse number</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">parse identifier</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">parse string</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">parse a.b</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">parse 1+1</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">parse 1+1*1</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">parse 1*1+1</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">parse 1*1</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">parse 1*1*1</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">parse (1*1)</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">parse (1*1)</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">parse (1*1)+(2*3)</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">parse a=1</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">parse a  = 1</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">parse a  = b = 1</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">parse 1?  a = 3:  b = 4</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">parse 1?a=3:b=4</span>
+			</div>
+		
+		</div>
+	
+		<div class="suite passed">
+			<span class="description">run samples/testarithmatic2:</span>
+		
+			<div class="specSummary passed">
+			<span class="description"></span>
+			</div>
+		
+		</div>
+	
+		<div class="suite passed">
+			<span class="description">testarithmatic2</span>
+		
+			<div class="specSummary passed">
+			<span class="description">testaritmatic2: parse number</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">testaritmatic2: parse identifier</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">testaritmatic2: parse string</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">testaritmatic2: parse a.b</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">testaritmatic2: parse 1+1</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">testaritmatic2: parse 1+1*1</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">testaritmatic2: parse 1*1+1</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">testaritmatic2: parse 1*1</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">testaritmatic2: parse 1*1*1  </span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">testaritmatic2: parse (1*1)  </span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">testaritmatic2: parse (1*1)</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">testaritmatic2: parse (1*1)+(2*3)</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">testaritmatic2: parse a=1</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">testaritmatic2: parse a  = 1</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">testaritmatic2: parse a  = b = 1</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">testaritmatic2: parse 1?  a = 3:  b = 4</span>
+			</div>
+		
+			<div class="specSummary passed">
+			<span class="description">testaritmatic2: parse 1?a=3:b=4</span>
 			</div>
 		
 		</div>
@@ -433,105 +578,6 @@ body)</span>
 </div>
 
 <div id="details">
-	
-	
-	<div class="specDetail failed">
-		<span class="description">logicpeasy should unify logicvar with backtracking</span>
-		<div class="stackTrace">
-			<div class="resultMessage">TypeError: undefined is not a function
-    at http://localhost:9876/base/logicpeasy.js?1389234519000:76:28
-    at Parser.orp (http://localhost:9876/base/logicpeasy.js?1389234519000:79:11)
-    at orp (http://localhost:9876/base/test/karma/testlogicpeasy.js?1389234520000:24:27)
-    at null.&lt;anonymous&gt; (http://localhost:9876/base/test/karma/testlogicpeasy.js?1389234520000:42:38)</div>
-		</div>
-	</div>
-	
-	<div class="specDetail failed">
-		<span class="description">logicpeasy should unify cons 4</span>
-		<div class="stackTrace">
-			<div class="resultMessage">TypeError: undefined is not a function
-    at http://localhost:9876/base/logicpeasy.js?1389234519000:76:28
-    at Parser.orp (http://localhost:9876/base/logicpeasy.js?1389234519000:79:11)
-    at orp (http://localhost:9876/base/test/karma/testlogicpeasy.js?1389234520000:24:27)
-    at null.&lt;anonymous&gt; (http://localhost:9876/base/test/karma/testlogicpeasy.js?1389234520000:60:38)</div>
-		</div>
-	</div>
-	
-	<div class="specDetail failed">
-		<span class="description">logicpeasy should unify uobject 5</span>
-		<div class="stackTrace">
-			<div class="resultMessage">TypeError: undefined is not a function
-    at http://localhost:9876/base/logicpeasy.js?1389234519000:76:28
-    at Parser.orp (http://localhost:9876/base/logicpeasy.js?1389234519000:79:11)
-    at orp (http://localhost:9876/base/test/karma/testlogicpeasy.js?1389234520000:24:27)
-    at null.&lt;anonymous&gt; (http://localhost:9876/base/test/karma/testlogicpeasy.js?1389234520000:97:38)</div>
-		</div>
-	</div>
-	
-	<div class="specDetail failed">
-		<span class="description">logicpeasy should unify array, uarray 6</span>
-		<div class="stackTrace">
-			<div class="resultMessage">TypeError: undefined is not a function
-    at http://localhost:9876/base/logicpeasy.js?1389234519000:76:28
-    at Parser.orp (http://localhost:9876/base/logicpeasy.js?1389234519000:79:11)
-    at orp (http://localhost:9876/base/test/karma/testlogicpeasy.js?1389234520000:24:27)
-    at null.&lt;anonymous&gt; (http://localhost:9876/base/test/karma/testlogicpeasy.js?1389234520000:125:38)</div>
-		</div>
-	</div>
-	
-	
-	
-	<div class="specDetail failed">
-		<span class="description">logic test unify logicvar</span>
-		<div class="stackTrace">
-			<div class="resultMessage">TypeError: undefined is not a function
-    at http://localhost:9876/base/deprecated/logic.js?1389234519000:487:16
-    at http://localhost:9876/base/deprecated/logic.js?1389234519000:494:9
-    at null.&lt;anonymous&gt; (http://localhost:9876/base/test/karma/deprecated/testlogic.js?1389234520000:33:38)</div>
-		</div>
-	</div>
-	
-	<div class="specDetail failed">
-		<span class="description">logic test unify cons</span>
-		<div class="stackTrace">
-			<div class="resultMessage">TypeError: undefined is not a function
-    at http://localhost:9876/base/deprecated/logic.js?1389234519000:487:16
-    at http://localhost:9876/base/deprecated/logic.js?1389234519000:494:9
-    at null.&lt;anonymous&gt; (http://localhost:9876/base/test/karma/deprecated/testlogic.js?1389234520000:48:38)</div>
-		</div>
-	</div>
-	
-	<div class="specDetail failed">
-		<span class="description">logic test unify uobject</span>
-		<div class="stackTrace">
-			<div class="resultMessage">TypeError: undefined is not a function
-    at http://localhost:9876/base/deprecated/logic.js?1389234519000:487:16
-    at http://localhost:9876/base/deprecated/logic.js?1389234519000:494:9
-    at null.&lt;anonymous&gt; (http://localhost:9876/base/test/karma/deprecated/testlogic.js?1389234520000:81:38)</div>
-		</div>
-	</div>
-	
-	<div class="specDetail failed">
-		<span class="description">logic test unify array, uarray</span>
-		<div class="stackTrace">
-			<div class="resultMessage">TypeError: undefined is not a function
-    at http://localhost:9876/base/deprecated/logic.js?1389234519000:487:16
-    at http://localhost:9876/base/deprecated/logic.js?1389234519000:494:9
-    at null.&lt;anonymous&gt; (http://localhost:9876/base/test/karma/deprecated/testlogic.js?1389234520000:104:38)</div>
-		</div>
-	</div>
-	
-	
-	
-	<div class="specDetail failed">
-		<span class="description">parse parse @) shold throw error</span>
-		<div class="stackTrace">
-			<div class="resultMessage">Expected '1' to be 1.
-Error: Expected '1' to be 1.
-    at null.&lt;anonymous&gt; (http://localhost:9876/base/test/karma/samples/testarithmatic.js?1389234520000:16:33)</div>
-		</div>
-	</div>
-	
 	
 </div>
 </body>

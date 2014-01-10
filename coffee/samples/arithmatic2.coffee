@@ -1,4 +1,4 @@
-if typeof window=='object' then {require, exports, module} = twoside('/samples/arithmatic')
+if typeof window=='object' then {require, exports, module} = twoside('/samples/arithmatic2')
 do (require=require, exports=exports, module=module) ->
 
   ###https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
@@ -139,7 +139,7 @@ do (require=require, exports=exports, module=module) ->
       unaryTail = orp(prefixExpr, suffixExpr, atom)
       unaryExpr = -> (op=unaryOp()) and (x=unaryTail()) and op+x
 
-      bracketExpr1 = wrap(paren(wrap(-> commaExpr()), lbracket, rbracket, 'expect ) to match ('))
+      bracketExpr1 = wrap(paren(wrap(-> commaExpr()), lbracket, rbracket, 'expect ] to match ['))
       bracketExpr = -> (x=bracketExpr1()) and '['+x+']'
       wrapDot = wrap(dot)
       dotIdentifier = -> wrapDot() and (id=expect(identifier, 'expect identifier')) and '.'+id
