@@ -36,7 +36,7 @@ do (require=require, exports=exports, module=module) ->
   exports.Parser = class Parser extends peasy.Parser
     constructor: ->
       super
-      self = @
+      {orp, list, rec, memo, wrap, char, literal, spaces, eoi, identifier} = self = @
 
       number = ->
         text = self.data
@@ -88,8 +88,6 @@ do (require=require, exports=exports, module=module) ->
             return quote+result+quote
           else if not c then error('expect '+quote)
           else result += c; cur++
-
-      {orp, list, rec, memo, wrap, char, literal, spaces, eoi, identifier} = self
 
       question = char('?'); colon = char(':'); comma = char(','); dot = char('.')
       lpar = char('('); rpar = char(')')
