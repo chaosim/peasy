@@ -32,94 +32,96 @@ I advice you read the code in /test and /samples, which  are simple and self-int
 
 In order to immediately have an intuitive feeling on how to write parser in peasy,  the main content of `samples/arithmatic2.coffee` is listed below. To save space and ease of reading, ... is used to omit the the paragraph which do not affect the overall structure.
 
-    exports.Parser = class Parser extends peasy.Parser
-      constructor:->
-        super # call the constructor of peasy.Parser
-        self = @ save 'this' to self in advance, avoid the problem that 'this' may be bound to wrong object.
+```coffeescript
+exports.Parser = class Parser extends peasy.Parser
+  constructor:->
+    super # call the constructor of peasy.Parser
+    self = @ save 'this' to self in advance, avoid the problem that 'this' may be bound to wrong object.
 
-        number =->...
-        string =->...
+    number =->...
+    string =->...
 
-        {orp, list, rec, memo, wrap, char, literal, spaces, eoi, identifier} = self
+    {orp, list, rec, memo, wrap, char, literal, spaces, eoi, identifier} = self
 
-        question = char('?'); colon = char(':'); comma = char(','); dot = char('.')
-        lpar = char('('); rpar = char(')')
-        lbracket = char('['); rbracket = char(']')
+    question = char('?'); colon = char(':'); comma = char(','); dot = char('.')
+    lpar = char('('); rpar = char(')')
+    lbracket = char('['); rbracket = char(']')
 
-        myop =(op)->
-          if op.length == 1 then opFn = char(op) else opFn = literal(op)
-          if _in_(op [0], identifierCharSet)
-            -> Spaces() and(op = opFn()) and spaces() and not _in_(data [self.cur], identifierCharSet) and '' + op + ''
-          else-> spaces() and(op = opFn()) and spaces() and op
+    myop =(op)->
+      if op.length == 1 then opFn = char(op) else opFn = literal(op)
+      if _in_(op [0], identifierCharSet)
+        -> Spaces() and(op = opFn()) and spaces() and not _in_(data [self.cur], identifierCharSet) and '' + op + ''
+      else-> spaces() and(op = opFn()) and spaces() and op
 
-        posNeg =(op)->...
-        positive = posNeg('+'); negative = posNeg('-')
-        ...
-        assign = myop('=');..., bitorassign = myop('|=')
+    posNeg =(op)->...
+    positive = posNeg('+'); negative = posNeg('-')
+    ...
+    assign = myop('=');..., bitorassign = myop('|=')
 
-        error =(msg)-> throw self.data [self.cur-20.. self.cur +20] + '' + self.cur + ':' + msg
-        expect =(fn, msg)-> fn() or error(msg)
+    error =(msg)-> throw self.data [self.cur-20.. self.cur +20] + '' + self.cur + ':' + msg
+    expect =(fn, msg)-> fn() or error(msg)
 
-        incDec = orp(inc, dec)
-        prefixExpr =->(op = incDec()) and(x = headExpr()) and op + x
-        suffixExpr =->(x = headExpr()) and(op = incDec()) and x + op
+    incDec = orp(inc, dec)
+    prefixExpr =->(op = incDec()) and(x = headExpr()) and op + x
+    suffixExpr =->(x = headExpr()) and(op = incDec()) and x + op
 
-        paren =(item, left = lpar, right = rpar, msg = 'expect) to match(')->s
-          -> Start = self.cur; left() and(x = item()) and expect(right, msg + 'at:' + start) and x
+    paren =(item, left = lpar, right = rpar, msg = 'expect) to match(')->s
+      -> Start = self.cur; left() and(x = item()) and expect(right, msg + 'at:' + start) and x
 
-        paren1 = paren(->(spaces() and(x = expression()) and spaces() and x))
-        parenExpr = memo->(x = paren1()) and '(' + x + ')'
-        atom = memo orp(parenExpr, number, string, identifier)
-        newExpr =-> new_() and(x = callProp()) and 'new' + x
-        unaryTail = orp(prefixExpr, suffixExpr, atom)
-        unaryExpr =->(op = unaryOp()) and(x = unaryTail()) and op + x
+    paren1 = paren(->(spaces() and(x = expression()) and spaces() and x))
+    parenExpr = memo->(x = paren1()) and '(' + x + ')'
+    atom = memo orp(parenExpr, number, string, identifier)
+    newExpr =-> new_() and(x = callProp()) and 'new' + x
+    unaryTail = orp(prefixExpr, suffixExpr, atom)
+    unaryExpr =->(op = unaryOp()) and(x = unaryTail()) and op + x
 
-        bracketExpr1 = wrap(paren(wrap(-> commaExpr()), lbracket, rbracket, 'expect ] to match ['))
-        bracketExpr =->(x = bracketExpr1()) and '[' + x + ']'
-        wrapDot = wrap(dot)
-        dotIdentifier =-> wrapDot() and(id = expect(identifier, 'expect identifier')) and + id '.'
-        attr = orp(bracketExpr, dotIdentifier)
-        param = paren->(spaces() and(x = expression()) and spaces() and expect(rpar, 'expect)')) or ''
-        paramExpr = memo->(x = param()) and '(' + x + ')'
-        callPropTail = orp(paramExpr, attr)
-        callPropExpr = rec->(h = headExpr()) and(((e = callPropTail()) and h + e) ​​or h)
-        property = rec->(h = headExpr()) and(((e = attr()) and h + e) ​​or h)
-        headAtom = memo orp(parenExpr, identifier)
-        headExpr = memo orp(callPropExpr, headAtom)
-        simpleExpr = memo orp(unaryExpr, prefixExpr, suffixExpr, callPropExpr, newExpr, atom)
+    bracketExpr1 = wrap(paren(wrap(-> commaExpr()), lbracket, rbracket, 'expect ] to match ['))
+    bracketExpr =->(x = bracketExpr1()) and '[' + x + ']'
+    wrapDot = wrap(dot)
+    dotIdentifier =-> wrapDot() and(id = expect(identifier, 'expect identifier')) and + id '.'
+    attr = orp(bracketExpr, dotIdentifier)
+    param = paren->(spaces() and(x = expression()) and spaces() and expect(rpar, 'expect)')) or ''
+    paramExpr = memo->(x = param()) and '(' + x + ')'
+    callPropTail = orp(paramExpr, attr)
+    callPropExpr = rec->(h = headExpr()) and(((e = callPropTail()) and h + e) ​​or h)
+    property = rec->(h = headExpr()) and(((e = attr()) and h + e) ​​or h)
+    headAtom = memo orp(parenExpr, identifier)
+    headExpr = memo orp(callPropExpr, headAtom)
+    simpleExpr = memo orp(unaryExpr, prefixExpr, suffixExpr, callPropExpr, newExpr, atom)
 
-        binaryOpPriorityMap = {5: ['*', '/', '/ /', '%'],...}
+    binaryOpPriorityMap = {5: ['*', '/', '/ /', '%'],...}
 
-        binaryOpItems = []
-        do-> for k, ops of binaryOpPriorityMap
-          for op in ops then binaryOpItems.push [op, {text: op, pri: parseInt(k)}]
+    binaryOpItems = []
+    do-> for k, ops of binaryOpPriorityMap
+      for op in ops then binaryOpItems.push [op, {text: op, pri: parseInt(k)}]
 
-        binarysm = new StateMachine(binaryOpItems)
+    binarysm = new StateMachine(binaryOpItems)
 
-        binaryOperator = memo->
-          m = binarysm.match(self.data, self.cur)
-          if m [0] then self.cur = m [1]; m [0]
+    binaryOperator = memo->
+      m = binarysm.match(self.data, self.cur)
+      if m [0] then self.cur = m [1]; m [0]
 
-        expr =(n)-> binary = rec->
-            if x = binary()
-              beforeOp = self.cur
-              if(op = binaryOperator()) and(n> = op.pri> = x.pri) and(fn = expr(op.pri)) and y = fn()
-                {text: x.text + op.text + y.text, pri: op.pri}
-              else self.cur = beforeOp; x
-            else if x = simpleExpr() then {text: x, pri: 4}
+    expr =(n)-> binary = rec->
+        if x = binary()
+          beforeOp = self.cur
+          if(op = binaryOperator()) and(n> = op.pri> = x.pri) and(fn = expr(op.pri)) and y = fn()
+            {text: x.text + op.text + y.text, pri: op.pri}
+          else self.cur = beforeOp; x
+        else if x = simpleExpr() then {text: x, pri: 4}
 
-        orBinary = expr(15)
-        logicOrExpr =->(x = orBinary()) and x.text
-        wrapQuestion = wrap(question); wrapColon = wrap(colon)
-        '?':- condition =>(x = logicOrExpr()) and((wrapQuestion() and(y = assignExpr()) and expect(wrapColon, 'expect') and(z = assignExpr()) and x + + y + ':' + z) or x)
-        assignOperator = orp(assign, addassign,..., bitorassign)
-        assignExpr_ =-> if(v = property()) and(op = assignOperator()) then(e = expect(assignExpr, '. expect the right hand side of assign')) and v + op + e
-        assignExpr = orp(assignExpr_, condition)
-        expression_ = list(assignExpr, wrap(comma))
-        expression =-> x = expression_(); if x then x.join(',')
+    orBinary = expr(15)
+    logicOrExpr =->(x = orBinary()) and x.text
+    wrapQuestion = wrap(question); wrapColon = wrap(colon)
+    '?':- condition =>(x = logicOrExpr()) and((wrapQuestion() and(y = assignExpr()) and expect(wrapColon, 'expect') and(z = assignExpr()) and x + + y + ':' + z) or x)
+    assignOperator = orp(assign, addassign,..., bitorassign)
+    assignExpr_ =-> if(v = property()) and(op = assignOperator()) then(e = expect(assignExpr, '. expect the right hand side of assign')) and v + op + e
+    assignExpr = orp(assignExpr_, condition)
+    expression_ = list(assignExpr, wrap(comma))
+    expression =-> x = expression_(); if x then x.join(',')
 
-        @ root =->(x = expression()) and expect(eoi, 'expect end of input') and x
-    
+    @ root =->(x = expression()) and expect(eoi, 'expect end of input') and x
+
+```
 Samples/arithmatic2.coffee has only 180 lines of code in total, and which also contains lexical process. Able to handle expressions as complex as in javascript, and the code is so simple, I bet that only peasy can make it.
 
 The code has several unique points need to explain:
