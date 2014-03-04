@@ -1,7 +1,10 @@
 if typeof window=='object' then {require, exports, module} = twoside('/test/karma//testdsl')
 do (require=require, exports=exports, module=module) ->
 
-  {parseTemplate, Textualizer, Listizer, Transformer, jsTemplates} = require '../../../samples/dsl'
+  peasy = require '../../../peasy'
+  console.log 'peasy is required:', peasy
+  peasy.testing = true
+  {parseTemplate} = require '../../../samples/dsl'
 
   describe "run samples/testdsl:", ->
     it '', ->

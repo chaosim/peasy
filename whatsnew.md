@@ -1,5 +1,9 @@
 ## What's new in peasy
 
+### what's new in 0.3.1
+  * add member "base" to peasy.Parser, to support modularization
+  * exports.debug and exports.warn
+
 ### what's new in 0.3.0
   * new class based api
   * samples: arithmatic, arithmatic2, dsl

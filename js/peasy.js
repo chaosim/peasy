@@ -7,13 +7,14 @@ if (typeof window === 'object') {
 }
 
 (function(require, exports, module) {
-  var Parser, charset, digits, letterDigits, letters, lowers, uppers;
+  var Charset, Parser, charset, digits, letterDigits, letters, lowers, uppers;
   exports.Parser = Parser = (function() {
     function Parser() {
-      var self, some;
+      var base, self;
       self = this;
+      base = this.base = {};
       this.ruleIndex = 0;
-      this.parse = function(data, root, cur) {
+      base.parse = this.parse = function(data, root, cur) {
         if (root == null) {
           root = self.root;
         }
@@ -26,7 +27,7 @@ if (typeof window === 'object') {
         self.cache = {};
         return root();
       };
-      this.rec = function(rule) {
+      base.rec = this.rec = function(rule) {
         var tag;
         tag = self.ruleIndex++;
         return function() {
@@ -62,7 +63,7 @@ if (typeof window === 'object') {
           }
         };
       };
-      this.memo = function(rule) {
+      base.memo = this.memo = function(rule) {
         var tag,
           _this = this;
         tag = self.ruleIndex++;
@@ -81,7 +82,7 @@ if (typeof window === 'object') {
           }
         };
       };
-      this.orp = function() {
+      base.orp = this.orp = function() {
         var item, items,
           _this = this;
         items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
@@ -111,7 +112,7 @@ if (typeof window === 'object') {
           }
         };
       };
-      this.andp = function() {
+      base.andp = this.andp = function() {
         var item, items;
         items = 1 <= arguments.length ? __slice.call(arguments, 0) : [];
         items = (function() {
@@ -138,7 +139,7 @@ if (typeof window === 'object') {
           return result;
         };
       };
-      this.notp = function(item) {
+      base.notp = this.notp = function(item) {
         if ((typeof item) === 'string') {
           item = self.literal(item);
         }
@@ -146,7 +147,7 @@ if (typeof window === 'object') {
           return !item();
         };
       };
-      this.may = function(item) {
+      base.may = this.may = function(item) {
         var _this = this;
         if ((typeof item) === 'string') {
           item = self.literal(item);
@@ -162,7 +163,7 @@ if (typeof window === 'object') {
           }
         };
       };
-      this.any = function(item) {
+      base.any = this.any = function(item) {
         var _this = this;
         if ((typeof item) === 'string') {
           item = self.literal(item);
@@ -176,7 +177,7 @@ if (typeof window === 'object') {
           return result;
         };
       };
-      some = function(item) {
+      base.some = this.some = function(item) {
         if ((typeof item) === 'string') {
           item = self.literal(item);
         }
@@ -192,7 +193,7 @@ if (typeof window === 'object') {
           return result;
         };
       };
-      this.times = function(item, n) {
+      base.times = this.times = function(item, n) {
         if ((typeof item) === 'string') {
           item = self.literal(item);
         }
@@ -209,7 +210,7 @@ if (typeof window === 'object') {
           return result;
         };
       };
-      this.list = function(item, separator) {
+      base.list = this.list = function(item, separator) {
         if (separator == null) {
           separator = self.spaces;
         }
@@ -231,7 +232,7 @@ if (typeof window === 'object') {
           return result;
         };
       };
-      this.listn = function(item, n, separator) {
+      base.listn = this.listn = function(item, n, separator) {
         if (separator == null) {
           separator = self.spaces;
         }
@@ -258,7 +259,7 @@ if (typeof window === 'object') {
           return result;
         };
       };
-      this.follow = function(item) {
+      base.follow = this.follow = function(item) {
         var _this = this;
         if ((typeof item) === 'string') {
           item = self.literal(item);
@@ -271,7 +272,7 @@ if (typeof window === 'object') {
           return x;
         };
       };
-      this.literal = function(string) {
+      base.literal = this.literal = function(string) {
         return function() {
           var len, start, stop;
           len = string.length;
@@ -282,7 +283,7 @@ if (typeof window === 'object') {
           }
         };
       };
-      this.char = function(c) {
+      base.char = this.char = function(c) {
         return function() {
           if (self.data[self.cur] === c) {
             self.cur++;
@@ -290,7 +291,7 @@ if (typeof window === 'object') {
           }
         };
       };
-      this.wrap = function(item, left, right) {
+      base.wrap = this.wrap = function(item, left, right) {
         if (left == null) {
           left = self.spaces;
         }
@@ -307,7 +308,7 @@ if (typeof window === 'object') {
           }
         };
       };
-      this.spaces = function() {
+      base.spaces = this.spaces = function() {
         var c, cur, data, len;
         data = self.data;
         len = 0;
@@ -322,7 +323,7 @@ if (typeof window === 'object') {
         self.cur += len;
         return len + 1;
       };
-      this.spaces1 = function() {
+      base.spaces1 = this.spaces1 = function() {
         var c, cur, data, len;
         data = self.data;
         cur = self.cur;
@@ -337,10 +338,10 @@ if (typeof window === 'object') {
         self.cur += len;
         return len;
       };
-      this.eoi = function() {
+      base.eoi = this.eoi = function() {
         return self.cur === self.data.length;
       };
-      this.identifierLetter = function() {
+      base.identifierLetter = this.identifierLetter = function() {
         var c;
         c = self.data[self.cur];
         if (c === '$' || c === '_' || ('a' <= c && c < 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9')) {
@@ -348,12 +349,12 @@ if (typeof window === 'object') {
           return true;
         }
       };
-      this.followIdentifierLetter = function() {
+      base.followIdentifierLetter = this.followIdentifierLetter = function() {
         var c;
         c = self.data[self.cur];
         return (c === '$' || c === '_' || ('a' <= c && c < 'z') || ('A' <= c && c <= 'Z') || ('0' <= c && c <= '9')) && c;
       };
-      this.digit = function() {
+      base.digit = this.digit = function() {
         var c;
         c = self.data[self.cur];
         if (('0' <= c && c <= '9')) {
@@ -361,7 +362,7 @@ if (typeof window === 'object') {
           return c;
         }
       };
-      this.letter = function() {
+      base.letter = this.letter = function() {
         var c;
         c = self.data[self.cur];
         if (('a' <= c && c <= 'z') || ('A' <= c && c <= 'Z')) {
@@ -369,7 +370,7 @@ if (typeof window === 'object') {
           return c;
         }
       };
-      this.lower = function() {
+      base.lower = this.lower = function() {
         var c;
         c = self.data[self.cur];
         if (('a' <= c && c <= 'z')) {
@@ -377,7 +378,7 @@ if (typeof window === 'object') {
           return c;
         }
       };
-      this.upper = function() {
+      base.upper = this.upper = function() {
         var c;
         c = self.data[self.cur];
         if (('A' <= c && c <= 'Z')) {
@@ -385,7 +386,7 @@ if (typeof window === 'object') {
           return c;
         }
       };
-      this.identifier = function() {
+      base.identifier = this.identifier = function() {
         var c, cur, data, start;
         data = self.data;
         start = cur = self.cur;
@@ -406,7 +407,7 @@ if (typeof window === 'object') {
         self.cur = cur;
         return data.slice(start, cur);
       };
-      this.number = function() {
+      base.number = this.number = function() {
         var c, cur, data;
         data = self.data;
         cur = self.cur;
@@ -427,7 +428,7 @@ if (typeof window === 'object') {
         self.cur = cur;
         return data.slice(start, cur);
       };
-      this.string = function() {
+      base.string = this.string = function() {
         var c, cur, quote, start, text;
         text = self.data;
         start = cur = self.cur;
@@ -450,24 +451,55 @@ if (typeof window === 'object') {
           }
         }
       };
+      base.select = this.select = function(item, actions) {
+        var action, defaultAction;
+        console.log('select');
+        action = actions[item];
+        if (action) {
+          return action();
+        }
+        defaultAction = actions['default'] || actions[''];
+        if (defaultAction) {
+          return defaultAction();
+        }
+      };
     }
 
     return Parser;
 
   })();
+  exports.debugging = false;
+  exports.testing = false;
+  exports.debug = function(message) {
+    if (exports.debugging) {
+      return console.log(message);
+    }
+  };
+  exports.warn = function(message) {
+    if (exports.debugging || exports.testing) {
+      return console.log(message);
+    }
+  };
   /* some utilities for parsing*/
 
-  exports.charset = charset = function(string) {
-    var dict, x, _i, _len;
-    dict = {};
+  Charset = function(string) {
+    var x, _i, _len;
     for (_i = 0, _len = string.length; _i < _len; _i++) {
       x = string[_i];
-      dict[x] = true;
+      this[x] = true;
     }
-    return dict;
+    return this;
   };
-  exports.inCharset = exports.in_ = function(c, set) {
-    return set.hasOwnProperty(c);
+  Charset.prototype.contain = function(char) {
+    return this.hasOwnProperty(char);
+  };
+  exports.charset = charset = function(string) {
+    return new Charset(string);
+  };
+  exports.inCharset = exports.in_ = function(char, set) {
+    exports.warn('peasy.inCharset(char, set) is deprecated, use set.contain(char) instead.');
+    exports.warn(char + ':' + set.hasOwnProperty(char));
+    return set.hasOwnProperty(char);
   };
   exports.isdigit = function(c) {
     return ('0' <= c && c <= '9');

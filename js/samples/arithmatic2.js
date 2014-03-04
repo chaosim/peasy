@@ -42,9 +42,9 @@ if (typeof window === 'object') {
     __extends(Parser, _super);
 
     function Parser() {
-      var addassign, assign, assignExpr, assignExpr_, assignOperator, atom, attr, binaryOpItems, binaryOpPriorityMap, binaryOperator, binarysm, bitandassign, bitnot, bitorassign, bitxorassign, bracketExpr, bracketExpr1, callPropExpr, callPropTail, char, colon, comma, condition, dec, delete_, divassign, dot, dotIdentifier, eoi, error, expect, expr, expression, expression_, headAtom, headExpr, identifier, idivassign, inc, incDec, lbracket, list, literal, logicOrExpr, lpar, lshiftassign, memo, modassign, mulassign, myop, negative, newExpr, new_, not1, not_, number, orBinary, orp, param, paramExpr, paren, paren1, parenExpr, posNeg, positive, prefixExpr, property, question, rbracket, rec, rpar, rshiftassign, self, simpleExpr, spaces, string, subassign, suffixExpr, typeof_, unaryExpr, unaryOp, unaryTail, void_, wrap, wrapColon, wrapDot, wrapQuestion, zrshiftassign;
+      var addassign, assign, assignExpr, assignExpr_, assignOperator, atom, attr, binaryOpItems, binaryOpPriorityMap, binaryOperator, binarysm, bitandassign, bitnot, bitorassign, bitxorassign, bracketExpr, bracketExpr1, callPropExpr, callPropTail, char, colon, comma, condition, dec, delete_, divassign, dot, dotIdentifier, eoi, error, expect, expr, expression, expression_, headAtom, headExpr, identifier, idivassign, inc, incDec, lbracket, list, literal, logicOrExpr, lpar, lshiftassign, memo, modassign, mulassign, myop, negative, newExpr, new_, not1, not_, number, orBinary, orp, param, paramExpr, paren, paren1, parenExpr, posNeg, positive, prefixExpr, property, question, rbracket, rec, rpar, rshiftassign, self, simpleExpr, spaces, string, subassign, suffixExpr, typeof_, unaryExpr, unaryOp, unaryTail, void_, wrap, wrapColon, wrapDot, wrapQuestion, zrshiftassign, _ref1;
       Parser.__super__.constructor.apply(this, arguments);
-      self = this;
+      _ref1 = self = this, orp = _ref1.orp, list = _ref1.list, rec = _ref1.rec, memo = _ref1.memo, wrap = _ref1.wrap, char = _ref1.char, literal = _ref1.literal, spaces = _ref1.spaces, eoi = _ref1.eoi, identifier = _ref1.identifier;
       number = function() {
         var base, c, cur, start, text;
         text = self.data;
@@ -132,7 +132,6 @@ if (typeof window === 'object') {
           }
         }
       };
-      orp = self.orp, list = self.list, rec = self.rec, memo = self.memo, wrap = self.wrap, char = self.char, literal = self.literal, spaces = self.spaces, eoi = self.eoi, identifier = self.identifier;
       question = char('?');
       colon = char(':');
       comma = char(',');
@@ -333,10 +332,10 @@ if (typeof window === 'object') {
       expr = function(n) {
         var binary;
         return binary = rec(function() {
-          var beforeOp, fn, op, x, y, _ref1;
+          var beforeOp, fn, op, x, y, _ref2;
           if (x = binary()) {
             beforeOp = self.cur;
-            if ((op = binaryOperator()) && ((n >= (_ref1 = op.pri) && _ref1 >= x.pri)) && (fn = expr(op.pri)) && (y = fn())) {
+            if ((op = binaryOperator()) && ((n >= (_ref2 = op.pri) && _ref2 >= x.pri)) && (fn = expr(op.pri)) && (y = fn())) {
               return {
                 text: x.text + op.text + y.text,
                 pri: op.pri

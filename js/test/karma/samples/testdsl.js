@@ -5,8 +5,11 @@ if (typeof window === 'object') {
 }
 
 (function(require, exports, module) {
-  var Listizer, Textualizer, Transformer, jsTemplates, parseTemplate, _ref1;
-  _ref1 = require('../../../samples/dsl'), parseTemplate = _ref1.parseTemplate, Textualizer = _ref1.Textualizer, Listizer = _ref1.Listizer, Transformer = _ref1.Transformer, jsTemplates = _ref1.jsTemplates;
+  var parseTemplate, peasy;
+  peasy = require('../../../peasy');
+  console.log('peasy is required:', peasy);
+  peasy.testing = true;
+  parseTemplate = require('../../../samples/dsl').parseTemplate;
   describe("run samples/testdsl:", function() {
     return it('', function() {});
   });

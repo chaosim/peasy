@@ -3,12 +3,13 @@ do (require=require, exports=exports, module=module) ->
 # The two lines above make this module can be used both in browser(with twoside.js) and on node.js
 
   exports.Parser = class Parser
-
     constructor:  ->
       self = @
+      # base collects all members of peasy.Parser, so that the derived parser can be modularized.
+      base = @base = {}
       @ruleIndex = 0
 
-      @parse = (data, root=self.root, cur=0) ->
+      base.parse = @parse = (data, root=self.root, cur=0) ->
         self.data = data
         self.cur = cur
         self.ruleStack = {};
@@ -16,7 +17,7 @@ do (require=require, exports=exports, module=module) ->
         root()
 
       # make rule left recursive
-      @rec = (rule) ->
+      base.rec = @rec = (rule) ->
         tag = self.ruleIndex++
         ->
           ruleStack = self.ruleStack
@@ -39,7 +40,7 @@ do (require=require, exports=exports, module=module) ->
             self.cur = m[1]
             m[0]
 
-      @memo = (rule) ->
+      base.memo = @memo = (rule) ->
         tag = self.ruleIndex++
         =>
           cache = self.cache[tag] ?= {}
@@ -52,7 +53,7 @@ do (require=require, exports=exports, module=module) ->
             result
 
       # combinator *orp* <br/>
-      @orp = (items...) ->
+      base.orp = @orp = (items...) ->
         items = for item in items
           if (typeof item)=='string' then self.literal(item) else item
         =>
@@ -63,7 +64,7 @@ do (require=require, exports=exports, module=module) ->
             if result = item() then return result
 
       # #### matchers and combinators<br/>
-      @andp = (items...) ->
+      base.andp = @andp = (items...) ->
         items = for item in items
           if (typeof item)=='string' then self.literal(item) else item
         ->
@@ -71,11 +72,11 @@ do (require=require, exports=exports, module=module) ->
             if not (result = item()) then return
           result
 
-      @notp = (item) ->
+      base.notp = @notp = (item) ->
         if (typeof item)=='string' then item = self.literal(item)
         -> not item()
 
-      @may = (item) ->
+      base.may = @may = (item) ->
         if (typeof item)=='string' then item = self.literal(item)
         =>
           start = self.cur
@@ -83,7 +84,7 @@ do (require=require, exports=exports, module=module) ->
           else self.cur = start; true
 
       # combinator *any*: zero or more times of `item()`
-      @any = (item) ->
+      base.any = @any = (item) ->
         if (typeof item)=='string' then item = self.literal(item)
         =>
           result = []
@@ -91,7 +92,7 @@ do (require=require, exports=exports, module=module) ->
           result
 
       # combinator *some*: one or more times of `item()`
-      some = (item) ->
+      base.some = @some = (item) ->
         if (typeof item)=='string' then item = self.literal(item)
         ->
           if not (x = item()) then return
@@ -100,7 +101,7 @@ do (require=require, exports=exports, module=module) ->
           result
 
       # combinator *times*: match *self.n* times item(), n>=1
-      @times = (item, n) ->
+      base.times = @times = (item, n) ->
         if (typeof item)=='string' then item = self.literal(item)
         ->
           i = 0
@@ -110,7 +111,7 @@ do (require=require, exports=exports, module=module) ->
           result
 
       # combinator *list*: some times item(), separated by self.separator
-      @list = (item, separator=self.spaces) ->
+      base.list = @list = (item, separator=self.spaces) ->
         if (typeof item)=='string' then item = self.literal(item)
         if (typeof separator)=='string' then separator = self.literal(separator)
         ->
@@ -120,7 +121,7 @@ do (require=require, exports=exports, module=module) ->
           result
 
       # combinator *listn*: given self.n times self.item separated by self.separator, n>=1
-      @listn = (item, n, separator=self.spaces) ->
+      base.listn = @listn = (item, n, separator=self.spaces) ->
         if (typeof item)=='string' then item = self.literal(item)
         if (typeof separator)=='string' then separator = self.literal(separator)
         ->
@@ -133,7 +134,7 @@ do (require=require, exports=exports, module=module) ->
           result
 
       # combinator *follow* <br/>
-      @follow = (item) ->
+      base.follow = @follow = (item) ->
         if (typeof item)=='string' then item = self.literal(item)
         =>
           start = self.cur
@@ -142,22 +143,22 @@ do (require=require, exports=exports, module=module) ->
       # matcher *literal*<br/>
       # match a text string.<br/>
       # `notice = some combinators like andp, orp, notp, any, some, etc. use literal to wrap a object which is not a matcher.
-      @literal = (string) -> ->
+      base.literal = @literal = (string) -> ->
         len = string.length
         start = self.cur
         if self.data.slice(start, stop = start+len)==string then self.cur = stop; true
 
       # matcher *char*: match one character<br/>
-      @char = (c) -> -> if self.data[self.cur]==c then self.cur++; c
+      base.char = @char = (c) -> -> if self.data[self.cur]==c then self.cur++; c
 
       # matcher *wrap*<br/>
       # match left, then match item, match right at last
-      @wrap = (item, left=self.spaces, right=self.spaces) ->
+      base.wrap = @wrap = (item, left=self.spaces, right=self.spaces) ->
         if (typeof item)=='string' then item = self.literal(item)
         -> if left() and result = item() and right() then result
 
       # matcher *spaces*: zero or more whitespaces, ie. space or tab.<br/>
-      @spaces = ->
+      base.spaces = @spaces = ->
         data = self.data
         len = 0
         cur = self.cur
@@ -168,7 +169,7 @@ do (require=require, exports=exports, module=module) ->
 
       # matcher *spaces1*<br/>
       # one or more whitespaces, ie. space or tab.<br/>
-      @spaces1 = ->
+      base.spaces1 = @spaces1 = ->
         data = self.data
         cur = self.cur
         len = 0
@@ -177,24 +178,24 @@ do (require=require, exports=exports, module=module) ->
         self.cur += len
         len
 
-      @eoi = -> self.cur==self.data.length
+      base.eoi = @eoi = -> self.cur==self.data.length
 
       # matcher *identifierLetter* = normal version<br/>
-      @identifierLetter = ->
+      base.identifierLetter = @identifierLetter = ->
         c = self.data[self.cur]
         if c is '$' or c is '_' or 'a'<=c<'z' or 'A'<=c<='Z' or '0'<=c<='9'
           self.cur++; true
 
-      @followIdentifierLetter = ->
+      base.followIdentifierLetter = @followIdentifierLetter = ->
         c = self.data[self.cur]
         (c is '$' or c is '_' or 'a'<=c<'z' or 'A'<=c<='Z' or '0'<=c<='9') and c
 
-      @digit = -> c = self.data[self.cur];  if '0'<=c<='9' then self.cur++; c
-      @letter = -> c = self.data[self.cur]; if 'a'<=c<='z' or 'A'<=c<='Z' then self.cur++; c
-      @lower = -> c = self.data[self.cur]; if 'a'<=c<='z' then self.cur++; c
-      @upper = -> c = self.data[self.cur]; if 'A'<=c<='Z' then self.cur++; c
+      base.digit = @digit = -> c = self.data[self.cur];  if '0'<=c<='9' then self.cur++; c
+      base.letter = @letter = -> c = self.data[self.cur]; if 'a'<=c<='z' or 'A'<=c<='Z' then self.cur++; c
+      base.lower = @lower = -> c = self.data[self.cur]; if 'a'<=c<='z' then self.cur++; c
+      base.upper = @upper = -> c = self.data[self.cur]; if 'A'<=c<='Z' then self.cur++; c
 
-      @identifier = ->
+      base.identifier = @identifier = ->
         data = self.data
         start = cur = self.cur
         c = data[cur]
@@ -207,7 +208,7 @@ do (require=require, exports=exports, module=module) ->
         self.cur = cur
         data[start...cur]
 
-      @number = ->
+      base.number = @number = ->
         data = self.data
         cur = self.cur
         c = data[cur]
@@ -220,7 +221,7 @@ do (require=require, exports=exports, module=module) ->
         self.cur = cur
         data[start...cur]
 
-      @string = ->
+      base.string = @string = ->
         text = self.data
         start = cur = self.cur
         c = text[cur]
@@ -235,13 +236,26 @@ do (require=require, exports=exports, module=module) ->
             return text[start..cur]
           else if not c then return
 
-  ### some utilities for parsing ###
-  exports.charset = charset = (string) ->
-    dict = {}
-    for x in string then dict[x] = true
-    dict
+      base.select = @select = (item, actions) ->
+        console.log 'select'
+        action = actions[item]
+        if action then return action()
+        defaultAction = actions['default'] or actions['']
+        if defaultAction then defaultAction()
 
-  exports.inCharset = exports.in_ = (c, set) -> set.hasOwnProperty(c)
+  exports.debugging = false
+  exports.testing = false
+  exports.debug = (message) -> if exports.debugging then console.log message
+  exports.warn = (message) -> if exports.debugging or exports.testing then console.log message
+
+  ### some utilities for parsing ###
+  Charset = (string) -> @[x] = true for x in string; this
+  Charset::contain = (char) -> @hasOwnProperty(char)
+  exports.charset = charset = (string) -> new Charset(string)
+
+  exports.inCharset = exports.in_ = (char, set) ->
+    exports.warn 'peasy.inCharset(char, set) is deprecated, use set.contain(char) instead.'
+    set.hasOwnProperty(char)
 
   exports.isdigit = (c) -> '0'<=c<='9'
   exports.isletter = (c) -> 'a'<=c<='z' or 'A'<=c<='Z'
