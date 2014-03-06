@@ -1,10 +1,10 @@
-if typeof window=='object' then {require, exports, module} = twoside('/test/mocha/testpeasy')
+if typeof window=='object' then {require, exports, module} = twoside('/test/mocha/testparser')
 do (require=require, exports=exports, module=module) ->
 
   chai = require 'chai'
   expect = chai.expect
 
-  {charset, inCharset} = peasy = require '../../peasy'
+  {charset, inCharset} = peasy = require '../../index'
 
   describe "run testpeasy:", ->
     it '', ->

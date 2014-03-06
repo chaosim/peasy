@@ -3,19 +3,19 @@ var exports, module, require, _ref,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 if (typeof window === 'object') {
-  _ref = twoside('/test/mocha/testpeasy'), require = _ref.require, exports = _ref.exports, module = _ref.module;
+  _ref = twoside('/test/mocha/testparser'), require = _ref.require, exports = _ref.exports, module = _ref.module;
 }
 
 (function(require, exports, module) {
   var chai, charset, expect, inCharset, peasy, _ref1;
   chai = require('chai');
   expect = chai.expect;
-  _ref1 = peasy = require('../../peasy'), charset = _ref1.charset, inCharset = _ref1.inCharset;
+  _ref1 = peasy = require('../../index'), charset = _ref1.charset, inCharset = _ref1.inCharset;
   describe("run testpeasy:", function() {
     return it('', function() {});
   });
   describe("peasy", function() {
-    return it.only("charset('ab') should contain 'a'", function() {
+    return it("charset('ab') should contain 'a'", function() {
       var set;
       set = charset('ab');
       expect(inCharset('a', set)).to.equal(true);
@@ -29,15 +29,16 @@ if (typeof window === 'object') {
         __extends(Parser, _super);
 
         function Parser() {
-          var a, x,
-            _this = this;
+          var a, x;
           Parser.__super__.constructor.apply(this, arguments);
           a = this.char('a');
           x = this.char('x');
-          this.A = this.rec(this.orp((function() {
-            var m;
-            return (m = _this.A()) && x() && m + 'x' || m;
-          }), a));
+          this.A = this.rec(this.orp(((function(_this) {
+            return function() {
+              var m;
+              return (m = _this.A()) && x() && m + 'x' || m;
+            };
+          })(this)), a));
         }
 
         return Parser;
@@ -58,16 +59,17 @@ if (typeof window === 'object') {
         __extends(Parser, _super);
 
         function Parser() {
-          var B, a, b, x,
-            _this = this;
+          var B, a, b, x;
           Parser.__super__.constructor.apply(this, arguments);
           a = this.char('a');
           b = this.char('b');
           x = this.char('x');
-          this.A = this.rec(this.orp((function() {
-            var m;
-            return (m = B()) && x() && m + 'x' || m;
-          }), a));
+          this.A = this.rec(this.orp(((function(_this) {
+            return function() {
+              var m;
+              return (m = B()) && x() && m + 'x' || m;
+            };
+          })(this)), a));
           B = this.rec(this.orp(this.A, b));
         }
 
@@ -97,16 +99,17 @@ if (typeof window === 'object') {
         __extends(Parser, _super);
 
         function Parser() {
-          var B, C, a, b, x,
-            _this = this;
+          var B, C, a, b, x;
           Parser.__super__.constructor.apply(this, arguments);
           a = this.char('a');
           b = this.char('b');
           x = this.char('x');
-          this.A = this.rec(this.orp((function() {
-            var m;
-            return (m = B()) && x() && m + 'x' || m;
-          }), a));
+          this.A = this.rec(this.orp(((function(_this) {
+            return function() {
+              var m;
+              return (m = B()) && x() && m + 'x' || m;
+            };
+          })(this)), a));
           B = this.rec(function() {
             return C();
           });
@@ -139,21 +142,24 @@ if (typeof window === 'object') {
         __extends(Parser, _super);
 
         function Parser() {
-          var B, C, a, b, x, y,
-            _this = this;
+          var B, C, a, b, x, y;
           Parser.__super__.constructor.apply(this, arguments);
           a = this.char('a');
           b = this.char('b');
           x = this.char('x');
           y = this.char('y');
-          this.A = this.rec(this.orp((function() {
-            var m;
-            return (m = B()) && x() && m + 'x' || m;
-          }), a));
-          B = this.rec(this.orp((function() {
-            var m;
-            return (m = _this.A()) && y() && m + 'y';
-          }), function() {
+          this.A = this.rec(this.orp(((function(_this) {
+            return function() {
+              var m;
+              return (m = B()) && x() && m + 'x' || m;
+            };
+          })(this)), a));
+          B = this.rec(this.orp(((function(_this) {
+            return function() {
+              var m;
+              return (m = _this.A()) && y() && m + 'y';
+            };
+          })(this)), function() {
             return C();
           }));
           C = this.rec(this.orp(this.A, b));
@@ -191,26 +197,31 @@ if (typeof window === 'object') {
         __extends(Parser, _super);
 
         function Parser() {
-          var B, C, a, b, x, y, z,
-            _this = this;
+          var B, C, a, b, x, y, z;
           Parser.__super__.constructor.apply(this, arguments);
           a = this.char('a');
           b = this.char('b');
           x = this.char('x');
           y = this.char('y');
           z = this.char('z');
-          this.root = function() {
-            var m;
-            return (m = _this.A()) && z() && m + 'z';
-          };
-          this.A = this.rec(this.orp((function() {
-            var m;
-            return (m = B()) && x() && m + 'x' || m;
-          }), a));
-          B = this.rec(this.orp((function() {
-            var m;
-            return (m = _this.A()) && y() && m + 'y';
-          }), function() {
+          this.root = (function(_this) {
+            return function() {
+              var m;
+              return (m = _this.A()) && z() && m + 'z';
+            };
+          })(this);
+          this.A = this.rec(this.orp(((function(_this) {
+            return function() {
+              var m;
+              return (m = B()) && x() && m + 'x' || m;
+            };
+          })(this)), a));
+          B = this.rec(this.orp(((function(_this) {
+            return function() {
+              var m;
+              return (m = _this.A()) && y() && m + 'y';
+            };
+          })(this)), function() {
             return C();
           }));
           C = this.rec(this.orp(this.A, b));

@@ -1,10 +1,7 @@
-/* modules/twoside
-# make modules can be used on both server side and client side.
-github.com/chaosim/twoside
-npmjs.org/package/twoside
-npm install twoside
-*/
 
+/* modules/twoside
+ * make modules can be used on both server side and client side.
+ */
 (function() {
   var getStackTrace, normalize, oldexports, oldmodule, oldrequire, twoside;
   oldrequire = window.require;
@@ -17,28 +14,34 @@ npm install twoside
     return obj.stack;
   };
   twoside = window.twoside = function(path) {
-    var exports, module, modulePath, require;
+    var exports, filename, module, modulePath, require;
     window.require = oldrequire;
     window.exports = oldexports;
     window.module = oldmodule;
-    path = normalize(path);
+    path = normalize(path).slice(0, path.lastIndexOf("."));
+    modulePath = path.slice(0, path.lastIndexOf("/"));
+    filename = path.slice(path.lastIndexOf("/") + 1);
     exports = {};
     module = twoside._modules[path] = {
       exports: exports
     };
-    modulePath = path.slice(0, path.lastIndexOf("/") + 1);
+    if (filename === 'index') {
+      twoside._modules[modulePath] = module;
+    }
     require = function(path) {
-      module = twoside._modules[path];
-      if (module) {
-        return module;
+      var requiredModule;
+      requiredModule = twoside._modules[path];
+      if (requiredModule) {
+        return requiredModule;
       }
-      path = normalize(modulePath + path);
-      module = twoside._modules[path];
-      if (!module) {
+      path = path.slice(0, path.lastIndexOf("."));
+      path = normalize(modulePath + '/' + path);
+      requiredModule = twoside._modules[path];
+      if (!requiredModule) {
         console.log(getStackTrace());
         throw path + ' is a wrong twoside module path.';
       }
-      return module.exports;
+      return requiredModule.exports;
     };
     return {
       require: require,
@@ -47,13 +50,12 @@ npm install twoside
     };
   };
   twoside._modules = {};
-  /* we can alias some external modules.*/
 
+  /* we can alias some external modules. */
   twoside.alias = function(path, object) {
     return twoside._modules[path] = object;
   };
-  /* e.g. n browser, if underscore have been imported before, we can alias it like below:*/
-
+  twoside.alias('lodash', _);
   return normalize = function(path) {
     var head, target, token, _i, _len, _ref;
     if (!path || path === '/') {
@@ -69,17 +71,9 @@ npm install twoside
         target.push(token);
       }
     }
-    /* for IE 6 & 7 - use path.charAt(i), not path[i]*/
 
+    /* for IE 6 & 7 - use path.charAt(i), not path[i] */
     head = path.charAt(0) === '/' || path.charAt(0) === '.' ? '/' : '';
     return head + target.join('/').replace(/[\/]{2,}/g, '/');
   };
 })();
-
-/* javascript sample
-if (typeof window==='object'){ var m = twoside('/module1'), exports= m.exports, module = m.module, require = m.module; }
-(function(require, exports, module){
-  // wrapped module definition
-})(require, exports, module);
-*/
-

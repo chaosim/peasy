@@ -1,0 +1,5 @@
+require './testparser.js'
+require './testlogicparser'
+require './samples/testdsl'
+require './samples/testarithmatic'
+require './samples/testarithmatic2'

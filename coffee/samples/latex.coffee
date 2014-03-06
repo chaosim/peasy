@@ -19,47 +19,44 @@ Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 -}
 
 {- |
-   Module      : Text.Pandoc.Readers.LaTeX
-   Copyright   : Copyright (C) 2006-2012 John MacFarlane
-   License     : GNU GPL, version 2 or above
+ Module      : Text.Pandoc.Readers.LaTeX
+ Copyright   : Copyright (C) 2006-2012 John MacFarlane
+ License     : GNU GPL, version 2 or above
 
-   Maintainer  : John MacFarlane <jgm@berkeley.edu>
-   Stability   : alpha
-   Portability : portable
+ Maintainer  : John MacFarlane <jgm@berkeley.edu>
+ Stability   : alpha
+ Portability : portable
 
 Conversion of LaTeX to 'Pandoc' document.
 -}
 ###
 
-if typeof window=='object' then {require, exports, module} = twoside('/samples/latex')
-do (require=require, exports=exports, module=module) ->
+peasy  = require "../index"
+{StateMachine} =   require "./statemachine"
 
-  peasy  = require "../peasy"
-  {StateMachine} =   require "./statemachine"
+{in_, charset, letterDigits} = peasy
+_in_ = in_
+identifierChars = '$_'+letterDigits
+identifierCharSet = charset(identifierChars)
 
-  {in_, charset, letterDigits} = peasy
-  _in_ = in_
-  identifierChars = '$_'+letterDigits
-  identifierCharSet = charset(identifierChars)
-
-  exports.Parser = class Parser extends peasy.Parser
-    constructor: ->
-      super
-      {orp, list, rec, memo, wrap, char, literal, spaces, eoi, identifier} = self = @
-      mayNewLine = may(newline)
-      anyControlSeq = -> slash() and orp(NewLine, anyChar)()
-      controlSeq = (name) -> slash()
-      dimenarg = (ch=orp("", literal('='))()) and (num=many1(digit)()) and (dim=oneOfStrings("pt","pc","in","bp","cm","mm","dd","cc","sp")()) and ch+num+dim
-      isLowerHex = (x) -> (x >= '0' && x <= '9' || x >= 'a' && x <= 'f')
-      anyCharUnless('\n')
-      skipLine = ->
-        text = self.data
-        cur = self.cur
-        while 1
-          c = text[cur++]
-          if c=='\n' then return true
-      percent = char('%')
-      comment = percent() and skipLine()
-      block = orp(comment, emptyLines, environment, macro, blockCommand, groupedBlock, paragraph, charAt)
-      blocks = any(block)
-      @root = -> (x = blocks()) and x
+exports.Parser = class Parser extends peasy.Parser
+  constructor: ->
+    super
+    {orp, list, rec, memo, wrap, char, literal, spaces, eoi, identifier} = self = @
+    mayNewLine = may(newline)
+    anyControlSeq = -> slash() and orp(NewLine, anyChar)()
+    controlSeq = (name) -> slash()
+    dimenarg = (ch=orp("", literal('='))()) and (num=many1(digit)()) and (dim=oneOfStrings("pt","pc","in","bp","cm","mm","dd","cc","sp")()) and ch+num+dim
+    isLowerHex = (x) -> (x >= '0' && x <= '9' || x >= 'a' && x <= 'f')
+    anyCharUnless('\n')
+    skipLine = ->
+      text = self.data
+      cur = self.cur
+      while 1
+        c = text[cur++]
+        if c=='\n' then return true
+    percent = char('%')
+    comment = percent() and skipLine()
+    block = orp(comment, emptyLines, environment, macro, blockCommand, groupedBlock, paragraph, charAt)
+    blocks = any(block)
+    @root = -> (x = blocks()) and x
