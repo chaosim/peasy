@@ -34,10 +34,10 @@ module.exports = function(basepath, packageName, pathMap) {
 
     var head, foot;
     if (pathMap['only_wrap_for_browser']) {
-      head = "/* wrap line by gulp-twoside for providing twoside module*/; (function() {var ts = twoside('" + padpath + "'), require = ts.require, exports = ts.exports, module = ts.module; \n\n";
+      head = "(function() {var ts = twoside('" + padpath + "'), require = ts.require, exports = ts.exports, module = ts.module; // wrap line by gulp-twoside for providing twoside module\n\n";
       foot = "\n\n})();// wrap line by gulp-twoside"
     } else {
-      head = "/* wrap line by gulp-twoside for providing twoside module*/; var exports, module, require; (function(require, exports, module) {var ts;if (typeof window === 'object') { ts = twoside('" + padpath + "'), require = ts.require, exports = ts.exports, module = ts.module;} \n\n";
+      head = "var exports, module, require; \n(function(require, exports, module) {var ts;if (typeof window === 'object') { ts = twoside('" + padpath + "'), require = ts.require, exports = ts.exports, module = ts.module;} // wrap line by gulp-twoside for providing twoside module; \n\n";
       foot = "\n\n})(require, exports, module);// wrap line by gulp-twoside"
     }
     //console.log(file);

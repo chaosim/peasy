@@ -1,10 +1,8 @@
+(function() {var ts = twoside('peasy/karma/samples-dsl.js'), require = ts.require, exports = ts.exports, module = ts.module; // wrap line by gulp-twoside for providing twoside module
+
 var parseTemplate, peasy;
 
 peasy = require('../peasy');
-
-console.log('peasy is required:', peasy);
-
-peasy.testing = true;
 
 parseTemplate = require('../samples/dsl').parseTemplate;
 
@@ -99,3 +97,6 @@ describe("parse template", function() {
     return expect(parseTemplate('!case test: \n@block(body)')).toBe('"case ",t.transform(e.test),": \\n",t.block(t.transform(e.body))');
   });
 });
+
+
+})();// wrap line by gulp-twoside

@@ -1,3 +1,6 @@
+var exports, module, require; 
+(function(require, exports, module) {var ts;if (typeof window === 'object') { ts = twoside('peasy/samples/arithmatic2.js'), require = ts.require, exports = ts.exports, module = ts.module;} // wrap line by gulp-twoside for providing twoside module; 
+
 
 /*https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
 Precedence	Operator type	Associativity	Individual operators
@@ -388,3 +391,6 @@ exports.Parser = Parser = (function(_super) {
   return Parser;
 
 })(peasy.Parser);
+
+
+})(require, exports, module);// wrap line by gulp-twoside

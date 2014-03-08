@@ -1,6 +1,6 @@
 peasy = require '../peasy'
-console.log 'peasy is required:', peasy
-peasy.testing = true
+#console.log 'peasy is required:', peasy
+#peasy.testing = true
 {parseTemplate} = require '../samples/dsl'
 
 describe "run samples/testdsl:", ->

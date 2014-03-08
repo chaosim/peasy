@@ -1,3 +1,5 @@
+(function() {var ts = twoside('peasy/karma/logicpeasy.js'), require = ts.require, exports = ts.exports, module = ts.module; // wrap line by gulp-twoside for providing twoside module
+
 var Parser, Trail, cons, uarray, uobject, vari, _ref,
   __slice = [].slice;
 
@@ -124,3 +126,6 @@ describe('logicparser', function() {
     })).toBe(true);
   });
 });
+
+
+})();// wrap line by gulp-twoside

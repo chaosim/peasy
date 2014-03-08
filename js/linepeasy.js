@@ -1,3 +1,6 @@
+var exports, module, require; 
+(function(require, exports, module) {var ts;if (typeof window === 'object') { ts = twoside('peasy/linepeasy.js'), require = ts.require, exports = ts.exports, module = ts.module;} // wrap line by gulp-twoside for providing twoside module; 
+
 
 /* an extended parser with lineno and row support */
 var Parser, exports, peasy,
@@ -474,3 +477,6 @@ exports = module.exports = Parser = (function(_super) {
   return Parser;
 
 })(peasy.BaseParser);
+
+
+})(require, exports, module);// wrap line by gulp-twoside

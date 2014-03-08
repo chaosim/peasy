@@ -1,3 +1,6 @@
+var exports, module, require; 
+(function(require, exports, module) {var ts;if (typeof window === 'object') { ts = twoside('peasy/peasy.js'), require = ts.require, exports = ts.exports, module = ts.module;} // wrap line by gulp-twoside for providing twoside module; 
+
 var Parser,
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
   __slice = [].slice;
@@ -595,3 +598,6 @@ exports.isObject = function (value) {
 }
 
 ;
+
+
+})(require, exports, module);// wrap line by gulp-twoside

@@ -1,3 +1,6 @@
+var exports, module, require; 
+(function(require, exports, module) {var ts;if (typeof window === 'object') { ts = twoside('peasy/logicpeasy.js'), require = ts.require, exports = ts.exports, module = ts.module;} // wrap line by gulp-twoside for providing twoside module; 
+
 
 /* an extended parser with logic features */
 var BindingError, Cons, DummyVar, Error, Parser, Trail, UArray, UObject, Var, dummy, exports, nameToIndexMap, peasy, reElements, uarray,
@@ -635,3 +638,6 @@ exports.unifiable = function(x) {
     return x;
   }
 };
+
+
+})(require, exports, module);// wrap line by gulp-twoside
