@@ -1,4 +1,4 @@
-peasy  = require "../index"
+peasy  = require "../peasy"
 
 {in_, charset, letterDigits} = peasy
 _in_ = in_

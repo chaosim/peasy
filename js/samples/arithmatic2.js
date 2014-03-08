@@ -1,7 +1,3 @@
-// wrap lines by gulp-twoside for providing twoside module
-var exports, module, require, ts;
-if (typeof window === 'object') { ts = twoside('peasy/samples/arithmatic2.js'), require = ts.require, exports = ts.exports, module = ts.module;} 
-(function(require, exports, module) {
 
 /*https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Operator_Precedence
 Precedence	Operator type	Associativity	Individual operators
@@ -30,7 +26,7 @@ var Parser, StateMachine, charset, identifierCharSet, identifierChars, in_, lett
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
-peasy = require("../index");
+peasy = require("../peasy");
 
 StateMachine = require("./statemachine").StateMachine;
 
@@ -392,4 +388,3 @@ exports.Parser = Parser = (function(_super) {
   return Parser;
 
 })(peasy.Parser);
-})(require, exports, module); // wrap line by gulp-twoside

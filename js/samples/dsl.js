@@ -1,13 +1,9 @@
-// wrap lines by gulp-twoside for providing twoside module
-var exports, module, require, ts;
-if (typeof window === 'object') { ts = twoside('peasy/samples/dsl.js'), require = ts.require, exports = ts.exports, module = ts.module;} 
-(function(require, exports, module) {
-var TemplateParser, charset, endTextCharset, identifierHeadChars, identifierHeadCharset, inCharset, letters, parseTemplate, peasy, templateParser, _ref,
+var BaseParser, TemplateParser, charset, endTextCharset, identifierHeadChars, identifierHeadCharset, inCharset, letters, parseTemplate, peasy, templateParser, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-_ref = peasy = require('../index'), inCharset = _ref.inCharset, letters = _ref.letters, charset = _ref.charset;
+_ref = peasy = require('../peasy'), inCharset = _ref.inCharset, letters = _ref.letters, charset = _ref.charset, BaseParser = _ref.BaseParser;
 
 identifierHeadChars = '$_' + letters;
 
@@ -124,11 +120,10 @@ exports.TemplateParser = TemplateParser = (function(_super) {
 
   return TemplateParser;
 
-})(peasy.Parser);
+})(BaseParser);
 
 templateParser = new TemplateParser;
 
 exports.parseTemplate = parseTemplate = function(text) {
   return templateParser.parse(text);
 };
-})(require, exports, module); // wrap line by gulp-twoside

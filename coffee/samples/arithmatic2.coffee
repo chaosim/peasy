@@ -22,7 +22,7 @@ left-to-right	[]
 18	comma	left-to-right	,
 ###
 
-peasy  = require "../index"
+peasy  = require "../peasy"
 {StateMachine} =   require "./statemachine"
 
 {in_, charset, letterDigits} = peasy

@@ -1,7 +1,3 @@
-// wrap lines by gulp-twoside for providing twoside module
-var exports, module, require, ts;
-if (typeof window === 'object') { ts = twoside('peasy/samples/latex.js'), require = ts.require, exports = ts.exports, module = ts.module;} 
-(function(require, exports, module) {
 
 /*
 {-# LANGUAGE ScopedTypeVariables, OverloadedStrings #-}
@@ -94,4 +90,3 @@ exports.Parser = Parser = (function(_super) {
   return Parser;
 
 })(peasy.Parser);
-})(require, exports, module); // wrap line by gulp-twoside

@@ -1,31 +1,56 @@
-### modules/twoside
-# make modules can be used on both server side and client side.
+### twoside.js(generated from twoside.coffee)
+make modules can be used on both server side and client side.
+use gulp-twoside to wrap your module.
+
+below is a sample module that have been wrapped by gulp-twoside:
+
+// wrap lines by gulp-twoside for providing twoside module
+var exports, module, require;
+(function(require, exports, module) {
+if (typeof window === 'object') { ts = twoside('twoside-sample/module1.js'), require = ts.require, exports = ts.exports, module = ts.module;}
+// module1.js
+exports.something = function(){
+  console.log('in module1');
+  return 'something in module1'
+}
+// wrap line by gulp-twoside
+})(require, exports, module);
 ###
 do ->
-  oldrequire = window.require
-  oldexports = window.exports
-  oldmodule = window.module
+#  oldrequire = window.require
+#  oldexports = window.exports
+#  oldmodule = window.module
   getStackTrace = ->
     obj = {}
     Error.captureStackTrace(obj, getStackTrace)
     obj.stack
+  removeExtname = (path) ->
+    length = path.length
+    if path.slice(length-3)=='.js' then path.slice(0, length-3)
+    else if path.slice(length-7)=='.coffee' then path.slice(0, length-7)
+    #else if path.slice(length-5)=='.json' then path.slice(length-5)
+    else path
   twoside = window.twoside = (path) ->
-    window.require = oldrequire
-    window.exports = oldexports
-    window.module = oldmodule
+#    window.require = oldrequire
+#    window.exports = oldexports
+#    window.module = oldmodule
     # extension name will be removed, so don't make different modules with same path and different extension name.
-    path = normalize(path).slice(0, path.lastIndexOf("."))
-    modulePath =  path.slice(0, path.lastIndexOf("/"))
-    filename = path.slice(path.lastIndexOf("/")+1)
+    lastSlashIndex = path.lastIndexOf("/")
+    if lastSlashIndex>=0
+      modulePath =  path.slice(0, lastSlashIndex)
+      filename = removeExtname(path.slice(lastSlashIndex+1))
+    else
+      modulePath = path
+      filename = ''
+    path = removeExtname(normalize(path))
     exports  = {}
     module = twoside._modules[path] = {exports:exports}
-    # support folder as module that is similar to nodejs
+    # support folder as module by adding index.js or index.coffee
     if filename=='index' then twoside._modules[modulePath] = module
     require = (path) ->
       requiredModule  = twoside._modules[path]
-      if requiredModule then return requiredModule
-      path = path.slice(0, path.lastIndexOf(".")) # remove .js, .coffee, .json extension name
-      path = normalize(modulePath+'/'+path)
+      if requiredModule then return requiredModule.exports
+      path = normalize(modulePath+'/'+removeExtname(path))
       requiredModule = twoside._modules[path]
       if !requiredModule
         console.log(getStackTrace())
@@ -35,7 +60,7 @@ do ->
   twoside._modules = {}
   ### we can alias some external modules.###
   twoside.alias = (path, object) -> twoside._modules[path] = object
-  twoside.alias('lodash', _)
+  #twoside.alias('lodash', _)
 
   normalize = (path) ->
     if !path || path == '/' then return '/'

@@ -1,7 +1,3 @@
-// wrap lines by gulp-twoside for providing twoside module
-var exports, module, require, ts;
-if (typeof window === 'object') { ts = twoside('peasy/samples/statemachine.js'), require = ts.require, exports = ts.exports, module = ts.module;} 
-(function(require, exports, module) {
 var StateMachine, hasOwnProperty;
 
 hasOwnProperty = Object.hasOwnProperty;
@@ -89,4 +85,3 @@ exports.StateMachine = StateMachine = (function() {
   return StateMachine;
 
 })();
-})(require, exports, module); // wrap line by gulp-twoside

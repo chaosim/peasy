@@ -1,10 +1,10 @@
-{inCharset, letters, charset} = peasy = require '../index'
+{inCharset, letters, charset, BaseParser} = peasy = require '../peasy'
 
 identifierHeadChars = '$_'+letters
 endTextCharset = charset(')@'+identifierHeadChars)
 identifierHeadCharset = charset(identifierHeadChars)
 
-exports.TemplateParser = class TemplateParser extends peasy.Parser
+exports.TemplateParser = class TemplateParser extends BaseParser
   constructor: ->
     super
 

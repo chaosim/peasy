@@ -5,6 +5,7 @@ changed = require('gulp-changed')
 cache = require('gulp-cached')
 plumber = require('gulp-plumber')
 clean = require('gulp-clean')
+gulpFilter = require('gulp-filter')
 shell = require 'gulp-shell'
 rename = require("gulp-rename")
 coffee = require ('gulp-coffee')
@@ -15,31 +16,31 @@ size = require('gulp-size')
 mocha = require('gulp-mocha')
 karma = require('gulp-karma')
 twoside = require './gulp-twoside'
-
-
 #pluginwatch = require('gulp-watch')
-#styl = require('gulp-styl')
-
 express = require('express')
-
 #http://rhumaric.com/2014/01/livereload-magic-gulp-style/
 livereload = require('gulp-livereload')
 tinylr = require('tiny-lr')
+runSequence = require('run-sequence')
 
 task = gulp.task.bind(gulp)
 watch = gulp.watch.bind(gulp)
 src = gulp.src.bind(gulp)
 dest = gulp.dest.bind(gulp)
-from = (source, options={dest:folders.destjs, cache:'cache'}) ->
-  options.dest ?= folders.destjs
+from = (source, options={dest:folders_destjs, cache:'cache'}) ->
+  options.dest ?= folders_destjs
   options.cache ?= 'cache'
   src(source).pipe(changed(options.dest)).pipe(cache(options.cache)).pipe(plumber())
 GulpStream = src('').constructor
 GulpStream::to = (dst) -> @pipe(dest(dst))#.pipe(livereload(tinylrServer))
 GulpStream::pipelog = (obj, log=gutil.log) -> @pipe(obj).on('error', log)
 
-rootOf = (path) -> path.slice(0, path.indexOf('/'))
-midOf = (path) -> path.slice(path.indexOf('/')+1, path.indexOf('/*'))
+rootOf = (path) -> path.slice(0, path.indexOf(''))
+midOf = (path) -> path.slice(path.indexOf('')+1, path.indexOf('*'))
+
+# below will put output js files in wrong directory structure!!!
+# coffee: [coffeeroot+'*.coffee', coffeeroot+'samples/**/*.coffee', coffeeroot+'test/**/*.coffee']
+# use the code below to solve this problem
 patterns = (args...) ->
   for arg in args
     if typeof arg =='string' then pattern(arg)
@@ -55,77 +56,111 @@ class Pattern
     srcRoot = rootOf(@src)
     if not @destbase then @destbase = rootOf(@src)
     if not options.desttail? then @desttail = midOf(@src)
-    if @desttail then @dest = @destbase+'/'+@desttail
+    if @desttail then @dest = @destbase+@desttail
     else @dest = @destbase
 
-# below will put output js files in wrong directory structure!!!
-# coffee: [coffeeroot+'/*.coffee', coffeeroot+'/samples/**/*.coffee', coffeeroot+'/test/**/*.coffee']
 
-folders =
-  dest: 'dist'
-  dist: 'dist'
-  dev: 'dev'
-  src: 'coffee'
-  coffee: 'coffee'
-  destjs: 'js'
-  pulic: 'public'
-  static: 'static'
+folders_src = 'coffee/'
+folders_coffee = folders_src
+folders_dest = 'js/'
+folders_destjs = folders_dest
+folders_destjsClient = folders_destjs+'client/'
+folders_dist = 'dist/'
+folders_dev = 'dev/'
+folders_pulic = 'public/'
+folders_static = 'static/'
 
-files =
-  copy: (folders.src+'/'+name for name in ['**/*.js', '**/*.json', '**/*.jade', '**/*.html', '**/*.css', '**/*.tjv'])
-  coffee: [folders.coffee+'/**/*.coffee']
-  mocha: folders.destjs+'/test/mocha/**/*.js'
-  karma: folders.destjs+'/test/karma/**/*.js'
-  modulejs: folders.destjs+'/lib/modules/**/*.js'
-  serverjs: folders.destjs+'/lib/server/**/*.js'
-  reload: ['*.html', folders.destjs+'/client/**/*.js', folders.destjs+'/modules/**/*.js', 'public/**/*.js', 'public/**/*.css']
+task 'clean', -> src([folders_destjs], {read:false}) .pipe(clean())
 
-task 'clean', -> src([folders.destjs], {read:false}) .pipe(clean())
+files_copy = (folders_src+name for name in ['**/*.js', '**/*.json', '**/*.jade', '**/*.html', '**/*.css', '**/*.tjv'])
+task 'copy', -> from(files_copy, {cache:'copy'}).to(folders_destjs)
+
+files_coffee = [folders_coffee+'**/*.coffee']
+task 'coffee', -> from(files_coffee, {cache:'coffee'}).pipelog(coffee({bare: true})).to(folders_destjs)
+
+client = folders_destjsClient
+
+files_twoside = [folders_destjs+'peasy.js', folders_destjs+'logicpeasy.js', folders_destjs+'linepeasy.js', folders_destjs+'index.js']
+
+task 'transform/peasy', (cb) -> # twoside, concat, minify
+  src(files_twoside)
+  .pipelog(twoside(folders_destjs, 'peasy', {only_wrap_for_browser:true})).to(client)
+  .pipe(concat("full-peasy-package.js")).pipe(size()).to(client)
+  #minify
+  .pipe(closureCompiler()).pipe(rename(suffix: "-min")).pipe(size()).to(client)
+
+  # generate index.js for part assembly.of the package
+  src(files_twoside.slice(0, files_twoside.length-1)).pipelog(twoside(folders_destjs, 'peasy',
+    {only_wrap_for_browser:true, 'peasy':'index', 'logicpeasy':'index', 'linepeasy':'index'}))
+  .pipe(rename(suffix:'-index')).to(client)
+
+task 'concat-min', (cb) ->
+  # concat and min for partly assembled peasy package
+  for part in [{name: 'peasy', files: [client+'peasy-index.js']},
+                 {name: 'logicpeasy', files: [client+'peasy.js', client+'logicpeasy-index.js']},
+                 {name: 'linepeasy', files: [client+'peasy.js', client+'linepeasy-index.js']}]
+    src(part.files)
+    .pipe(concat(part.name+'-package.js')).pipe(size()).to(client)
+    .pipe(closureCompiler()).pipe(rename(suffix: "-min")).pipe(size()).to(client)
+
+task 'concat/samples', (cb) -> # twoside, concat
+  # twoside and concat for samples
+  files = for name in 'statemachine dsl arithmatic arithmatic2'.split(' ') then folders_destjs+'samples/'+name+'.js'
+#  console.log files.join(' ')
+  src(files)
+  .pipelog(twoside(folders_destjs+'samples', 'peasy/samples', {only_wrap_for_browser:true}))
+  .pipe(concat('sample-concat.js')).pipe(size()).to(folders_destjs+'samples')
+
+task 'concat/test', (cb) -> # twoside, concat, minify
+  # twoside and concat for test/karma
+  src(folders_destjs+'test/karma/**/*.js')
+  .pipelog(twoside(folders_destjs+'test/karma', 'peasy/karma', {only_wrap_for_browser:true}))
+  .pipe(concat('karma-concat.js')).to(folders_destjs+'test/karma')
+
+task 'dist', (callback) -> runSequence('transform/peasy', ['concat-min', 'concat/samples', 'concat/test'], callback)
+
+gulp.task 'browserify', ['coffee'], ->
+  src(folders_destjs+'test/karma/karma-bundle.js').pipe(browserify({
+    insertGlobals : true,
+  #debug : !gulp.env.production
+  }))
+  .to(folders_destjs+'test/karma')
+
+files_mocha = folders_destjs+'test/mocha/**/*.js'
+
+onErrorContinue = (err) -> console.log(err.stack); @emit 'end'
+task 'mocha', ->  src(files_mocha).pipe(mocha({reporter: 'dot'})).on("error", onErrorContinue)
+
+files_karma = for item in 'twoside client/full-peasy-package samples/sample-concat test/karma/karma-concat'.split(' ') then folders_destjs+item+'.js'
+console.log files_karma.join(' ')
+
+task 'karma/once', -> src(files_karma).pipe(karma({configFile: folders_destjs+'test/karma-conf.js', action: 'run'}))     # run: once, watch: autoWatch=true
+task 'karma/watch', -> src(files_karma).pipe(karma({configFile: folders_destjs+'test/karma-conf.js', action: 'watch'}))     # run: once, watch: autoWatch=true
+
+#task 'stylus', -> from(['css/**/*.css']).pipe(styl({compress: true})).to(folders_destjs)
 task 'runapp', shell.task ['node dist/examples/sockio/app.js']
 task 'express',  ->
   app = express()
   app.use(require('connect-livereload')()) # play with tiny-lr to livereload stuffs
-  console.log __dirname
+  # console.log __dirname
   app.use(express.static(__dirname))
   app.listen(4000)
-task 'copy', -> from(files.copy, {cache:'copy'}).to(folders.destjs)
-task 'coffee', -> from(files.coffee, {cache:'coffee'}).pipelog(coffee({bare: true})).to(folders.destjs)
-task 'twoside', ['coffee'], (cb) ->
-  for pattern in patterns(folders.destjs+'/*.js', folders.destjs+'/samples/**/*.js', folders.destjs+'/test/karma/**/*.js')
-    stream = src(pattern.src).pipelog(twoside('f:/peasy/js', 'peasy')).to(pattern.dest)
-  stream
-gulp.task 'browserify', ['coffee'], ->
-  src(folders.destjs+'/test/karma/karma-bundle.js').pipe(browserify({
-    insertGlobals : true,
-  #debug : !gulp.env.production
-  }))
-  .to(folders.destjs+'/test/karma')
-gulp.task 'concat', ['twoside'], ->
-  src([folders.destjs+'/parser.js', folders.destjs+'/lineparser.js', folders.destjs+'/logicparser.js', folders.destjs+'/index.js']).pipe(concat("peasy.js")).to(folders.destjs)
-gulp.task 'min', ['concat'], -> src(folders.destjs+'/peasy.js').pipe(closureCompiler()).pipe(rename(suffix: "-min")).pipe(size(showFiles:true)).to(folders.destjs)
-
-onErrorContinue = (err) -> console.log(err.stack); @emit 'end'
-#onErrorContinue = (err) -> @emit 'end'
-task 'mocha', ->
-  src(files.mocha)
-#  .pipelog(plumber())
-  .pipe(mocha({reporter: 'dot'})).on("error", onErrorContinue)
-task 'karma', -> src(files.karma).pipe(karma({configFile: folders.destjs+'/test/karma-conf', action: 'run'}))     # run: once, watch: autoWatch=true
-task 'stylus', -> from(['css/**/*.css']).pipe(styl({compress: true})).to(folders.destjs)
 task 'tinylr', -> server.listen 35729, (err) -> if err then console.log(err)
-task 'watch/copy', -> watch files.copy, ['copy']
-task 'watch/coffee', -> watch files.coffee, ['coffee']
-task 'watch/mocha', -> watch [files.modulejs, files.serverjs, files.mocha], ['mocha']
+
+task 'watch/copy', -> watch files_copy, ['copy']
+task 'watch/coffee', -> watch files_coffee, ['coffee']
+task 'watch/mocha', -> watch [files_modulejs, files_serverjs, files_mocha], ['mocha']
 #task 'watch:mocha', ->
-#  src([files.modulejs, files.serverjs, files.mocha])
+#  src([files_modulejs, files_serverjs, files_mocha])
 #  .pipe(plumber())
 #  .pipe pluginwatch emit: 'all', (files) ->
-#    files.pipe(mocha(reporter: 'dot' ))
+#    files_pipe(mocha(reporter: 'dot' ))
 #    .on 'error', onErrorContinue
 onWatchReload = (event) -> src(event.path, {read: false}).pipe(livereload(tinylrServer))
-task 'watch/reload', -> tinylrServer = tinylr(); tinylrServer.listen(35729); watch files.reload,onWatchReload
+task 'watch/reload', -> tinylrServer = tinylr(); tinylrServer.listen(35729); watch files_reload,onWatchReload
 task 'watch/all', -> ['watch/copy', 'watch/coffee', 'watch/mocha', 'watch/reload'] #
-task 'build', ['copy', 'coffee']
+
+task 'build', (callback) -> runSequence('clean', ['copy', 'coffee'], 'dist', callback)
 task 'mocha/auto', ['watch/copy', 'watch/coffee', 'watch/mocha']
 task 'default',['build', 'watch:all']
 

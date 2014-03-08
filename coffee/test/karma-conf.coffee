@@ -9,29 +9,12 @@ module.exports = (config) ->
     htmlReporter:
       outputDir: 'js/test/karma/html',
       templatePath: 'coffee/test/jasmine-template.html'
-    files: [
-      'twoside.js'
-      'peasy.js'
-      'logicpeasy.js'
-#      'deprecated/logic.js'
-#      'deprecated/autopeasy.js'
-#      'deprecated/modularpeasy.js'
-#      'deprecated/nonmodularpeasy.js'
-      'samples/dsl.js'
-      'samples/arithmatic.js'
-      'samples/statemachine.js'
-      'samples/arithmatic2.js'
-      'test/karma/testpeasy.js'
-      'test/karma/testlogicpeasy.js'
-#      'test/karma/deprecated/testlogic.js'
-#      'test/karma/deprecated/testautopeasy.js'
-#      'test/karma/deprecated/testmodularpeasy.js'
-#      'test/karma/deprecated/testnonmodularpeasy.js'
-      'test/karma/samples/testdsl.js'
-      'test/karma/samples/testarithmatic.js'
-      'test/karma/samples/testarithmatic2.js'
-#      'test/karma/karma-bundle.js'
-     ],
+#    files: [
+#      'twoside.js'
+#      'client/full-peasy-package.js'
+#      'samples/sample-concat.js'
+#      'test/karma/karma-concat.js'
+#     ],
     exclude: []
     #after switching from win7 64bit to win7 32bit, dsable many services, karma say chrome have not captured in 6000ms. use 9876 ok.
     #https://github.com/karma-runner/karma/issues/635
