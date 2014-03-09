@@ -5,22 +5,14 @@ changed = require('gulp-changed')
 cache = require('gulp-cached')
 plumber = require('gulp-plumber')
 clean = require('gulp-clean')
-#gulpFilter = require('gulp-filter')
-#shell = require 'gulp-shell'
 rename = require("gulp-rename")
 coffee = require ('gulp-coffee')
-#browserify = require('gulp-browserify')
 concat = require('gulp-concat')
 closureCompiler = require('gulp-closure-compiler')
 size = require('gulp-size')
 mocha = require('gulp-mocha')
 karma = require('gulp-karma')
 twoside = require './gulp-twoside'
-#pluginwatch = require('gulp-watch')
-#express = require('express')
-#http://rhumaric.com/2014/01/livereload-magic-gulp-style/
-#livereload = require('gulp-livereload')
-#tinylr = require('tiny-lr')
 runSequence = require('run-sequence')
 
 task = gulp.task.bind(gulp)
@@ -80,67 +72,73 @@ task 'copy', -> from(files_copy, {cache:'copy'}).to(folders_destjs)
 files_coffee = [folders_coffee+'**/*.coffee']
 task 'coffee', -> from(files_coffee, {cache:'coffee'}).pipelog(coffee({bare: true})).to(folders_destjs)
 
-#task 'stylus', -> from(['css/**/*.css']).pipe(styl({compress: true})).to(folders_destjs)
-
 client = folders_destjsClient
-
-files_twoside = [folders_destjs+'peasy.js', folders_destjs+'logicpeasy.js', folders_destjs+'linepeasy.js', folders_destjs+'index.js']
+files_twoside = 'peasy logicpeasy linepeasy index'
+files_twoside = (for item in files_twoside.split(' ') then folders_destjs+item+'.js')
 
 task 'transform:peasy', (cb) ->
   if not distributing then return src(files_twoside).pipelog(twoside(folders_destjs, 'peasy')).to(folders_destjs)
+  # twoside concat minify to js/client/
   src(files_twoside)
   .pipelog(twoside(folders_destjs, 'peasy', {only_wrap_for_browser:true})).to(client)
   .pipe(concat("full-peasy-package.js")).pipe(size()).to(client)
   #minify
   .pipe(closureCompiler()).pipe(rename(suffix: "-min")).pipe(size()).to(client)
+
+task 'twoside:peasy/part-package', (cb) ->
+  src(files_twoside)
   # generate index.js for part assembly.of the package
   src(files_twoside.slice(0, files_twoside.length-1)).pipelog(twoside(folders_destjs, 'peasy',
   {only_wrap_for_browser:true, 'peasy':'index', 'logicpeasy':'index', 'linepeasy':'index'}))
   .pipe(rename(suffix:'-index')).to(client)
 
+task 'transform:peasy/part-package', (cb) ->
   # peasy.js, peasy.js+logicpeasy.js, peasy.js+linepeasy.js can become thred packages
   # concat and min for partly assembled peasy package
   for part in [{name: 'peasy', files: [client+'peasy-index.js']},
                  {name: 'logicpeasy', files: [client+'peasy.js', client+'logicpeasy-index.js']},
                  {name: 'linepeasy', files: [client+'peasy.js', client+'linepeasy-index.js']}]
-    src(part.files)
+    stream = src(part.files)
     .pipe(concat(part.name+'-package.js')).pipe(size()).to(client)
     .pipe(closureCompiler()).pipe(rename(suffix: "-min")).pipe(size()).to(client)
+  stream
 
-task 'make:samples', (cb) -> # twoside, concat
+task 'build:samples', (cb) -> # twoside, concat
+#  console.log 'build:samples'
   # twoside and concat for samples
   files = 'statemachine dsl arithmatic arithmatic2'
   files = for name in files.split(' ') then folders_destjs+'samples/'+name+'.js'
 #  console.log files.join(' ')
   stream = src(files).pipelog(twoside(folders_destjs+'samples', 'peasy/samples')) #, {only_wrap_for_browser:true}
+  # when debuggin, dont concat
   if not distributing then return stream.to(folders_destjs+'samples')
-  stream.pipe(concat('sample-concat.js')).pipe(size()) # when debuggin, dont concat
-  stream.to(folders_destjs+'samples')
+  #console.log 'build:samples'
+  stream.pipe(concat('sample-concat.js')).pipe(size())
+  .to(folders_destjs+'samples')
 
-task 'make:test', (cb) -> # twoside, concat, minify
+task 'build:test', (cb) -> # twoside, concat, minify
+#  console.log 'build:test'
   # twoside and concat for test/karma
   stream = src(folders_destjs+'test/karma/**/*.js')
   .pipelog(twoside(folders_destjs+'test/karma', 'peasy/karma', {only_wrap_for_browser:true}))
+  # when debugging, dont concat
   if not distributing then return  stream.to(folders_destjs+'test/karma')
-  stream.pipe(concat('karma-concat.js')) # when debugging, dont concat
+#  console.log 'build:test'
+  stream.pipe(concat('karma-concat.js'))
   .to(folders_destjs+'test/karma')
 
-build = (callback) ->
-  runSequence('clean', ['copy', 'coffee'], ['transform:peasy', 'make:samples', 'make:test'], callback)
+_make = (callback) ->
+  runSequence('clean', ['copy', 'coffee'], ['transform:peasy', 'build:samples', 'build:test'], callback)
 # make is for debugging and test, dont concat and minify
-task 'make', (callback) -> distributing = false; build(callback)
+task 'make', (callback) -> distributing = false; _make(callback)
+_dist = (callback) ->
+  runSequence('clean', ['copy', 'coffee'],
+    ['transform:peasy'], ['twoside:peasy/part-package'], ['transform:peasy/part-package'],
+    ['build:samples', 'build:test'], callback)
 # dist is for release, so concat and minify packages
-task 'dist', (callback) -> distributing = true; build(callback)
-
-gulp.task 'browserify', ['coffee'], ->
-  src(folders_destjs+'test/karma/karma-bundle.js').pipe(browserify({
-    insertGlobals : true,
-  #debug : !gulp.env.production
-  }))
-  .to(folders_destjs+'test/karma')
+task 'dist', (callback) -> distributing = true; _dist(callback)
 
 files_mocha = folders_destjs+'test/mocha/**/*.js'
-
 onErrorContinue = (err) -> console.log(err.stack); @emit 'end'
 task 'mocha', ->  src(files_mocha).pipe(mocha({reporter: 'dot'})).on("error", onErrorContinue)
 
