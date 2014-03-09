@@ -4,7 +4,7 @@ peasy = require "./peasy"
 exports = module.exports = {}
 if typeof window=='object' then peasy.extend exports, peasy
 
-exports = module.exports = class Parser extends peasy.BaseParser
+exports.Parser = class Parser extends peasy.BaseParser
   constructor: ->
     super
     self = @
@@ -23,7 +23,7 @@ exports = module.exports = class Parser extends peasy.BaseParser
       ->
         ruleStack = self.ruleStack
         cache = self.cache[tag] ?= {}
-        {start, lineno, row} = self
+        start = self.cur; lineno = self.lineno; row = self.row
         callStack = ruleStack[start] ?= []
         if tag not in callStack
           callStack.push(tag)

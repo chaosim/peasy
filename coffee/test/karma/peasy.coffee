@@ -1,4 +1,4 @@
-peasy = require '../peasy'
+peasy = require 'peasy'
 
 describe "run testparser:", ->
   it '', ->

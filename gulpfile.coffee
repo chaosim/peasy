@@ -113,7 +113,7 @@ task 'build:samples', (cb) -> # twoside, concat
   # when debuggin, dont concat
   if not distributing then return stream.to(folders_destjs+'samples')
   #console.log 'build:samples'
-  stream.pipe(concat('sample-concat.js')).pipe(size())
+  stream.to(folders_destjs+'samples').pipe(concat('sample-concat.js')).pipe(size())
   .to(folders_destjs+'samples')
 
 task 'build:test', (cb) -> # twoside, concat, minify
@@ -124,7 +124,8 @@ task 'build:test', (cb) -> # twoside, concat, minify
   # when debugging, dont concat
   if not distributing then return  stream.to(folders_destjs+'test/karma')
 #  console.log 'build:test'
-  stream.pipe(concat('karma-concat.js'))
+  stream.to(folders_destjs+'test/karma')
+  .pipe(concat('karma-concat.js'))
   .to(folders_destjs+'test/karma')
 
 _make = (callback) ->
@@ -157,6 +158,16 @@ karmaWatch = karma({configFile: folders_destjs+'test/karma-conf.js', action: 'wa
 task 'karma', -> src(files_karma_debug).pipe(karmaWatch)
 task 'karma/dist', -> src(files_karma_dist).pipe(karmaWatch)
 
+files_karma_logicpeasy = 'twoside client/logicpeasy-package test/karma/logicpeasy'
+files_karma_logicpeasy = for item in files_karma_logicpeasy.split(' ') then folders_destjs+item+'.js'
+task 'karma:logicpeasy', -> src(files_karma_logicpeasy).pipe(karmaWatch)
+task 'karma1:logicpeasy', -> src(files_karma_logicpeasy).pipe(karmaOnce)
+
+files_karma_linepeasy = 'twoside client/linepeasy-package test/karma/peasy'
+files_karma_linepeasy = for item in files_karma_linepeasy.split(' ') then folders_destjs+item+'.js'
+task 'karma:linepeasy', -> src(files_karma_linepeasy).pipe(karmaWatch)
+task 'karma1:linepeasy', -> src(files_karma_linepeasy).pipe(karmaOnce)
+
 #task 'runapp', shell.task ['node dist/examples/sockio/app.js']
 #task 'express',  ->
 #  app = express()
@@ -176,4 +187,3 @@ task 'mocha/auto', ['watch/copy', 'watch/coffee', 'watch/mocha']
 task 'test', (callback) -> runSequence('make', ['mocha', 'karma1'], callback)
 task 'test/dist', (callback) -> runSequence('dist', ['mocha', 'karma1/dist'], callback)
 task 'default',['test']
-

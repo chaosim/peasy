@@ -1,3 +1,6 @@
+var exports, module, require; 
+(function(require, exports, module) {var ts;if (typeof window === 'object') { ts = twoside('peasy/samples/arithmatic.js'), require = ts.require, exports = ts.exports, module = ts.module;} // wrap line by gulp-twoside for providing twoside module; 
+
 var Parser, charset, identifierCharSet, identifierChars, in_, letterDigits, parser, peasy, _in_,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -369,3 +372,6 @@ exports.parser = parser = new Parser;
 exports.parse = function(text) {
   return parser.parse(text);
 };
+
+
+})(require, exports, module);// wrap line by gulp-twoside

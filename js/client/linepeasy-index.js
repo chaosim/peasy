@@ -1,4 +1,4 @@
-(function() {var ts = twoside('peasy/linepeasy.js'), require = ts.require, exports = ts.exports, module = ts.module; // wrap line by gulp-twoside for providing twoside module
+(function() {var ts = twoside('peasy/index'), require = ts.require, exports = ts.exports, module = ts.module; // wrap line by gulp-twoside for providing twoside module
 
 
 /* an extended parser with lineno and row support */
@@ -16,7 +16,7 @@ if (typeof window === 'object') {
   peasy.extend(exports, peasy);
 }
 
-exports = module.exports = Parser = (function(_super) {
+exports.Parser = Parser = (function(_super) {
   __extends(Parser, _super);
 
   function Parser() {
@@ -52,7 +52,9 @@ exports = module.exports = Parser = (function(_super) {
         var cache, callStack, lineno, m, result, row, ruleStack, start, _base;
         ruleStack = self.ruleStack;
         cache = (_base = self.cache)[tag] != null ? _base[tag] : _base[tag] = {};
-        start = self.start, lineno = self.lineno, row = self.row;
+        start = self.cur;
+        lineno = self.lineno;
+        row = self.row;
         callStack = ruleStack[start] != null ? ruleStack[start] : ruleStack[start] = [];
         if (__indexOf.call(callStack, tag) < 0) {
           callStack.push(tag);

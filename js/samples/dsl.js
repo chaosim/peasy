@@ -1,3 +1,6 @@
+var exports, module, require; 
+(function(require, exports, module) {var ts;if (typeof window === 'object') { ts = twoside('peasy/samples/dsl.js'), require = ts.require, exports = ts.exports, module = ts.module;} // wrap line by gulp-twoside for providing twoside module; 
+
 var BaseParser, TemplateParser, charset, endTextCharset, identifierHeadChars, identifierHeadCharset, inCharset, letters, parseTemplate, peasy, templateParser, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
@@ -127,3 +130,6 @@ templateParser = new TemplateParser;
 exports.parseTemplate = parseTemplate = function(text) {
   return templateParser.parse(text);
 };
+
+
+})(require, exports, module);// wrap line by gulp-twoside

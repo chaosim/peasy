@@ -600,7 +600,7 @@ exports.isObject = function (value) {
 
 
 })();// wrap line by gulp-twoside
-(function() {var ts = twoside('peasy/logicpeasy.js'), require = ts.require, exports = ts.exports, module = ts.module; // wrap line by gulp-twoside for providing twoside module
+(function() {var ts = twoside('peasy/index'), require = ts.require, exports = ts.exports, module = ts.module; // wrap line by gulp-twoside for providing twoside module
 
 
 /* an extended parser with logic features */
