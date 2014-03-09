@@ -25,11 +25,25 @@
     "type": "git",
     "url": "git://github.com/chaosim/peasy.git"
   },
-  "dependencies": {},
+  "dependencies": {
+  },
   "devDependencies": {
-    "karma-html-reporter": "~0.1.1"
+    "lodash":"*",
+    "gulp": "*",
+    "gulp-util":"*",
+    "gulp-changed":"*",
+    "gulp-plumber": "*",
+    "gulp-clean": "*",
+    "gulp-rename":"*",
+    "gulp-coffee": "*",
+    "coffee-script": "1.7.0",
+    "gulp-concat": "*",
+    "gulp-closure-compiler": "*",
+    "gulp-size": "*",
+    "gulp-mocha":"*",
+    "gulp-karma":"*"
   },
   "scripts": {
-    "test": "grunt test"
+    "test": "gulp test"
   }
 }

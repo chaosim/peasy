@@ -5,11 +5,11 @@ changed = require('gulp-changed')
 cache = require('gulp-cached')
 plumber = require('gulp-plumber')
 clean = require('gulp-clean')
-gulpFilter = require('gulp-filter')
-shell = require 'gulp-shell'
+#gulpFilter = require('gulp-filter')
+#shell = require 'gulp-shell'
 rename = require("gulp-rename")
 coffee = require ('gulp-coffee')
-browserify = require('gulp-browserify')
+#browserify = require('gulp-browserify')
 concat = require('gulp-concat')
 closureCompiler = require('gulp-closure-compiler')
 size = require('gulp-size')
@@ -17,10 +17,10 @@ mocha = require('gulp-mocha')
 karma = require('gulp-karma')
 twoside = require './gulp-twoside'
 #pluginwatch = require('gulp-watch')
-express = require('express')
+#express = require('express')
 #http://rhumaric.com/2014/01/livereload-magic-gulp-style/
-livereload = require('gulp-livereload')
-tinylr = require('tiny-lr')
+#livereload = require('gulp-livereload')
+#tinylr = require('tiny-lr')
 runSequence = require('run-sequence')
 
 task = gulp.task.bind(gulp)
@@ -79,6 +79,8 @@ task 'copy', -> from(files_copy, {cache:'copy'}).to(folders_destjs)
 
 files_coffee = [folders_coffee+'**/*.coffee']
 task 'coffee', -> from(files_coffee, {cache:'coffee'}).pipelog(coffee({bare: true})).to(folders_destjs)
+
+#task 'stylus', -> from(['css/**/*.css']).pipe(styl({compress: true})).to(folders_destjs)
 
 client = folders_destjsClient
 
@@ -157,29 +159,23 @@ karmaWatch = karma({configFile: folders_destjs+'test/karma-conf.js', action: 'wa
 task 'karma', -> src(files_karma_debug).pipe(karmaWatch)
 task 'karma/dist', -> src(files_karma_dist).pipe(karmaWatch)
 
-#task 'stylus', -> from(['css/**/*.css']).pipe(styl({compress: true})).to(folders_destjs)
-task 'runapp', shell.task ['node dist/examples/sockio/app.js']
-task 'express',  ->
-  app = express()
-  app.use(require('connect-livereload')()) # play with tiny-lr to livereload stuffs
-  # console.log __dirname
-  app.use(express.static(__dirname))
-  app.listen(4000)
-task 'tinylr', -> server.listen 35729, (err) -> if err then console.log(err)
+#task 'runapp', shell.task ['node dist/examples/sockio/app.js']
+#task 'express',  ->
+#  app = express()
+#  app.use(require('connect-livereload')()) # play with tiny-lr to livereload stuffs
+#  app.use(express.static(__dirname))
+#  app.listen(4000)
+#task 'tinylr', -> server.listen 35729, (err) -> if err then console.log(err)
 
 task 'watch/copy', -> watch files_copy, ['copy']
 task 'watch/coffee', -> watch files_coffee, ['coffee']
 task 'watch/mocha', -> watch [files_modulejs, files_serverjs, files_mocha], ['mocha']
-#task 'watch:mocha', ->
-#  src([files_modulejs, files_serverjs, files_mocha])
-#  .pipe(plumber())
-#  .pipe pluginwatch emit: 'all', (files) ->
-#    files_pipe(mocha(reporter: 'dot' ))
-#    .on 'error', onErrorContinue
-onWatchReload = (event) -> src(event.path, {read: false}).pipe(livereload(tinylrServer))
-task 'watch/reload', -> tinylrServer = tinylr(); tinylrServer.listen(35729); watch files_reload,onWatchReload
-task 'watch/all', -> ['watch/copy', 'watch/coffee', 'watch/mocha', 'watch/reload'] #
+#onWatchReload = (event) -> src(event.path, {read: false}).pipe(livereload(tinylrServer))
+#task 'watch/reload', -> tinylrServer = tinylr(); tinylrServer.listen(35729); watch files_reload,onWatchReload
+task 'watch/all', -> ['watch/copy', 'watch/coffee', 'watch/mocha'] #  , 'watch/reload'
 
 task 'mocha/auto', ['watch/copy', 'watch/coffee', 'watch/mocha']
-task 'default',['make']
+task 'test', (callback) -> runSequence('make', ['mocha', 'karma1'], callback)
+task 'test/dist', (callback) -> runSequence('dist', ['mocha', 'karma1/dist'], callback)
+task 'default',['test']
 

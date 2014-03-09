@@ -1,5 +1,3 @@
-(function() {var ts = twoside('peasy/karma/samples-arithmatic2.js'), require = ts.require, exports = ts.exports, module = ts.module; // wrap line by gulp-twoside for providing twoside module
-
 var Parser, parse, parser;
 
 Parser = require('../samples/arithmatic2').Parser;
@@ -85,6 +83,3 @@ describe("testarithmatic2", function() {
     return expect(parse('1?a=3:b=4')).toBe('1? a=3: b=4');
   });
 });
-
-
-})();// wrap line by gulp-twoside
