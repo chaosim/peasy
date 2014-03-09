@@ -221,13 +221,10 @@ andp在实际的代码中很少用到。因为可以写`item1() and item2() ... 
 Var，vars，Dummy, dummy用来构造逻辑变量。
 UObject, uobject, UArray, uarray, Cons, cons, unifiable用来构造可以包含逻辑变量并合一的值。
 
-### 0.3.0 新功能
-* 新的基于类的API
-* 示例：arithmatic，arithmatic2，dsl
-* 重写readme.md
-* 新增readme[cn].md
-* grunt 工作流
-* 重新组织文件夹，分离coffee和js文件夹。
+### 0.3.2 新功能
+* 不再用gruntjs，改用gulpjs
+* 用gulp-twoside.js帮助为浏览器进行模块化封装
+* 增加lineparser以支持行号和列号
 
 ###peasy项目的由来
 peasy项目是以本人的下一代编程语言项目dao(python)和daonode（coffeescript/javascript）的解析特性为基础移植而来的。dao项目实现了逻辑编程范式和函数编程范式的自然结合，是lisp和prolog语言的合体，并且内置包含了解析器功能。以逻辑变量作为参数编写文法规是dao项目的独创，这种逻辑参数文法具有强大的能力，具有超越传统编译原理所基于的乔姆斯基文法（包括上下文无关文法cfg、上下文相关文法csg以及0型文法）以及现在流行的解析表达式文法（peg)的表达能力（有兴趣的可以查阅编译原理中有关0-4型文法表达能力的一些论述，[比如这个链接](http://ccl.pku.edu.cn/doubtfire/Syntax/Introduction/Chomsky/Chomsky_Hierarchy/Chapter%2024%20The%20Chomsky%20Hierarchy.htm)），同时无损于解析算法的时间复杂度。

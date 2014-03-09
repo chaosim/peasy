@@ -220,13 +220,10 @@ Class Members
 Var, vars, Dummy, dummy variables are used to construct logic variables.
 UObject, uobject, UArray, uarray, Cons, cons, unifiable can contain logical variables and unify correctly.
 
-### what's new in 0.3.0
-* new class-based API
-* samples: arithmatic, arithmatic2, dsl
-* rewrite readme.md
-* added readme[cn].md  
-* grunt work flow
-* reorganize folders, separate coffee and js folder.
+### what's new in 0.3.2
+  * change from gruntjs to gulpjs
+  * use gulp-twoside.js to wrap module for browser
+  * add lineparser to support lineno and row.
 
 ### the origin of peasy project
 Peasy project is based on the next-generation programming language project I make in dao(python) and daonode(coffeescript/javascript).

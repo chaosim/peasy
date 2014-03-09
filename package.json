@@ -8,7 +8,7 @@
     "coffeescript"
   ],
   "author": "Caoxingming",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "licenses": [
     {
       "type": "MIT",
@@ -32,6 +32,7 @@
     "gulp": "*",
     "gulp-util":"*",
     "gulp-changed":"*",
+    "gulp-cached":"*",
     "gulp-plumber": "*",
     "gulp-clean": "*",
     "gulp-rename":"*",
@@ -41,7 +42,8 @@
     "gulp-closure-compiler": "*",
     "gulp-size": "*",
     "gulp-mocha":"*",
-    "gulp-karma":"*"
+    "gulp-karma":"*",
+    "run-sequence":"*"
   },
   "scripts": {
     "test": "gulp test"

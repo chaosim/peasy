@@ -1,5 +1,10 @@
 ## What's new in peasy
 
+### what's new in 0.3.2
+  * dont use gruntjs any more, use gulpjs instead.
+  * use gulp-twoside.js to wrap module for browser
+  * add lineparser to support lineno and row.
+
 ### what's new in 0.3.1
   * add member "base" to peasy.Parser, to support modularization
   * exports.debug and exports.warn
