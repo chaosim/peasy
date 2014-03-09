@@ -43,7 +43,8 @@
     "gulp-size": "*",
     "gulp-mocha":"*",
     "gulp-karma":"*",
-    "run-sequence":"*"
+    "run-sequence":"*",
+    "event-stream":"*"
   },
   "scripts": {
     "test": "gulp test"
