@@ -408,14 +408,23 @@ exports.Parser = exports.BaseParser = Parser = (function() {
       self.cur = cur;
       return data.slice(start, cur);
     };
-    base.number = this.number = function() {
-      var c, cur, data;
+    base.decimal = this.decimal = function() {
+      var c, cur, data, nonZeroStart, start;
       data = self.data;
-      cur = self.cur;
-      c = data[cur];
-      if (('0' <= c && c <= '9')) {
-        cur++;
-      } else {
+      nonZeroStart = start = cur = self.cur;
+      while (1) {
+        c = data[cur];
+        if ('0' === c) {
+          cur++;
+          nonZeroStart++;
+        } else if (('1' <= c && c <= '9')) {
+          cur++;
+          break;
+        } else {
+          break;
+        }
+      }
+      if (cur === start) {
         return;
       }
       while (1) {
@@ -427,7 +436,143 @@ exports.Parser = exports.BaseParser = Parser = (function() {
         }
       }
       self.cur = cur;
-      return data.slice(start, cur);
+      return [parseInt(data.slice(nonZeroStart, cur), 10)];
+    };
+    base.number = this.number = function() {
+      var c, cur, data, dot, neg, nonZeroStart, pow, powSign, start, v;
+      data = self.data;
+      base = 10;
+      start = cur = self.cur;
+      c = data[cur++];
+      if (c === '-') {
+        neg = true;
+        c = data[cur++];
+      } else if (c === '+') {
+        c = data[cur++];
+      }
+      if (c === '0') {
+        c = data[cur++];
+        if (c === 'b' || c === 'B') {
+          base = 2;
+        } else if (c === 'x' || c === 'X') {
+          base = 16;
+        } else if (('1' <= c && c <= '9')) {
+          nonZeroStart = cur;
+        } else if (c === '.') {
+          nonZeroStart = 1;
+          dot = cur;
+        } else if (c === '0') {
+          c = data[cur++];
+        } else {
+          return [0];
+        }
+      } else if (('1' <= c && c <= '9')) {
+        nonZeroStart = cur;
+        c = data[cur++];
+      } else if (c === '.') {
+        dot = cur;
+        nonZeroStart = cur;
+      } else {
+        return;
+      }
+      if (base !== 10) {
+        nonZeroStart = cur;
+        if (base === 2) {
+          while (c = data[cur++]) {
+            if (('2' <= c && c <= '9')) {
+              throw new NumberFormatError(self, 'number format errer: binary integer followed by digit 2-9');
+            } else if (c !== '0' && c !== '1') {
+              break;
+            }
+          }
+        } else if (base === 16) {
+          while (c = data[cur++]) {
+            if (!(('0' <= c && c <= '9') || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F'))) {
+              break;
+            }
+          }
+        }
+        if (base === 2) {
+          if (c === '.' && (c === '.' || c === 'e' || c === 'E')) {
+            throw new NumberFormatError(self, 'number format errer: binary integer followed by . or e or E');
+          } else if (('2' <= c && c <= '9')) {
+            throw new NumberFormatError(self, 'number format errer: binary integer followed by digit 2-9');
+          }
+        }
+        if (base === 16 && c === '.') {
+          throw new NumberFormatError(self, 'number format errer: hexadecimal followed by . or e or E');
+        }
+        if (cur === nonZeroStart) {
+          return;
+        }
+        self.cur = cur;
+        v = parseInt(data.slice(nonZeroStart, cur), base);
+        if (neg) {
+          v = -v;
+        }
+        return [v];
+      }
+      if (!nonZeroStart) {
+        while (c = data[cur++]) {
+          if (c === '0') {
+            continue;
+          } else if (('1' <= c && c <= '9')) {
+            nonZeroStart = cur;
+            break;
+          } else if (c === '.') {
+            dot = cur;
+            nonZeroStart = 1;
+            break;
+          } else {
+            break;
+          }
+        }
+      }
+      if (!nonZeroStart) {
+        self.cur = cur;
+        return [0];
+      }
+      if (c === '.') {
+        dot = cur;
+      }
+      if (!dot) {
+        while (c = data[cur++]) {
+          if (c < '0' || '9' < c) {
+            break;
+          }
+        }
+      }
+      if (c === '.') {
+        while (c = data[++cur]) {
+          if (c < '0' || '9' < c) {
+            break;
+          }
+        }
+      }
+      if (c === 'e' || c === 'E') {
+        c = data[++cur];
+        pow = cur;
+        if (c === '+' || c === '-') {
+          cur++;
+          powSign = cur;
+        }
+        while (c = data[cur]) {
+          if (c < '0' || '9' < c) {
+            break;
+          } else {
+            cur++;
+          }
+        }
+        if (powSign === cur || pow === cur) {
+          cur = pow - 1;
+        }
+      }
+      self.cur = cur;
+      v = parseFloat(data.slice(nonZeroStart - 1, cur));
+      if (neg) {
+        v = -v;
+      }
+      return [v];
     };
     base.string = this.string = function() {
       var c, c1, cur, quote, start, text, wrap;
