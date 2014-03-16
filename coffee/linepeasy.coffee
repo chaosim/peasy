@@ -219,68 +219,71 @@ exports.Parser = exports.LineParser = class Parser extends peasy.BaseParser
       # dot = undefined # dot should be cur+1 of '.'
       base = 10
       start = cur = self.cur
-      c = data[cur++]
-      if c=='-' then neg = true; c = data[cur++]
-      else if c=='+' then c = data[cur++]
-      if c=='0'
-        c = data[cur++]
-        if c=='b' or c=='B' then base = 2
-        else if c=='x' or c=='X' then base = 16
-        else if '1'<=c<='9' then nonZeroStart = cur
-        else if c=='.' then nonZeroStart = 1; dot = cur
-        else if c=='0' then c = data[cur++]
-        else return [0]
-      else if  '1'<=c<='9' then nonZeroStart = cur; c = data[cur++]
-      else if c=='.' then dot = cur; nonZeroStart = cur
-      else return
-      if base!=10
-        nonZeroStart = cur
-        if base==2
-          while c = data[cur++]
-            if '2'<=c<='9'
-              throw new NumberFormatError(self, 'number format errer: binary integer followed by digit 2-9')
-            else if  c!='0'and c!='1' then break
-        else if base==16
-          while c = data[cur++]
-            if  not('0'<=c<='9' or 'a'<=c<='f' or 'A'<=c<='F') then break
-        if base==2
-          if c=='.' and (c=='.' or c=='e' or c=='E')
-            throw new NumberFormatError(self, 'number format errer: binary integer followed by . or e or E')
+      signNext = 0
+      c = data[cur]
+      if c=='-' then neg = true; c = data[++cur]; signNext = 1
+      else if c=='+' then c = data[++cur]; signNext = 1
+      if c=='0' and c2 = data[cur+1]
+        if c2=='b' or c2=='B' then base = 2; baseStart = cur += 2; c = data[cur]
+        else if c2=='x' or c2=='X' then base = 16; baseStart = cur += 2; c = data[cur]
+        else c = data[++cur]; meetDigit = true
+      if base==2
+        while c
+          if c=='0' or c=='1' then c = data[++cur]
           else if '2'<=c<='9'
             throw new NumberFormatError(self, 'number format errer: binary integer followed by digit 2-9')
-        if base==16 and c=='.'
-          throw new NumberFormatError(self, 'number format errer: hexadecimal followed by . or e or E')
-        if cur==nonZeroStart then return
+          else break
+      else if base==16
+        while c
+          if  not('0'<=c<='9' or 'a'<=c<='f' or 'A'<=c<='F') then break
+          else c = data[++cur]
+      if base==2
+        if c=='.' or c=='e' or c=='E'
+          throw new NumberFormatError(self, 'number format errer: binary integer followed by . or e or E')
+        else if '2'<=c<='9'
+          throw new NumberFormatError(self, 'number format errer: binary integer followed by digit 2-9')
+      if base==16 and c=='.'
+        throw new NumberFormatError(self, 'number format errer: hexadecimal followed by .')
+      if base!=10
+        if cur==baseStart then return
         self.row = self.row+cur-start; self.cur = cur
-        v  =  parseInt(data[nonZeroStart...cur], base)
+        v  =  parseInt(data[baseStart...cur], base)
         if neg then v = -v
         return [v]
       # base==10
-      if not nonZeroStart
-        while c = data[cur++]
-          if c=='0' then continue
-          else if '1'<=c<='9' then nonZeroStart = cur; break
-          else if c=='.' then dot = cur; nonZeroStart = 1; break
-          else break
-      if not nonZeroStart
-        self.row = self.row+cur-start; self.cur = cur; return [0]
-      if c=='.' then dot = cur
-      if !dot
-        while c = data[cur++]
-          if  c<'0' or '9'<c then break
+      while c
+        if c=='0' then meetDigit = true; c = data[++cur]
+        else if '1'<=c<='9'
+          if nonZeroStart==undefined then nonZeroStart = cur
+          meetDigit = true; c = data[++cur]
+        else if c=='.'
+          if nonZeroStart==undefined then nonZeroStart = cur
+          break
+        else break
       if c=='.'
-        while c = data[++cur]
-          if c<'0' or '9'<c then break
-      if c=='e' or c=='E'
         c = data[++cur]
-        pow = cur
-        if c=='+' or c=='-' then cur++; powSign = cur
-        while c = data[cur]
-          if c<'0' or '9'<c then break else cur++
-        if powSign==cur or pow==cur then cur = pow-1
+        while c
+          if c<'0' or '9'<c then break
+          else meetDigit = true; c = data[++cur]
+      if c=='e' or c=='E'
+        if not meetDigit then return
+        c = data[++cur]
+        if c=='+' or c=='-'
+          c = data[++cur]
+          if c and(c<'0' or '9'<c) then cur -= 2
+          else
+            while c
+              c = data[++cur]
+              if  c<'0' or '9'<c then break
+        else if c and (c<'0' or '9'<c) then cur--
+        else
+          while c
+            c = data[++cur]
+            if  c<'0' or '9'<c then break
+      if not meetDigit then return
       self.row += cur-start; self.cur = cur
       # 0 is false, so it will make parser fail to continue, use result to hold number value
-      v  =  parseFloat(data[nonZeroStart-1...cur])
+      v  =  parseFloat(data[nonZeroStart...cur])
       if neg then v = -v
       return [v]
 

@@ -445,139 +445,139 @@ exports.Parser = exports.LineParser = Parser = (function(_super) {
       return [parseInt(data.slice(nonZeroStart, cur), 10)];
     };
     lineparser.number = this.number = function() {
-      var base, c, cur, data, dot, neg, nonZeroStart, pow, powSign, start, v;
+      var base, baseStart, c, c2, cur, data, meetDigit, neg, nonZeroStart, signNext, start, v;
       data = self.data;
       base = 10;
       start = cur = self.cur;
-      c = data[cur++];
+      signNext = 0;
+      c = data[cur];
       if (c === '-') {
         neg = true;
-        c = data[cur++];
+        c = data[++cur];
+        signNext = 1;
       } else if (c === '+') {
-        c = data[cur++];
+        c = data[++cur];
+        signNext = 1;
       }
-      if (c === '0') {
-        c = data[cur++];
-        if (c === 'b' || c === 'B') {
+      if (c === '0' && (c2 = data[cur + 1])) {
+        if (c2 === 'b' || c2 === 'B') {
           base = 2;
-        } else if (c === 'x' || c === 'X') {
+          baseStart = cur += 2;
+          c = data[cur];
+        } else if (c2 === 'x' || c2 === 'X') {
           base = 16;
-        } else if (('1' <= c && c <= '9')) {
-          nonZeroStart = cur;
-        } else if (c === '.') {
-          nonZeroStart = 1;
-          dot = cur;
-        } else if (c === '0') {
-          c = data[cur++];
+          baseStart = cur += 2;
+          c = data[cur];
         } else {
-          return [0];
+          c = data[++cur];
+          meetDigit = true;
         }
-      } else if (('1' <= c && c <= '9')) {
-        nonZeroStart = cur;
-        c = data[cur++];
-      } else if (c === '.') {
-        dot = cur;
-        nonZeroStart = cur;
-      } else {
-        return;
       }
-      if (base !== 10) {
-        nonZeroStart = cur;
-        if (base === 2) {
-          while (c = data[cur++]) {
-            if (('2' <= c && c <= '9')) {
-              throw new NumberFormatError(self, 'number format errer: binary integer followed by digit 2-9');
-            } else if (c !== '0' && c !== '1') {
-              break;
-            }
-          }
-        } else if (base === 16) {
-          while (c = data[cur++]) {
-            if (!(('0' <= c && c <= '9') || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F'))) {
-              break;
-            }
-          }
-        }
-        if (base === 2) {
-          if (c === '.' && (c === '.' || c === 'e' || c === 'E')) {
-            throw new NumberFormatError(self, 'number format errer: binary integer followed by . or e or E');
+      if (base === 2) {
+        while (c) {
+          if (c === '0' || c === '1') {
+            c = data[++cur];
           } else if (('2' <= c && c <= '9')) {
             throw new NumberFormatError(self, 'number format errer: binary integer followed by digit 2-9');
+          } else {
+            break;
           }
         }
-        if (base === 16 && c === '.') {
-          throw new NumberFormatError(self, 'number format errer: hexadecimal followed by . or e or E');
+      } else if (base === 16) {
+        while (c) {
+          if (!(('0' <= c && c <= '9') || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F'))) {
+            break;
+          } else {
+            c = data[++cur];
+          }
         }
-        if (cur === nonZeroStart) {
+      }
+      if (base === 2) {
+        if (c === '.' || c === 'e' || c === 'E') {
+          throw new NumberFormatError(self, 'number format errer: binary integer followed by . or e or E');
+        } else if (('2' <= c && c <= '9')) {
+          throw new NumberFormatError(self, 'number format errer: binary integer followed by digit 2-9');
+        }
+      }
+      if (base === 16 && c === '.') {
+        throw new NumberFormatError(self, 'number format errer: hexadecimal followed by .');
+      }
+      if (base !== 10) {
+        if (cur === baseStart) {
           return;
         }
         self.row = self.row + cur - start;
         self.cur = cur;
-        v = parseInt(data.slice(nonZeroStart, cur), base);
+        v = parseInt(data.slice(baseStart, cur), base);
         if (neg) {
           v = -v;
         }
         return [v];
       }
-      if (!nonZeroStart) {
-        while (c = data[cur++]) {
-          if (c === '0') {
-            continue;
-          } else if (('1' <= c && c <= '9')) {
+      while (c) {
+        if (c === '0') {
+          meetDigit = true;
+          c = data[++cur];
+        } else if (('1' <= c && c <= '9')) {
+          if (nonZeroStart === void 0) {
             nonZeroStart = cur;
-            break;
-          } else if (c === '.') {
-            dot = cur;
-            nonZeroStart = 1;
+          }
+          meetDigit = true;
+          c = data[++cur];
+        } else if (c === '.') {
+          if (nonZeroStart === void 0) {
+            nonZeroStart = cur;
+          }
+          break;
+        } else {
+          break;
+        }
+      }
+      if (c === '.') {
+        c = data[++cur];
+        while (c) {
+          if (c < '0' || '9' < c) {
             break;
           } else {
-            break;
-          }
-        }
-      }
-      if (!nonZeroStart) {
-        self.row = self.row + cur - start;
-        self.cur = cur;
-        return [0];
-      }
-      if (c === '.') {
-        dot = cur;
-      }
-      if (!dot) {
-        while (c = data[cur++]) {
-          if (c < '0' || '9' < c) {
-            break;
-          }
-        }
-      }
-      if (c === '.') {
-        while (c = data[++cur]) {
-          if (c < '0' || '9' < c) {
-            break;
+            meetDigit = true;
+            c = data[++cur];
           }
         }
       }
       if (c === 'e' || c === 'E') {
-        c = data[++cur];
-        pow = cur;
-        if (c === '+' || c === '-') {
-          cur++;
-          powSign = cur;
+        if (!meetDigit) {
+          return;
         }
-        while (c = data[cur]) {
-          if (c < '0' || '9' < c) {
-            break;
+        c = data[++cur];
+        if (c === '+' || c === '-') {
+          c = data[++cur];
+          if (c && (c < '0' || '9' < c)) {
+            cur -= 2;
           } else {
-            cur++;
+            while (c) {
+              c = data[++cur];
+              if (c < '0' || '9' < c) {
+                break;
+              }
+            }
+          }
+        } else if (c && (c < '0' || '9' < c)) {
+          cur--;
+        } else {
+          while (c) {
+            c = data[++cur];
+            if (c < '0' || '9' < c) {
+              break;
+            }
           }
         }
-        if (powSign === cur || pow === cur) {
-          cur = pow - 1;
-        }
+      }
+      if (!meetDigit) {
+        return;
       }
       self.row += cur - start;
       self.cur = cur;
-      v = parseFloat(data.slice(nonZeroStart - 1, cur));
+      v = parseFloat(data.slice(nonZeroStart, cur));
       if (neg) {
         v = -v;
       }

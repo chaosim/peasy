@@ -13,41 +13,44 @@ describe "peasy", ->
     expect(inCharset('0', set)).to.equal false
 
 describe "linepeasy parse number", ->
-  parse = (text) -> peasy.parse(text, peasy.parser.number)
+  parser = peasy.parser
+  expectParse = (text, result) ->
+    expect(parser.parse(text, parser.number)[0]).to.equal result
+    expect(parser.cur).to.equal text.length
   it "parse(1)",  ->
-    expect(parse('0')[0]).to.equal 0
-    expect(parse('1')[0]).to.equal 1
+    expectParse('0', 0)
+    expectParse('1', 1)
   it "parse(1.2)",  ->
-    expect(parse('1.2')[0]).to.equal 1.2
+    expectParse('1.2', 1.2)
   it "parse 1. .1",  ->
-    expect(parse('1.')[0]).to.equal 1
-    expect(parse('.1')[0]).to.equal .1
+    expectParse('1.', 1)
+    expectParse('.1', .1)
   it "parse 0x1",  ->
-    expect(parse('0x1')[0]).to.equal 0x1
+    expectParse('0x1', 0x1)
   it "parse 0x1efFA",  ->
-    expect(parse('0x1efFA')[0]).to.equal 0x1efFA
+    expectParse('0x1efFA', 0x1efFA )
   it "parse 0b1101",  ->
-    expect(parse('0b1101')[0]).to.equal parseInt('1101', 2)
+    expectParse('0b1101', parseInt('1101', 2))
   it "parse 0b0",  ->
-    expect(parse('0b0')[0]).to.equal 0
+    expectParse('0b0', 0)
   it "parse 0b2",  ->
-    try expect( -> parse('0b2')).to.throw peasy.NumberFormatError
-    catch e then return
-    throw 'NumberFormatError'
+      try expectParse( -> parse('0b2')).to.throw peasy.NumberFormatError
+      catch e then return
+      throw 'NumberFormatError'
   it "parse +1.2",  ->
-    expect(parse('+1.2')[0]).to.equal 1.2
+    expectParse('+1.2', 1.2)
   it "parse +1.2e2",  ->
-    expect(parse('+1.2e2')[0]).to.equal 1.2e2
+    expectParse('+1.2e2', 1.2e2)
   it "parse +1.2 1.2e2",  ->
-    expect(parse('+1.2e-2')[0]).to.equal 1.2e-2
-    expect(parse('+.2e-2')[0]).to.equal .2e-2
-    expect(parse('+0.2e-2')[0]).to.equal .2e-2
+    expectParse('+1.2e-2', 1.2e-2)
+    expectParse('+.2e-2', .2e-2)
+    expectParse('+0.2e-2', .2e-2)
   it "parse +000.2e-2",  ->
-    expect(parse('+000.2e-2')[0]).to.equal .2e-2
+    expectParse('+000.2e-2', .2e-2)
   it "parse .2e1",  ->
-    expect(parse('.2e1')[0]).to.equal 2
+    expectParse('.2e1', 2)
   it "parse .2e1",  ->
-    expect(parse('.2e2')[0]).to.equal 20
+    expectParse('.2e2', 20)
 
 describe "peasy.parser left recursive", ->
   it "should parse with A: Ax|a",  ->

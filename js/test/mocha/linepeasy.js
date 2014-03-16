@@ -22,37 +22,39 @@ describe("peasy", function() {
 });
 
 describe("linepeasy parse number", function() {
-  var parse;
-  parse = function(text) {
-    return peasy.parse(text, peasy.parser.number);
+  var expectParse, parser;
+  parser = peasy.parser;
+  expectParse = function(text, result) {
+    expect(parser.parse(text, parser.number)[0]).to.equal(result);
+    return expect(parser.cur).to.equal(text.length);
   };
   it("parse(1)", function() {
-    expect(parse('0')[0]).to.equal(0);
-    return expect(parse('1')[0]).to.equal(1);
+    expectParse('0', 0);
+    return expectParse('1', 1);
   });
   it("parse(1.2)", function() {
-    return expect(parse('1.2')[0]).to.equal(1.2);
+    return expectParse('1.2', 1.2);
   });
   it("parse 1. .1", function() {
-    expect(parse('1.')[0]).to.equal(1);
-    return expect(parse('.1')[0]).to.equal(.1);
+    expectParse('1.', 1);
+    return expectParse('.1', .1);
   });
   it("parse 0x1", function() {
-    return expect(parse('0x1')[0]).to.equal(0x1);
+    return expectParse('0x1', 0x1);
   });
   it("parse 0x1efFA", function() {
-    return expect(parse('0x1efFA')[0]).to.equal(0x1efFA);
+    return expectParse('0x1efFA', 0x1efFA);
   });
   it("parse 0b1101", function() {
-    return expect(parse('0b1101')[0]).to.equal(parseInt('1101', 2));
+    return expectParse('0b1101', parseInt('1101', 2));
   });
   it("parse 0b0", function() {
-    return expect(parse('0b0')[0]).to.equal(0);
+    return expectParse('0b0', 0);
   });
   it("parse 0b2", function() {
     var e;
     try {
-      expect(function() {
+      expectParse(function() {
         return parse('0b2');
       }).to["throw"](peasy.NumberFormatError);
     } catch (_error) {
@@ -62,24 +64,24 @@ describe("linepeasy parse number", function() {
     throw 'NumberFormatError';
   });
   it("parse +1.2", function() {
-    return expect(parse('+1.2')[0]).to.equal(1.2);
+    return expectParse('+1.2', 1.2);
   });
   it("parse +1.2e2", function() {
-    return expect(parse('+1.2e2')[0]).to.equal(1.2e2);
+    return expectParse('+1.2e2', 1.2e2);
   });
   it("parse +1.2 1.2e2", function() {
-    expect(parse('+1.2e-2')[0]).to.equal(1.2e-2);
-    expect(parse('+.2e-2')[0]).to.equal(.2e-2);
-    return expect(parse('+0.2e-2')[0]).to.equal(.2e-2);
+    expectParse('+1.2e-2', 1.2e-2);
+    expectParse('+.2e-2', .2e-2);
+    return expectParse('+0.2e-2', .2e-2);
   });
   it("parse +000.2e-2", function() {
-    return expect(parse('+000.2e-2')[0]).to.equal(.2e-2);
+    return expectParse('+000.2e-2', .2e-2);
   });
   it("parse .2e1", function() {
-    return expect(parse('.2e1')[0]).to.equal(2);
+    return expectParse('.2e1', 2);
   });
   return it("parse .2e1", function() {
-    return expect(parse('.2e2')[0]).to.equal(20);
+    return expectParse('.2e2', 20);
   });
 });
 
