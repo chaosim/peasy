@@ -3,7 +3,7 @@ var exports, module, require;
 
 
 /* an extended parser with lineno and row support */
-var Parser, exports, peasy,
+var NumberFormatError, Parser, exports, parser, peasy,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; },
   __indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; },
@@ -13,11 +13,9 @@ peasy = require("./peasy");
 
 exports = module.exports = {};
 
-if (typeof window === 'object') {
-  peasy.extend(exports, peasy);
-}
+peasy.extend(exports, peasy);
 
-exports.Parser = Parser = (function(_super) {
+exports.Parser = exports.LineParser = Parser = (function(_super) {
   __extends(Parser, _super);
 
   function Parser() {
@@ -268,6 +266,15 @@ exports.Parser = Parser = (function(_super) {
         return true;
       };
     };
+    lineparser.step = this.step = function() {
+      var c;
+      if ((c = self.data[self.cur]) === '\n') {
+        self.lineno++;
+      } else {
+        self.row++;
+      }
+      return c;
+    };
     lineparser['char'] = this['char'] = function(c) {
       return function() {
         if (self.data[self.cur] === c) {
@@ -406,14 +413,23 @@ exports.Parser = Parser = (function(_super) {
       self.cur = cur;
       return data.slice(start, cur);
     };
-    lineparser.number = this.number = function() {
-      var c, cur, data;
+    lineparser.decimal = this.decimal = function() {
+      var c, cur, data, nonZeroStart, start;
       data = self.data;
-      cur = self.cur;
-      c = data[cur];
-      if (('0' <= c && c <= '9')) {
-        cur++;
-      } else {
+      nonZeroStart = start = cur = self.cur;
+      while (1) {
+        c = data[cur];
+        if ('0' === c) {
+          cur++;
+          nonZeroStart++;
+        } else if (('1' <= c && c <= '9')) {
+          cur++;
+          break;
+        } else {
+          break;
+        }
+      }
+      if (cur === start) {
         return;
       }
       while (1) {
@@ -426,7 +442,146 @@ exports.Parser = Parser = (function(_super) {
       }
       self.row += cur - self.cur;
       self.cur = cur;
-      return data.slice(start, cur);
+      return [parseInt(data.slice(nonZeroStart, cur), 10)];
+    };
+    lineparser.number = this.number = function() {
+      var base, c, cur, data, dot, neg, nonZeroStart, pow, powSign, start, v;
+      data = self.data;
+      base = 10;
+      start = cur = self.cur;
+      c = data[cur++];
+      if (c === '-') {
+        neg = true;
+        c = data[cur++];
+      } else if (c === '+') {
+        c = data[cur++];
+      }
+      if (c === '0') {
+        c = data[cur++];
+        if (c === 'b' || c === 'B') {
+          base = 2;
+        } else if (c === 'x' || c === 'X') {
+          base = 16;
+        } else if (('1' <= c && c <= '9')) {
+          nonZeroStart = cur;
+        } else if (c === '.') {
+          nonZeroStart = 1;
+          dot = cur;
+        } else if (c === '0') {
+          c = data[cur++];
+        } else {
+          return [0];
+        }
+      } else if (('1' <= c && c <= '9')) {
+        nonZeroStart = cur;
+        c = data[cur++];
+      } else if (c === '.') {
+        dot = cur;
+        nonZeroStart = cur;
+      } else {
+        return;
+      }
+      if (base !== 10) {
+        nonZeroStart = cur;
+        if (base === 2) {
+          while (c = data[cur++]) {
+            if (('2' <= c && c <= '9')) {
+              throw new NumberFormatError(self, 'number format errer: binary integer followed by digit 2-9');
+            } else if (c !== '0' && c !== '1') {
+              break;
+            }
+          }
+        } else if (base === 16) {
+          while (c = data[cur++]) {
+            if (!(('0' <= c && c <= '9') || ('a' <= c && c <= 'f') || ('A' <= c && c <= 'F'))) {
+              break;
+            }
+          }
+        }
+        if (base === 2) {
+          if (c === '.' && (c === '.' || c === 'e' || c === 'E')) {
+            throw new NumberFormatError(self, 'number format errer: binary integer followed by . or e or E');
+          } else if (('2' <= c && c <= '9')) {
+            throw new NumberFormatError(self, 'number format errer: binary integer followed by digit 2-9');
+          }
+        }
+        if (base === 16 && c === '.') {
+          throw new NumberFormatError(self, 'number format errer: hexadecimal followed by . or e or E');
+        }
+        if (cur === nonZeroStart) {
+          return;
+        }
+        self.row = self.row + cur - start;
+        self.cur = cur;
+        v = parseInt(data.slice(nonZeroStart, cur), base);
+        if (neg) {
+          v = -v;
+        }
+        return [v];
+      }
+      if (!nonZeroStart) {
+        while (c = data[cur++]) {
+          if (c === '0') {
+            continue;
+          } else if (('1' <= c && c <= '9')) {
+            nonZeroStart = cur;
+            break;
+          } else if (c === '.') {
+            dot = cur;
+            nonZeroStart = 1;
+            break;
+          } else {
+            break;
+          }
+        }
+      }
+      if (!nonZeroStart) {
+        self.row = self.row + cur - start;
+        self.cur = cur;
+        return [0];
+      }
+      if (c === '.') {
+        dot = cur;
+      }
+      if (!dot) {
+        while (c = data[cur++]) {
+          if (c < '0' || '9' < c) {
+            break;
+          }
+        }
+      }
+      if (c === '.') {
+        while (c = data[++cur]) {
+          if (c < '0' || '9' < c) {
+            break;
+          }
+        }
+      }
+      if (c === 'e' || c === 'E') {
+        c = data[++cur];
+        pow = cur;
+        if (c === '+' || c === '-') {
+          cur++;
+          powSign = cur;
+        }
+        while (c = data[cur]) {
+          if (c < '0' || '9' < c) {
+            break;
+          } else {
+            cur++;
+          }
+        }
+        if (powSign === cur || pow === cur) {
+          cur = pow - 1;
+        }
+      }
+      self.row += cur - start;
+      self.cur = cur;
+      v = parseFloat(data.slice(nonZeroStart - 1, cur));
+      if (neg) {
+        v = -v;
+      }
+      return [v];
     };
     lineparser.string = this.string = function() {
       var c, c1, cur, quote, row, start, text, wrap;
@@ -436,11 +591,11 @@ exports.Parser = Parser = (function(_super) {
       c = text[cur];
       if (c === '"') {
         quote = c;
-        wrap = '"';
+        wrap = "'";
         row++;
       } else if (c === "'") {
         quote = c;
-        wrap = "'";
+        wrap = '"';
         row++;
       } else {
         return;
@@ -479,6 +634,36 @@ exports.Parser = Parser = (function(_super) {
   return Parser;
 
 })(peasy.BaseParser);
+
+parser = exports.parser = new Parser();
+
+exports.parse = function(text, root, cursor, lineno, row) {
+  if (root == null) {
+    root = parser.root;
+  }
+  if (cursor == null) {
+    cursor = 0;
+  }
+  if (lineno == null) {
+    lineno = 0;
+  }
+  if (row == null) {
+    row = 0;
+  }
+  return parser.parse(text, root, cursor, lineno, row);
+};
+
+exports.NumberFormatError = NumberFormatError = (function() {
+  function NumberFormatError(parser, message) {
+    this.cur = parser.cur;
+    this.lineno = parser.lineno;
+    this.row = parser.row;
+    this.message = message;
+  }
+
+  return NumberFormatError;
+
+})();
 
 
 })(require, exports, module);// wrap line by gulp-twoside

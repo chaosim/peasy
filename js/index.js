@@ -1,7 +1,7 @@
 var exports, module, require; 
 (function(require, exports, module) {var ts;if (typeof window === 'object') { ts = twoside('peasy/index.js'), require = ts.require, exports = ts.exports, module = ts.module;} // wrap line by gulp-twoside for providing twoside module; 
 
-var exports, extend, linepeasy;
+var exports, extend;
 
 exports = module.exports = {};
 
@@ -15,7 +15,7 @@ exports.logicpeasy = require('./logicpeasy');
 
 extend(exports, exports.logicpeasy);
 
-linepeasy = require('./linepeasy');
+exports.linepeasy = require('./linepeasy');
 
 extend(exports, exports.linepeasy);
 

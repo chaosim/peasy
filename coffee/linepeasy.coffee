@@ -2,9 +2,9 @@
 
 peasy = require "./peasy"
 exports = module.exports = {}
-if typeof window=='object' then peasy.extend exports, peasy
+peasy.extend exports, peasy
 
-exports.Parser = class Parser extends peasy.BaseParser
+exports.Parser = exports.LineParser = class Parser extends peasy.BaseParser
   constructor: ->
     super
     self = @
@@ -123,6 +123,11 @@ exports.Parser = class Parser extends peasy.BaseParser
         self.cur = cur; self.lineno = lineno; self.row = row
         true
 
+    lineparser.step = @step = ->
+      if (c=self.data[self.cur])=='\n' then self.lineno++
+      else self.row++
+      c
+
     # matcher *char*: match one character<br/>
     lineparser['char'] = @['char'] = (c) -> ->
       if self.data[self.cur]==c
@@ -189,19 +194,95 @@ exports.Parser = class Parser extends peasy.BaseParser
       self.cur = cur
       data[start...cur]
 
-    lineparser.number = @number = ->
+    lineparser.decimal = @decimal = ->
       data = self.data
-      cur = self.cur
-      c = data[cur]
-      if  '0'<=c<='9' then cur++
-      else return
+      nonZeroStart = start = cur = self.cur
+      while 1
+        c = data[cur]
+        if '0'==c then cur++; nonZeroStart++
+        else if '1'<=c<='9' then cur++; break
+        else break
+      if cur==start then return
       while 1
         c = data[cur]
         if  '0'<=c<='9' then cur++
         else break
       self.row += cur-self.cur
       self.cur = cur
-      data[start...cur]
+      # use array to hold value to avoid that 0 interrupt parsing
+      [parseInt(data[nonZeroStart...cur], 10)]
+
+    # binary, hexidecimal, decimal, scientic float
+    lineparser.number = @number = ->
+      data = self.data
+      # nonZeroStart = undefined # if meet . e E then should be 1, else should be cur+1 of first non zero digit.
+      # dot = undefined # dot should be cur+1 of '.'
+      base = 10
+      start = cur = self.cur
+      c = data[cur++]
+      if c=='-' then neg = true; c = data[cur++]
+      else if c=='+' then c = data[cur++]
+      if c=='0'
+        c = data[cur++]
+        if c=='b' or c=='B' then base = 2
+        else if c=='x' or c=='X' then base = 16
+        else if '1'<=c<='9' then nonZeroStart = cur
+        else if c=='.' then nonZeroStart = 1; dot = cur
+        else if c=='0' then c = data[cur++]
+        else return [0]
+      else if  '1'<=c<='9' then nonZeroStart = cur; c = data[cur++]
+      else if c=='.' then dot = cur; nonZeroStart = cur
+      else return
+      if base!=10
+        nonZeroStart = cur
+        if base==2
+          while c = data[cur++]
+            if '2'<=c<='9'
+              throw new NumberFormatError(self, 'number format errer: binary integer followed by digit 2-9')
+            else if  c!='0'and c!='1' then break
+        else if base==16
+          while c = data[cur++]
+            if  not('0'<=c<='9' or 'a'<=c<='f' or 'A'<=c<='F') then break
+        if base==2
+          if c=='.' and (c=='.' or c=='e' or c=='E')
+            throw new NumberFormatError(self, 'number format errer: binary integer followed by . or e or E')
+          else if '2'<=c<='9'
+            throw new NumberFormatError(self, 'number format errer: binary integer followed by digit 2-9')
+        if base==16 and c=='.'
+          throw new NumberFormatError(self, 'number format errer: hexadecimal followed by . or e or E')
+        if cur==nonZeroStart then return
+        self.row = self.row+cur-start; self.cur = cur
+        v  =  parseInt(data[nonZeroStart...cur], base)
+        if neg then v = -v
+        return [v]
+      # base==10
+      if not nonZeroStart
+        while c = data[cur++]
+          if c=='0' then continue
+          else if '1'<=c<='9' then nonZeroStart = cur; break
+          else if c=='.' then dot = cur; nonZeroStart = 1; break
+          else break
+      if not nonZeroStart
+        self.row = self.row+cur-start; self.cur = cur; return [0]
+      if c=='.' then dot = cur
+      if !dot
+        while c = data[cur++]
+          if  c<'0' or '9'<c then break
+      if c=='.'
+        while c = data[++cur]
+          if c<'0' or '9'<c then break
+      if c=='e' or c=='E'
+        c = data[++cur]
+        pow = cur
+        if c=='+' or c=='-' then cur++; powSign = cur
+        while c = data[cur]
+          if c<'0' or '9'<c then break else cur++
+        if powSign==cur or pow==cur then cur = pow-1
+      self.row += cur-start; self.cur = cur
+      # 0 is false, so it will make parser fail to continue, use result to hold number value
+      v  =  parseFloat(data[nonZeroStart-1...cur])
+      if neg then v = -v
+      return [v]
 
     # 'string' or "string", single line string
     lineparser.string = @string = ->
@@ -209,8 +290,8 @@ exports.Parser = class Parser extends peasy.BaseParser
       start = cur = self.cur; row = self.row
       # lineno = self.lineno;  # lineno should not be changed in single line string
       c = text[cur]
-      if c=='"'then quote = c; wrap = '"'; row++
-      else if c=="'" then quote = c; wrap="'"; row++
+      if c=='"'then quote = c; wrap = "'"; row++
+      else if c=="'" then quote = c; wrap='"'; row++
       else return
       cur++
       while 1
@@ -233,3 +314,13 @@ exports.Parser = class Parser extends peasy.BaseParser
 
     # generate a matcher, which select one action from actions based on item()
     lineparser.selectp = @selectp # = (item, actions) ->
+
+parser = exports.parser = new Parser()
+
+exports.parse = (text, root=parser.root, cursor=0, lineno=0, row=0) ->
+  parser.parse(text, root, cursor, lineno, row)
+
+exports.NumberFormatError = class NumberFormatError
+  constructor: (parser, message) ->
+    @cur = parser.cur; @lineno = parser.lineno; @row = parser.row
+    @message = message

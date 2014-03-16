@@ -100,7 +100,7 @@ task 'transform:peasy/part-package', (cb) ->
                  {name: 'linepeasy', files: [client+'peasy.js', client+'linepeasy-index.js']}]
     stream = src(part.files)
     .pipe(concat(part.name+'-package.js')).pipe(size()).to(client)
-    .pipe(closureCompiler()).pipe(rename(suffix: "-min")).pipe(size()).to(client)
+    .pipe(closuresolver()).pipe(rename(suffix: "-min")).pipe(size()).to(client)
   stream
 
 task 'build:samples', (cb) -> # twoside, concat
@@ -184,6 +184,7 @@ task 'watch/mocha', -> watch [files_modulejs, files_serverjs, files_mocha], ['mo
 task 'watch/all', -> ['watch/copy', 'watch/coffee', 'watch/mocha'] #  , 'watch/reload'
 
 task 'mocha/auto', ['watch/copy', 'watch/coffee', 'watch/mocha']
+task 'moch', (callback) -> runSequence('make', ['mocha'], callback)
 task 'test', (callback) -> runSequence('make', ['mocha', 'karma1'], callback)
 task 'test/dist', (callback) -> runSequence('dist', ['mocha', 'karma1/dist'], callback)
 task 'default',['test']

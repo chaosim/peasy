@@ -1,9 +1,9 @@
 chai = require 'chai'
 expect = chai.expect
 
-{charset, inCharset} = peasy = require '../../index'
+{charset, inCharset} = peasy = require '../../linepeasy'
 
-describe "run testpeasy:", ->
+describe "run testlinepeasy:", ->
   it '', ->
 
 describe "peasy", ->
@@ -11,6 +11,43 @@ describe "peasy", ->
     set = charset('ab')
     expect(inCharset('a', set)).to.equal true
     expect(inCharset('0', set)).to.equal false
+
+describe "linepeasy parse number", ->
+  parse = (text) -> peasy.parse(text, peasy.parser.number)
+  it "parse(1)",  ->
+    expect(parse('0')[0]).to.equal 0
+    expect(parse('1')[0]).to.equal 1
+  it "parse(1.2)",  ->
+    expect(parse('1.2')[0]).to.equal 1.2
+  it "parse 1. .1",  ->
+    expect(parse('1.')[0]).to.equal 1
+    expect(parse('.1')[0]).to.equal .1
+  it "parse 0x1",  ->
+    expect(parse('0x1')[0]).to.equal 0x1
+  it "parse 0x1efFA",  ->
+    expect(parse('0x1efFA')[0]).to.equal 0x1efFA
+  it "parse 0b1101",  ->
+    expect(parse('0b1101')[0]).to.equal parseInt('1101', 2)
+  it "parse 0b0",  ->
+    expect(parse('0b0')[0]).to.equal 0
+  it "parse 0b2",  ->
+    try expect( -> parse('0b2')).to.throw peasy.NumberFormatError
+    catch e then return
+    throw 'NumberFormatError'
+  it "parse +1.2",  ->
+    expect(parse('+1.2')[0]).to.equal 1.2
+  it "parse +1.2e2",  ->
+    expect(parse('+1.2e2')[0]).to.equal 1.2e2
+  it "parse +1.2 1.2e2",  ->
+    expect(parse('+1.2e-2')[0]).to.equal 1.2e-2
+    expect(parse('+.2e-2')[0]).to.equal .2e-2
+    expect(parse('+0.2e-2')[0]).to.equal .2e-2
+  it "parse +000.2e-2",  ->
+    expect(parse('+000.2e-2')[0]).to.equal .2e-2
+  it "parse .2e1",  ->
+    expect(parse('.2e1')[0]).to.equal 2
+  it "parse .2e1",  ->
+    expect(parse('.2e2')[0]).to.equal 20
 
 describe "peasy.parser left recursive", ->
   it "should parse with A: Ax|a",  ->

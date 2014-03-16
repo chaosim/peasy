@@ -125,7 +125,7 @@ exports.Parser = class Parser extends peasy.Parser
 Samples/arithmatic2.coffee has only 180 lines of code in total, and which also contains lexical process. Able to handle expressions as complex as in javascript, and the code is so simple, I bet that only peasy can make it.
 
 The code has several unique points need to explain:
-* Coffeescript syntax makes the rules' readability as good as any other compiler's rule definition, and will be slightly worse under the javascript.
+* Coffeescript syntax makes the rules' readability as good as any other solver's rule definition, and will be slightly worse under the javascript.
 * All the rules are set as instance member of the parser in the constructor, rather than the prototype members, which can avoid many potential problems associated with binding of `this`. I have tried the prototype members solution before, after testing and debugging I found there were many hidden bugs. In addition, the speed of the parser can be improved by avoiding the lookup to prototype inheritance chain.
 * The process to binary expression(expr(n), and it generates binary = rec...) is also unique. This will be further explained hereinafter.
 
